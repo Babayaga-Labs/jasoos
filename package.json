@@ -1,5 +1,5 @@
 {
-  "name": "ai-detective-game",
+  "name": "jhakaas-jasoos",
   "version": "0.1.0",
   "private": true,
   "description": "AI-powered detective game where players interrogate suspects to solve mysteries",
@@ -15,8 +15,7 @@
     "next": "^14.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "zustand": "^4.4.0",
-    "@anthropic-ai/sdk": "^0.24.0"
+    "zustand": "^4.4.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

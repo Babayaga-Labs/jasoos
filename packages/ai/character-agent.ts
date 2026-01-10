@@ -1,13 +1,14 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { LLMClient, ChatMessage } from './llm-client';
+import type { LLMConfig } from './config';
 import type { Character, ConversationMessage } from '../types';
 
 export class CharacterAgent {
-  private client: Anthropic;
+  private client: LLMClient;
   private character: Character;
   private conversationHistory: ConversationMessage[] = [];
 
-  constructor(character: Character) {
-    this.client = new Anthropic();
+  constructor(character: Character, llmConfig: LLMConfig) {
+    this.client = new LLMClient(llmConfig);
     this.character = character;
   }
 
@@ -69,32 +70,34 @@ Respond only as ${this.character.name}. Begin.`;
       timestamp: new Date()
     });
 
-    const messages = this.conversationHistory.map(msg => ({
-      role: msg.role === 'player' ? 'user' as const : 'assistant' as const,
+    const messages: ChatMessage[] = this.conversationHistory.map(msg => ({
+      role: msg.role === 'player' ? 'user' : 'assistant',
       content: msg.content
     }));
 
-    const response = await this.client.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 300,
-      system: this.buildSystemPrompt(),
-      messages
-    });
-
-    const assistantMessage = response.content[0].type === 'text'
-      ? response.content[0].text
-      : '';
+    const response = await this.client.roleplay(
+      this.buildSystemPrompt(),
+      messages,
+      { maxTokens: 300, temperature: 0.8 }
+    );
 
     this.conversationHistory.push({
       role: 'character',
-      content: assistantMessage,
+      content: response.content,
       timestamp: new Date()
     });
 
-    return assistantMessage;
+    return response.content;
   }
 
   getConversationHistory(): ConversationMessage[] {
     return [...this.conversationHistory];
+  }
+
+  /**
+   * Reset conversation history (for starting a new interrogation)
+   */
+  resetConversation(): void {
+    this.conversationHistory = [];
   }
 }
