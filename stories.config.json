@@ -1,0 +1,14 @@
+{
+  "stories": [
+    {
+      "id": "_template",
+      "enabled": false,
+      "description": "Template for creating new stories - copy this folder"
+    }
+  ],
+  "defaults": {
+    "maxMessagesPerCharacter": 50,
+    "allowAccusationWithoutEvidence": false,
+    "showHintsAfterMessages": 20
+  }
+}

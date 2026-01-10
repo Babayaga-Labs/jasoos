@@ -1,0 +1,83 @@
+{
+  "$schema": "../plot-points.schema.json",
+  "plotPoints": [
+    {
+      "id": "pp_argument",
+      "category": "relationship",
+      "description": "Dr. Blackwood had a heated argument with the victim about unpaid bills",
+      "importance": "medium",
+      "points": 10,
+      "revealedBy": ["suspect_1", "suspect_2"],
+      "detectionHints": [
+        "argument",
+        "fight",
+        "disagreement",
+        "bills",
+        "money owed"
+      ]
+    },
+    {
+      "id": "pp_embezzlement",
+      "category": "motive",
+      "description": "The butler has been embezzling money from the household",
+      "importance": "critical",
+      "points": 25,
+      "revealedBy": ["suspect_1"],
+      "detectionHints": [
+        "stealing",
+        "embezzlement",
+        "missing money",
+        "silverware",
+        "theft"
+      ]
+    },
+    {
+      "id": "pp_victim_knew",
+      "category": "motive",
+      "description": "The victim discovered the embezzlement and confronted the butler",
+      "importance": "critical",
+      "points": 30,
+      "revealedBy": ["suspect_2"],
+      "detectionHints": [
+        "discovered",
+        "found out",
+        "confronted",
+        "threatened",
+        "expose"
+      ]
+    },
+    {
+      "id": "pp_alibi_false",
+      "category": "alibi",
+      "description": "The butler's alibi about polishing silver cannot be verified",
+      "importance": "high",
+      "points": 20,
+      "revealedBy": ["suspect_2", "suspect_3"],
+      "detectionHints": [
+        "alibi",
+        "where were you",
+        "that night",
+        "polishing",
+        "pantry"
+      ]
+    },
+    {
+      "id": "pp_locked_room",
+      "category": "evidence",
+      "description": "The butler has a master key that opens all rooms including the study",
+      "importance": "critical",
+      "points": 25,
+      "revealedBy": ["suspect_2", "suspect_3"],
+      "detectionHints": [
+        "key",
+        "locked",
+        "door",
+        "master key",
+        "access"
+      ]
+    }
+  ],
+
+  "minimumPointsToAccuse": 50,
+  "perfectScoreThreshold": 100
+}

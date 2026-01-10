@@ -1,0 +1,34 @@
+{
+  "$schema": "../story.schema.json",
+  "id": "template-story",
+  "title": "Story Title",
+  "difficulty": "medium",
+  "estimatedMinutes": 25,
+
+  "setting": {
+    "location": "A Victorian mansion in the English countryside",
+    "timePeriod": "1890s",
+    "atmosphere": "Foggy evening, tension in the air"
+  },
+
+  "premise": "You have been summoned to investigate a mysterious death at Thornwood Manor. The master of the house, Lord Ashworth, was found dead in his study. The doors were locked from the inside, and five guests were present that evening. Your task: uncover who committed this crime and how.",
+
+  "actualEvents": [
+    "8:00 PM - Dinner begins with all guests present",
+    "9:30 PM - Lord Ashworth retires to his study",
+    "10:00 PM - [THE CRIME OCCURS - describe what actually happened]",
+    "10:45 PM - The body is discovered"
+  ],
+
+  "solution": {
+    "culprit": "character_id_here",
+    "method": "How the crime was committed",
+    "motive": "Why the culprit did it",
+    "explanation": "Full explanation of how everything fits together that will be revealed to the player after accusation"
+  },
+
+  "redHerrings": [
+    "A suspicious letter found in the library (actually innocent)",
+    "Character X's alibi has a gap (but they were doing something embarrassing, not criminal)"
+  ]
+}
