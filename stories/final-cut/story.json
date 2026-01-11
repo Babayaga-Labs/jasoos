@@ -1,0 +1,37 @@
+{
+  "id": "bollywood-murder",
+  "title": "The Final Cut",
+  "difficulty": "medium",
+  "estimatedMinutes": 30,
+  "setting": {
+    "location": "Malhotra Studios, Mumbai, India - specifically the luxurious top floor office",
+    "timePeriod": "Present day",
+    "atmosphere": "Glamorous yet tense, mixing the glittering world of Bollywood with dark secrets"
+  },
+  "premise": "During the wrap party of his latest film, renowned producer Raj Malhotra is found dead in his office, which was locked from inside. The murder weapon is his own Filmfare Award trophy, and five people had access to his office that evening. Hours before, Raj had threatened to expose a devastating secret about one of them.",
+  "actualEvents": [
+    "7:00 PM - Wrap party begins in the main studio hall",
+    "8:15 PM - Raj receives an urgent phone call and heads to his office",
+    "8:30 PM - Priya visits Raj to discuss their marriage",
+    "8:45 PM - Arjun delivers documents to Raj's office",
+    "9:00 PM - Vikram confronts Raj about the company finances",
+    "9:20 PM - Meera meets Raj to discuss her contract",
+    "9:35 PM - Kabir enters to pitch his new film",
+    "9:50 PM - Kabir murders Raj with the trophy",
+    "10:00 PM - Kabir exits through the window, using the scaffold outside to return to the party",
+    "10:30 PM - Body is discovered when Arjun brings investors to meet Raj"
+  ],
+  "solution": {
+    "culprit": "Kabir",
+    "method": "Used the scaffold outside the window to re-enter after leaving through the door, making it appear locked from inside",
+    "motive": "Raj discovered Kabir had been selling company scripts to rival studios",
+    "explanation": "Kabir had been secretly selling Malhotra Studios' scripts to competing production houses, explaining why his last three films flopped - they were already leaked. When Raj discovered this betrayal, he threatened to expose Kabir, which would have ended his career and likely led to criminal charges. Kabir used his knowledge of the building's renovation scaffold to stage a locked-room murder, making it appear impossible for anyone to have entered or left."
+  },
+  "redHerrings": [
+    "Vikram's embezzlement of company funds",
+    "Love letters between Raj and Meera found in his desk",
+    "Priya's recently updated life insurance policy on Raj",
+    "Arjun's secret recordings of Raj's meetings",
+    "A divorce petition draft found in Raj's personal files"
+  ]
+}

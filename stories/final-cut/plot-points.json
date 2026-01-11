@@ -1,0 +1,150 @@
+{
+  "plotPoints": [
+    {
+      "id": "pp_missing_scripts",
+      "category": "evidence",
+      "description": "Digital copies of several scripts were found on Raj's laptop, with metadata showing they were sent to external email addresses",
+      "importance": "critical",
+      "points": 30,
+      "revealedBy": [
+        "vikram_singh"
+      ],
+      "detectionHints": [
+        "scripts",
+        "email",
+        "laptop",
+        "files"
+      ]
+    },
+    {
+      "id": "pp_kabir_debt",
+      "category": "motive",
+      "description": "Kabir has been making large deposits to his bank account from unknown sources over the past 6 months",
+      "importance": "high",
+      "points": 25,
+      "revealedBy": [
+        "meera_kapoor"
+      ],
+      "detectionHints": [
+        "money",
+        "deposits",
+        "bank",
+        "payments"
+      ]
+    },
+    {
+      "id": "pp_late_night_meeting",
+      "category": "evidence",
+      "description": "Kabir was seen arguing with Raj in the parking lot the night before the murder",
+      "importance": "high",
+      "points": 20,
+      "revealedBy": [
+        "priya_malhotra"
+      ],
+      "detectionHints": [
+        "argument",
+        "parking lot",
+        "night before"
+      ]
+    },
+    {
+      "id": "pp_fake_alibi",
+      "category": "alibi",
+      "description": "Kabir claimed to be at home sick, but his car was spotted in the studio parking lot",
+      "importance": "critical",
+      "points": 30,
+      "revealedBy": [
+        "vikram_singh",
+        "meera_kapoor"
+      ],
+      "detectionHints": [
+        "sick",
+        "car",
+        "parking",
+        "home"
+      ]
+    },
+    {
+      "id": "pp_rival_connection",
+      "category": "evidence",
+      "description": "Phone records show Kabir had regular contact with executives at competing studios",
+      "importance": "high",
+      "points": 25,
+      "revealedBy": [
+        "vikram_singh"
+      ],
+      "detectionHints": [
+        "phone",
+        "calls",
+        "competitor",
+        "studio"
+      ]
+    },
+    {
+      "id": "pp_priya_affair",
+      "category": "relationship",
+      "description": "Priya and Raj were having a secret affair, giving her a potential motive",
+      "importance": "medium",
+      "points": 15,
+      "revealedBy": [
+        "meera_kapoor",
+        "vikram_singh"
+      ],
+      "detectionHints": [
+        "affair",
+        "relationship",
+        "secret"
+      ]
+    },
+    {
+      "id": "pp_meera_promotion",
+      "category": "relationship",
+      "description": "Meera was passed over for a promotion that Raj received",
+      "importance": "low",
+      "points": 10,
+      "revealedBy": [
+        "priya_malhotra"
+      ],
+      "detectionHints": [
+        "promotion",
+        "passed over",
+        "position"
+      ]
+    },
+    {
+      "id": "pp_script_changes",
+      "category": "evidence",
+      "description": "Recent scripts had been mysteriously altered, with changes matching those in competitor productions",
+      "importance": "high",
+      "points": 20,
+      "revealedBy": [
+        "priya_malhotra",
+        "vikram_singh"
+      ],
+      "detectionHints": [
+        "changes",
+        "alterations",
+        "similar",
+        "competitor"
+      ]
+    },
+    {
+      "id": "pp_vikram_threat",
+      "category": "relationship",
+      "description": "Vikram had threatened to quit after a heated argument with Raj about budget cuts",
+      "importance": "low",
+      "points": 10,
+      "revealedBy": [
+        "meera_kapoor"
+      ],
+      "detectionHints": [
+        "quit",
+        "argument",
+        "budget",
+        "threat"
+      ]
+    }
+  ],
+  "minimumPointsToAccuse": 75,
+  "perfectScoreThreshold": 185
+}

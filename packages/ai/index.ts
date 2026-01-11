@@ -1,16 +1,18 @@
-// AI Package - LLM and image generation clients
+// AI Package - LLM client, UGC engine, and image generation
 
 // Configuration
 export { loadAIConfig } from './config';
 export type { AIConfig, LLMConfig, ImageConfig, LLMProvider, ImageProvider } from './config';
 
-// Low-level clients (for custom usage)
-export { LLMClient } from './llm-client';
-export type { ChatMessage, LLMResponse } from './llm-client';
+// LLM client (OpenAI SDK compatible with OpenRouter)
+export { LLMClient, generateText } from './llm-client';
+export type { ChatMessage, LLMResponse, GenerateOptions } from './llm-client';
+
+// UGC Engine - Story and character generation
+export { StoryGenerator } from './story-generator';
+export { CharacterAgent } from './character-agent';
+
+// Image generation
 export { ImageClient } from './image-client';
 export type { ImageGenerationOptions, ImageResult } from './image-client';
-
-// High-level abstractions
-export { CharacterAgent } from './character-agent';
-export { StoryGenerator } from './story-generator';
 export { ImageGenerator } from './image-generator';

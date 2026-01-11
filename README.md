@@ -6,9 +6,10 @@ An AI-powered detective game where players take on the role of Sherlock Holmes, 
 
 ```
 /app                    # Next.js frontend
+/backend                # Python FastAPI backend (LLM interactions)
 /packages
   /engine               # Core game logic
-  /ai                   # LLM and image generation clients
+  /ai                   # Image generation clients (LLM moved to Python)
   /types                # Shared TypeScript types
 /stories                # Mystery scenarios (each folder = one story)
   /_template            # Copy this to create new stories
@@ -55,16 +56,67 @@ An AI-powered detective game where players take on the role of Sherlock Holmes, 
 - `points` - Score value
 - `revealedBy` - Which characters can reveal this
 
-## Development
+## Getting Started
 
+### Prerequisites
+- Node.js 18+
+- Python 3.10+
+- OpenRouter API key (or OpenAI/Anthropic)
+
+### Setup
+
+1. **Install dependencies**
 ```bash
 npm install
-npm run dev
+cd backend && python -m venv venv && source venv/bin/activate && pip install -r requirements.txt && cd ..
 ```
+
+2. **Configure environment**
+```bash
+cp .env.example .env.local
+# Edit .env.local with your API keys
+```
+
+Required env vars:
+- `LLM_API_KEY` - Your OpenRouter (or OpenAI) API key
+- `LLM_PROVIDER` - `openrouter`, `openai`, or `anthropic`
+- `IMAGE_API_KEY` - For character portrait generation (Fal.ai or Replicate)
+
+### Running the Game
+
+**Start both servers (recommended):**
+```bash
+npm run dev:all
+```
+
+This runs the Next.js frontend (port 3000) and Python backend (port 8000) concurrently.
+
+**Or run separately:**
+```bash
+# Terminal 1 - Frontend
+npm run dev
+
+# Terminal 2 - Backend
+npm run dev:backend
+# Or manually: cd backend && ./venv/bin/uvicorn main:app --reload
+```
+
+### Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev:all` | Start frontend + backend together |
+| `npm run dev` | Start Next.js frontend only |
+| `npm run dev:backend` | Start Python backend only |
+| `npm run generate:story <id>` | Generate a new story from synopsis |
+| `npm run generate:images <id>` | Generate character portraits |
+| `npm run test:llm` | Test LLM connection |
+| `npm run test:character <story> <char>` | Interactive character chat |
 
 ## Tech Stack
 
 - **Frontend**: Next.js 14, React, Tailwind CSS, Zustand
-- **LLM**: Claude (Anthropic) for character conversations
+- **Backend**: Python FastAPI with OpenAI SDK
+- **LLM**: OpenRouter (unified gateway to 100+ models)
 - **Images**: Replicate/Fal.ai for character portraits
 - **Database**: Supabase (game sessions, progress)

@@ -1,11 +1,12 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { LLMClient } from './llm-client';
+import type { LLMConfig } from './config';
 import type { Story, Character, PlotPoint } from '../types';
 
 export class StoryGenerator {
-  private client: Anthropic;
+  private client: LLMClient;
 
-  constructor() {
-    this.client = new Anthropic();
+  constructor(config: LLMConfig) {
+    this.client = new LLMClient(config);
   }
 
   /**
@@ -35,16 +36,10 @@ ${JSON.stringify(character, null, 2)}
 
 Expand the personality, add behavioral details, and ensure the character has depth for interrogation gameplay. Return as JSON matching the Character type.`;
 
-    const response = await this.client.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 2000,
-      messages: [{ role: 'user', content: prompt }]
-    });
-
-    const text = response.content[0].type === 'text' ? response.content[0].text : '';
+    const response = await this.client.generate(prompt, { maxTokens: 2000 });
 
     // Extract JSON from response
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    const jsonMatch = response.content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error('Failed to parse character JSON');
 
     return JSON.parse(jsonMatch[0]) as Character;

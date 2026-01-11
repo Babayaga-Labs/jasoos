@@ -38,8 +38,8 @@ export const LLM_MODELS: Record<LLMProvider, { roleplay: string; judge: string }
     judge: 'gpt-4o-mini'
   },
   openrouter: {
-    roleplay: 'anthropic/claude-sonnet-4-20250514',
-    judge: 'anthropic/claude-3-haiku-20240307'
+    roleplay: 'anthropic/claude-3.5-sonnet',
+    judge: 'anthropic/claude-3-haiku'
   }
 };
 

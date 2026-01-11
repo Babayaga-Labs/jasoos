@@ -1,6 +1,11 @@
 {
   "stories": [
     {
+      "id": "final-cut",
+      "enabled": true,
+      "description": "The Final Cut - A Bollywood murder mystery"
+    },
+    {
       "id": "_template",
       "enabled": false,
       "description": "Template for creating new stories - copy this folder"

@@ -16,9 +16,19 @@ build/
 # IDE
 .idea/
 .vscode/
+.cursor/
 *.swp
 *.swo
 .DS_Store
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# TypeScript
+tsconfig.tsbuildinfo
 
 # Debug
 npm-debug.log*
@@ -27,6 +37,7 @@ yarn-error.log*
 
 # Testing
 coverage/
+scripts/testing/test-output.*
 
 # Turbo
 .turbo/
