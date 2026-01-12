@@ -1,4 +1,5 @@
 import { ScenarioCard } from '@/components/home/ScenarioCard';
+import { CreateMysteryCard } from '@/components/create/CreateMysteryCard';
 import fs from 'fs';
 import path from 'path';
 
@@ -71,28 +72,23 @@ export default async function HomePage() {
           Choose Your Case
         </h2>
 
-        {stories.length === 0 ? (
-          <div className="card p-8 text-center">
-            <p className="text-slate-400 mb-4">No cases available yet.</p>
-            <p className="text-slate-500 text-sm">
-              Enable a story in <code className="text-amber-400">stories.config.json</code>
-            </p>
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {stories.map((story) => (
-              <ScenarioCard
-                key={story.id}
-                id={story.id}
-                title={story.title}
-                difficulty={story.difficulty}
-                estimatedMinutes={story.estimatedMinutes}
-                premise={story.premise}
-                sceneImage={story.sceneImage}
-              />
-            ))}
-          </div>
-        )}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Create Your Own Mystery Card - always first */}
+          <CreateMysteryCard />
+
+          {/* Existing story cards */}
+          {stories.map((story) => (
+            <ScenarioCard
+              key={story.id}
+              id={story.id}
+              title={story.title}
+              difficulty={story.difficulty}
+              estimatedMinutes={story.estimatedMinutes}
+              premise={story.premise}
+              sceneImage={story.sceneImage}
+            />
+          ))}
+        </div>
       </div>
     </main>
   );

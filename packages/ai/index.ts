@@ -11,6 +11,16 @@ export type { ChatMessage, LLMResponse, GenerateOptions } from './llm-client';
 // UGC Engine - Story and character generation
 export { StoryGenerator } from './story-generator';
 export { CharacterAgent } from './character-agent';
+export { UGCEngine } from './ugc-engine';
+export type {
+  GenerationStep,
+  GenerationProgress,
+  GenerationResult,
+  StoryData,
+  CharacterData,
+  PlotPointData,
+  PlotPointsData,
+} from './ugc-engine';
 
 // Image generation
 export { ImageClient } from './image-client';

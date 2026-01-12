@@ -1,0 +1,36 @@
+{
+  "id": "ugc-mk9ndhmm-kclf",
+  "title": "The Birthday Woods",
+  "difficulty": "medium",
+  "estimatedMinutes": 30,
+  "setting": {
+    "location": "Pine Grove Forest and the adjacent suburban community of Millbrook",
+    "timePeriod": "Present day",
+    "atmosphere": "Dark and melancholic with an undercurrent of domestic tension"
+  },
+  "premise": "Sarah Miller, a 10-year-old girl, is found dead in Pine Grove Forest the morning after her birthday party. The party, held at her house, was attended by her classmates, including known bullies, and supervised by her father and stepmother. The girl's body shows signs of strangulation, and her favorite necklace is missing.",
+  "actualEvents": [
+    "6:00 PM - Birthday party begins, Sarah appears withdrawn and quiet",
+    "7:30 PM - Sarah has an argument with her father about her grades",
+    "8:00 PM - Party ends, guests leave",
+    "8:45 PM - Sarah's stepmother goes to bed early with a headache",
+    "9:15 PM - Sarah is seen crying in the backyard by a neighbor",
+    "9:30 PM - Father takes Sarah for a 'talk' in the woods",
+    "10:00 PM - Father strangles Sarah after she threatens to tell her mother about his gambling debts",
+    "10:30 PM - Father returns home alone, tells stepmother Sarah is sleeping at a friend's house",
+    "7:00 AM - Body discovered by morning jogger"
+  ],
+  "solution": {
+    "culprit": "James Miller (Father)",
+    "method": "Manual strangulation in the woods",
+    "motive": "Fear of exposure of his gambling debts and potential custody loss",
+    "explanation": "James Miller had been secretly gambling away Sarah's college fund and taking loans from dangerous people. Sarah discovered this while snooping through his office and confronted him during her birthday party. When she threatened to tell her mother (his ex-wife), who was already seeking increased custody, he panicked. He lured her to the woods under the pretense of a father-daughter talk and killed her to keep his secret."
+  },
+  "redHerrings": [
+    "Three school bullies were seen pushing Sarah during the party",
+    "Stepmother had recently increased Sarah's life insurance policy",
+    "A bloody tissue found near the body (actually from a bully's earlier nosebleed)",
+    "Sarah's missing necklace (actually fell off during party games)",
+    "Anonymous threatening notes in Sarah's room (from school bullies, unrelated to murder)"
+  ]
+}

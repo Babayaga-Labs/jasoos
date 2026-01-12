@@ -9,6 +9,13 @@
       "id": "_template",
       "enabled": false,
       "description": "Template for creating new stories - copy this folder"
+    },
+    {
+      "id": "ugc-mk9ndhmm-kclf",
+      "enabled": true,
+      "description": "The Birthday Woods (User Generated)",
+      "isUGC": true,
+      "createdAt": "2026-01-11T11:26:23.833Z"
     }
   ],
   "defaults": {
