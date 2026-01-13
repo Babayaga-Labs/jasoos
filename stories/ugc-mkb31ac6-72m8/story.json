@@ -1,0 +1,30 @@
+{
+  "id": "ugc-mkb31ac6-72m8",
+  "title": "Interspace Murder",
+  "difficulty": "medium",
+  "estimatedMinutes": 30,
+  "setting": {
+    "location": "International Space Station",
+    "timePeriod": "future",
+    "atmosphere": "Claustrophobic and tense environment where five delegates from different nations orbit Earth in close quarters. The sterile, mechanical surroundings and constant hum of life support systems create an eerie backdrop for a crime that seems impossible in such a controlled environment."
+  },
+  "premise": "In a historic moment for space exploration, Bulldozer, the first cat astronaut, joins an international crew aboard the ISS. But what should have been a celebrated milestone in interspecies space travel turns tragic when the beloved feline is found dead in the station's washroom. As tensions rise among the international delegates, it becomes clear that this was no accident - someone aboard the station is responsible for this unprecedented space crime.",
+  "actualEvents": [
+    "09:00 AM - Regular morning briefing with all delegates present. Bulldozer performs scheduled social media broadcast",
+    "11:30 AM - Shubham Sharma retreats to his private quarters, consuming cannabis gummies he smuggled onboard",
+    "12:45 PM - Emily Rosewood conducts maintenance checks in the East module while Omar Khan works on experiments in the lab",
+    "13:15 PM - David Zhang records atmospheric readings in the observation module",
+    "14:20 PM - Under the influence, Shubham encounters Bulldozer in the recreation area and offers the cat his cannabis gummies",
+    "14:30 PM - Bulldozer consumes the gummies while Shubham records video on his personal device, thinking it's amusing",
+    "15:45 PM - Bulldozer begins showing signs of distress, wandering the station erratically",
+    "16:30 PM - The cat retreats to the washroom area, unseen by the crew",
+    "17:45 PM - Emily Rosewood discovers Bulldozer's body in the washroom during routine cleaning schedule",
+    "18:00 PM - Emergency protocol initiated, station locked down, Earth Control notified"
+  ],
+  "solution": {
+    "culprit": "Shubham Sharma",
+    "method": "Shubham fed Bulldozer multiple cannabis-infused gummies that he had smuggled aboard the station. The concentration of THC, while tolerable for humans, proved lethal for the cat's smaller body mass and different metabolism.",
+    "motive": "While intoxicated from consuming his own illegal cannabis gummies, Shubham made the reckless decision to feed some to Bulldozer, finding humor in the idea of a 'high cat in space.' He didn't intend to kill the cat but showed criminal negligence in not considering the dangers.",
+    "explanation": "Shubham Sharma secretly brought cannabis gummies aboard the ISS, violating multiple space protocols. While under the influence, he made the fatal decision to feed several gummies to Bulldozer, recording the incident on his personal device as a joke. The high concentration of THC, combined with the cat's small size and the unique effects of zero gravity on metabolism, led to fatal poisoning. The video evidence was later found in Shubham's deleted files, along with the remaining gummies hidden in his personal effects."
+  }
+}

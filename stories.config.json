@@ -16,6 +16,27 @@
       "description": "The Birthday Woods (User Generated)",
       "isUGC": true,
       "createdAt": "2026-01-11T11:26:23.833Z"
+    },
+    {
+      "id": "ugc-mkb31ac6-72m8",
+      "enabled": true,
+      "description": "Interspace Murder (User Generated)",
+      "isUGC": true,
+      "createdAt": "2026-01-12T11:38:56.358Z"
+    },
+    {
+      "id": "pandoras-box-ygr5",
+      "enabled": true,
+      "description": "Pandora's Box (User Generated)",
+      "isUGC": true,
+      "createdAt": "2026-01-12T14:21:57.453Z"
+    },
+    {
+      "id": "hagrids-dead-horse-hr9i",
+      "enabled": true,
+      "description": "Hagrid's Dead Horse (User Generated)",
+      "isUGC": true,
+      "createdAt": "2026-01-13T08:23:35.207Z"
     }
   ],
   "defaults": {

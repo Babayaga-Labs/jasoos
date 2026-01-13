@@ -1,0 +1,313 @@
+================================================================================
+STEP: story-generation
+TIME: 2026-01-13T08:21:17.038Z
+================================================================================
+
+You are a mystery story writer. Create the story structure for a detective game based on the following user-provided details.
+
+USER'S STORY DETAILS:
+- Title: hagrid's dead horse 
+- Setting: hogwards castle 
+- Time Period: victorian
+- Premise: hagrid finds his beloved 3 winged horse stolen from his home, the suspition turns to harry, hermoinie and ron who were present at the night before at this house for a get together 
+- Crime Type: murder
+- Culprit: ron weasly  (hogwards student )
+- Motive: he was practiing charms with his broken wand and accidently killled the horse in front of harry
+- Method: stupefy curse from ron's wand 
+
+
+CHARACTERS:
+- hagrid : housekeeper to  - hagrid from harry potter 
+- hermoinei granger : hogwards student  - 15yo girl hermoinie granger hermoinie granger from harry potter 
+- ron weasly : hogwards student  - 16yo boy with orange hair ron weasly from harry potter 
+- harry potter: hogwards student  - the infamous harry potter as a 16yo boy
+
+Generate a JSON object with this structure:
+{
+  "id": "hagrids-dead-horse-hr9i",
+  "title": "hagrid's dead horse ",
+  "difficulty": "easy" | "medium" | "hard",
+  "estimatedMinutes": 20-40,
+  "setting": {
+    "location": "hogwards castle ",
+    "timePeriod": "victorian",
+    "atmosphere": "Describe the mood and tone fitting the setting"
+  },
+  "premise": "Polish the user's premise into 2-3 compelling sentences shown to the player at the start",
+  "actualEvents": [
+    "Timeline of what actually happened, step by step",
+    "Include times if relevant (e.g., '7:00 PM - Event happens')",
+    "Show what each character was doing",
+    "End with the crime being committed and discovered"
+  ],
+  "solution": {
+    "culprit": "ron weasly ",
+    "method": "Expand on: stupefy curse from ron's wand ",
+    "motive": "Expand on: he was practiing charms with his broken wand and accidently killled the horse in front of harry",
+    "explanation": "Full 3-4 sentence explanation for the player after they solve it, connecting all the pieces"
+  }
+}
+
+IMPORTANT:
+- The actualEvents timeline should be detailed (6-10 events minimum)
+- Make the atmosphere fitting for the crime type and setting
+- The explanation should feel satisfying and tie everything together
+
+Respond with ONLY the JSON object, no other text.
+
+
+================================================================================
+STEP: character-generation
+TIME: 2026-01-13T08:21:36.719Z
+================================================================================
+
+You are developing characters for a detective mystery game. The user has provided basic character info. Your job is to ENHANCE these characters with gameplay-relevant details.
+
+STORY CONTEXT:
+- Title: Hagrid's Dead Horse
+- Setting: Hogwarts Castle, Victorian
+- Atmosphere: A misty autumn evening at Hogwarts, where the castle's gothic architecture looms over Hagrid's humble hut. The atmosphere is thick with magical energy and the weight of betrayal, as friendship and truth are tested in the wake of a tragic accident.
+- Crime: Ron Weasley committed the crime because There was no malicious intent - Ron was practicing charms to improve his magical abilities and showing off to his friends, but his broken wand caused the spell to become lethal
+- Method: A miscast Stupefy spell from Ron's broken wand, which was much more powerful than intended due to the wand's damaged state, causing fatal damage to the horse's vital organs
+
+TIMELINE OF EVENTS:
+6:00 PM - Harry, Ron, and Hermione arrive at Hagrid's hut for evening tea
+6:45 PM - Hagrid shows them his new three-winged horse in the paddock
+7:30 PM - Hagrid goes inside to prepare more tea, leaving the trio outside
+7:35 PM - Ron attempts to practice his charm work with his broken wand
+7:40 PM - Harry suggests practicing near the horse to show off their skills
+7:45 PM - Ron's broken wand malfunctions during a Stupefy spell, hitting the horse
+7:46 PM - The horse collapses, Harry witnesses everything
+7:47 PM - Ron panics and makes Harry promise not to tell
+8:00 PM - The trio returns to the hut, acting as if nothing happened
+8:30 PM - They leave Hagrid's hut, with Ron and Harry carrying their guilty secret
+6:00 AM next day - Hagrid discovers his horse dead in the paddock
+
+USER'S CHARACTERS:
+[
+  {
+    "tempId": "char-1768292088438-7mee",
+    "name": "hagrid ",
+    "role": "housekeeper to ",
+    "description": "hagrid from harry potter ",
+    "isVictim": false,
+    "isGuilty": false,
+    "personalityTraits": [
+      "paranoid",
+      "emotional"
+    ],
+    "secret": null
+  },
+  {
+    "tempId": "char-1768292088438-uykj",
+    "name": "hermoinei granger ",
+    "role": "hogwards student ",
+    "description": "15yo girl hermoinie granger hermoinie granger from harry potter ",
+    "isVictim": false,
+    "isGuilty": false,
+    "personalityTraits": [
+      "intelligent",
+      "perfectionist",
+      "ambitious",
+      "anxious"
+    ],
+    "secret": "she disliked the horse for it's smell a lot "
+  },
+  {
+    "tempId": "char-1768292088438-lmjd",
+    "name": "ron weasly ",
+    "role": "hogwards student ",
+    "description": "16yo boy with orange hair ron weasly from harry potter ",
+    "isVictim": false,
+    "isGuilty": true,
+    "personalityTraits": [
+      "nervous",
+      "emotional"
+    ],
+    "secret": "ron's wand was broken so he cursed the horse accidently and is afraid of anyone finding it out "
+  },
+  {
+    "tempId": "char-1768292343232-f6bo",
+    "name": "harry potter",
+    "role": "hogwards student ",
+    "description": "the infamous harry potter as a 16yo boy",
+    "isVictim": false,
+    "isGuilty": false,
+    "personalityTraits": [
+      "sharp-witted",
+      "intelligent",
+      "ambitious",
+      "temperamental"
+    ],
+    "secret": "this accident happened in front of him and he wants to save his friend ron weasly "
+  }
+]
+
+For EACH character, generate enhanced details. The output must be a JSON array with this structure for each character:
+[
+  {
+    "id": "snake_case_id_from_name",
+    "tempId": "original tempId from input",
+    "name": "Character name",
+    "role": "Their role",
+    "age": appropriate_age_number,
+    "isGuilty": true/false,
+    "isVictim": true/false,
+    "personality": {
+      "traits": ["use user's traits if provided, or generate 3 appropriate ones"],
+      "speechStyle": "How they talk - formal, casual, nervous, etc.",
+      "quirks": ["2 behavioral quirks or mannerisms"]
+    },
+    "appearance": {
+      "description": "User's description",
+      "imagePrompt": "Detailed prompt for AI portrait generation based on description"
+    },
+    "knowledge": {
+      "knowsAboutCrime": "What this character witnessed, heard, or knows about the crime based on the timeline",
+      "knowsAboutOthers": ["What they know about other characters that could be revealed in interrogation"],
+      "alibi": "Where they claim to have been during the crime"
+    },
+    "secrets": [
+      {
+        "content": "Use user's secret if provided, or generate one",
+        "willingnessToReveal": "low" | "medium" | "high" | "never",
+        "revealCondition": "What makes them reveal this secret"
+      }
+    ],
+    "behaviorUnderPressure": {
+      "defensive": "How they act when feeling defensive",
+      "whenCaughtLying": "How they react when caught in a lie",
+      "whenAccused": "How they respond to direct accusation"
+    },
+    "relationships": {
+      "other_character_id": "Their relationship description"
+    }
+  }
+]
+
+CRITICAL RULES:
+1. The guilty character's alibi must be FALSE or have holes
+2. Innocent characters should have TRUE alibis that can be verified
+3. Each character should KNOW something useful that can be revealed through interrogation
+4. The "knowsAboutOthers" should include actionable information about other suspects
+5. Relationships should create a web of connections between characters
+
+Respond with ONLY the JSON array, no other text.
+
+
+================================================================================
+STEP: plot-points-generation
+TIME: 2026-01-13T08:22:14.223Z
+================================================================================
+
+You are creating clues and evidence for a detective mystery game where the ONLY way to discover information is through CHARACTER INTERROGATION.
+
+
+STORY:
+- Title: Hagrid's Dead Horse
+- Solution: Ron Weasley did it because There was no malicious intent - Ron was practicing charms to improve his magical abilities and showing off to his friends, but his broken wand caused the spell to become lethal
+- Method: A miscast Stupefy spell from Ron's broken wand, which was much more powerful than intended due to the wand's damaged state, causing fatal damage to the horse's vital organs
+
+TIMELINE:
+6:00 PM - Harry, Ron, and Hermione arrive at Hagrid's hut for evening tea
+6:45 PM - Hagrid shows them his new three-winged horse in the paddock
+7:30 PM - Hagrid goes inside to prepare more tea, leaving the trio outside
+7:35 PM - Ron attempts to practice his charm work with his broken wand
+7:40 PM - Harry suggests practicing near the horse to show off their skills
+7:45 PM - Ron's broken wand malfunctions during a Stupefy spell, hitting the horse
+7:46 PM - The horse collapses, Harry witnesses everything
+7:47 PM - Ron panics and makes Harry promise not to tell
+8:00 PM - The trio returns to the hut, acting as if nothing happened
+8:30 PM - They leave Hagrid's hut, with Ron and Harry carrying their guilty secret
+6:00 AM next day - Hagrid discovers his horse dead in the paddock
+
+CHARACTERS AND THEIR KNOWLEDGE:
+[
+  {
+    "id": "hagrid",
+    "name": "Rubeus Hagrid",
+    "role": "Hogwarts Gamekeeper",
+    "isGuilty": false,
+    "knowsAboutCrime": "Was inside preparing tea during the incident, found the horse dead next morning",
+    "knowsAboutOthers": [
+      "Noticed Ron's wand was damaged during tea",
+      "Saw Hermione's disgusted reaction to the horse's smell"
+    ]
+  },
+  {
+    "id": "hermione_granger",
+    "name": "Hermione Granger",
+    "role": "Hogwarts Student",
+    "isGuilty": false,
+    "knowsAboutCrime": "Was present but looking away when the spell was cast",
+    "knowsAboutOthers": [
+      "Knows Ron's wand is broken",
+      "Saw Harry's worried glances at Ron afterward"
+    ]
+  },
+  {
+    "id": "ron_weasley",
+    "name": "Ron Weasley",
+    "role": "Hogwarts Student",
+    "isGuilty": true,
+    "knowsAboutCrime": "Directly responsible for the horse's death through accidental spell misfire",
+    "knowsAboutOthers": [
+      "Knows Harry saw everything",
+      "Aware Hermione was distracted by plants"
+    ]
+  },
+  {
+    "id": "harry_potter",
+    "name": "Harry Potter",
+    "role": "Hogwarts Student",
+    "isGuilty": false,
+    "knowsAboutCrime": "Witnessed Ron's spell misfire and the horse's death",
+    "knowsAboutOthers": [
+      "Knows Ron is guilty",
+      "Saw Hermione's distraction with plants"
+    ]
+  }
+]
+
+Create 8-12 plot points (clues) that form a solvable mystery. Generate a JSON object:
+
+{
+  "plotPoints": [
+    {
+      "id": "pp_snake_case_id",
+      "category": "motive" | "alibi" | "evidence" | "relationship",
+      "description": "What the player learns when this clue is revealed",
+      "importance": "low" | "medium" | "high" | "critical",
+      "points": 10-30,
+      "revealedBy": ["character_id_who_can_reveal_this"],
+      "detectionHints": ["keywords", "phrases", "topics that trigger this clue"]
+    }
+  ],
+  "minimumPointsToAccuse": 50,
+  "perfectScoreThreshold": calculated_total_of_all_points
+}
+
+CRITICAL RULES FOR CLUE GENERATION:
+1. EVERY clue MUST be assigned to at least one LIVING character who can reveal it
+2. NEVER include victims in revealedBy - they are dead/missing and cannot be interrogated!
+3. Characters can only reveal clues they would realistically know:
+   - They witnessed the event directly
+   - They overheard a conversation
+   - They have expertise to notice something (doctor spots poison, accountant notices fraud)
+   - They know the culprit/victim personally
+   - Another character told them
+4. The player solves this ONLY through interrogation - NO physical evidence found randomly
+5. Critical clues pointing to the culprit must be discoverable through conversation
+6. Include clues that:
+   - Point to the culprit's motive (at least 2)
+   - Expose the culprit's false alibi (at least 1-2)
+   - Show the culprit's opportunity (at least 1)
+   - Provide corroborating evidence (at least 2)
+
+DETECTION HINTS should include:
+- Direct question keywords ("where were you", "what did you see")
+- Topic triggers ("alibi", "that night", "relationship")
+- Character name mentions that might reveal info about them
+
+Respond with ONLY the JSON object, no other text.
+

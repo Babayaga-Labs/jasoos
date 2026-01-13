@@ -1,0 +1,144 @@
+{
+  "plotPoints": [
+    {
+      "id": "pp_aryan_blackouts",
+      "category": "evidence",
+      "description": "Aryan has been experiencing frequent memory blackouts during the expedition, sometimes returning to consciousness in different locations",
+      "importance": "critical",
+      "points": 30,
+      "revealedBy": [
+        "dora_black",
+        "anvith_rajput"
+      ],
+      "detectionHints": [
+        "strange behavior",
+        "memory",
+        "blackouts",
+        "weird",
+        "acting different"
+      ]
+    },
+    {
+      "id": "pp_nail_cutter",
+      "category": "evidence",
+      "description": "Aryan's nail cutter has an unusual triangular blade shape matching the victim's wounds",
+      "importance": "critical",
+      "points": 30,
+      "revealedBy": [
+        "dora_black"
+      ],
+      "detectionHints": [
+        "weapon",
+        "wounds",
+        "unusual shape",
+        "tools",
+        "personal items"
+      ]
+    },
+    {
+      "id": "pp_personality_shifts",
+      "category": "evidence",
+      "description": "Witnesses observed Aryan switching between friendly and aggressive personalities throughout the expedition",
+      "importance": "high",
+      "points": 25,
+      "revealedBy": [
+        "anvith_rajput",
+        "dora_black"
+      ],
+      "detectionHints": [
+        "behavior changes",
+        "personality",
+        "mood swings",
+        "aggressive"
+      ]
+    },
+    {
+      "id": "pp_missing_time",
+      "category": "alibi",
+      "description": "Aryan cannot account for his whereabouts between 3:15-4:45 PM",
+      "importance": "high",
+      "points": 25,
+      "revealedBy": [
+        "aryan_jain"
+      ],
+      "detectionHints": [
+        "where were you",
+        "that afternoon",
+        "alibi",
+        "timeline"
+      ]
+    },
+    {
+      "id": "pp_strange_sound",
+      "category": "evidence",
+      "description": "Anvith heard a struggle and muffled sounds from the chamber at 3:30 PM",
+      "importance": "medium",
+      "points": 20,
+      "revealedBy": [
+        "anvith_rajput"
+      ],
+      "detectionHints": [
+        "noise",
+        "sounds",
+        "chamber",
+        "afternoon",
+        "heard anything"
+      ]
+    },
+    {
+      "id": "pp_blood_discovery",
+      "category": "evidence",
+      "description": "Aryan found unexplained blood on his nail cutter but doesn't remember how it got there",
+      "importance": "high",
+      "points": 25,
+      "revealedBy": [
+        "aryan_jain"
+      ],
+      "detectionHints": [
+        "blood",
+        "stains",
+        "cleaning",
+        "tools",
+        "nail cutter"
+      ]
+    },
+    {
+      "id": "pp_false_suspects",
+      "category": "relationship",
+      "description": "Both Anvith and Dora had plausible motives: land rights and government investigation",
+      "importance": "low",
+      "points": 15,
+      "revealedBy": [
+        "aryan_jain",
+        "anvith_rajput",
+        "dora_black"
+      ],
+      "detectionHints": [
+        "motive",
+        "land rights",
+        "government",
+        "investigation",
+        "conflicts"
+      ]
+    },
+    {
+      "id": "pp_prior_episodes",
+      "category": "evidence",
+      "description": "Dora's surveillance notes show multiple instances of Aryan's dissociative episodes in previous weeks",
+      "importance": "high",
+      "points": 25,
+      "revealedBy": [
+        "dora_black"
+      ],
+      "detectionHints": [
+        "surveillance",
+        "notes",
+        "previous behavior",
+        "patterns",
+        "watching"
+      ]
+    }
+  ],
+  "minimumPointsToAccuse": 100,
+  "perfectScoreThreshold": 195
+}

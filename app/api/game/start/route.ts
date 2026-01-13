@@ -18,8 +18,11 @@ export async function POST(request: NextRequest) {
     }
 
     const story = JSON.parse(fs.readFileSync(storyPath, 'utf-8'));
-    const { characters } = JSON.parse(fs.readFileSync(charactersPath, 'utf-8'));
+    const { characters: allCharacters } = JSON.parse(fs.readFileSync(charactersPath, 'utf-8'));
     const plotPointsData = JSON.parse(fs.readFileSync(plotPointsPath, 'utf-8'));
+
+    // Filter out victims - they can't be interrogated (they're dead/missing)
+    const interactableCharacters = allCharacters.filter((c: any) => !c.isVictim);
 
     // Calculate total possible points
     const totalPossiblePoints = plotPointsData.plotPoints.reduce(
@@ -29,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       story,
-      characters: characters.map((c: any) => ({
+      characters: interactableCharacters.map((c: any) => ({
         id: c.id,
         name: c.name,
         role: c.role,
@@ -39,7 +42,7 @@ export async function POST(request: NextRequest) {
           traits: c.personality.traits,
           speechStyle: c.personality.speechStyle,
         },
-        // Don't send isGuilty to client!
+        // Don't send isGuilty or isVictim to client!
       })),
       plotPoints: plotPointsData.plotPoints.map((pp: any) => ({
         id: pp.id,

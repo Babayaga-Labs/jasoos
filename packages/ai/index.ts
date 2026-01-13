@@ -16,11 +16,45 @@ export type {
   GenerationStep,
   GenerationProgress,
   GenerationResult,
+  StructuredGenerationResult,
   StoryData,
   CharacterData,
   PlotPointData,
   PlotPointsData,
+  PromptTrace,
 } from './ugc-engine';
+
+// UGC Types - Structured input/output types
+export type {
+  UGCFormInput,
+  UGCCharacterInput,
+  UGCCrimeInput,
+  UGCGeneratedData,
+  UGCGeneratedStory,
+  UGCGeneratedCharacter,
+  UGCGeneratedPlotPoint,
+  UGCDraftState,
+  UGCFinalStory,
+  UGCFinalCharacter,
+  UGCFinalPlotPoints,
+  EditableSection,
+  GenerateRequest,
+  GenerateProgressEvent,
+  GenerateCompleteEvent,
+  GenerateErrorEvent,
+  GenerateSSEEvent,
+  RegenerateSectionRequest,
+  RegenerateSectionResponse,
+  SaveRequest,
+  SaveResponse,
+} from './types/ugc-types';
+export {
+  TIME_PERIODS,
+  CRIME_TYPES,
+  PERSONALITY_TRAITS,
+  MAX_CHARACTERS,
+  MIN_CHARACTERS,
+} from './types/ugc-types';
 
 // Image generation
 export { ImageClient } from './image-client';

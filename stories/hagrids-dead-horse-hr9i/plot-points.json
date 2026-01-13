@@ -1,0 +1,143 @@
+{
+  "plotPoints": [
+    {
+      "id": "pp_broken_wand",
+      "category": "evidence",
+      "description": "Ron's wand was damaged and taped together, making spells unpredictable and potentially dangerous",
+      "importance": "critical",
+      "points": 30,
+      "revealedBy": [
+        "hermione_granger",
+        "hagrid"
+      ],
+      "detectionHints": [
+        "wand",
+        "broken",
+        "equipment",
+        "spells",
+        "accidents"
+      ]
+    },
+    {
+      "id": "pp_practice_motivation",
+      "category": "motive",
+      "description": "Ron was frustrated with his poor spell performance and desperately wanted to improve",
+      "importance": "high",
+      "points": 25,
+      "revealedBy": [
+        "hermione_granger",
+        "harry_potter"
+      ],
+      "detectionHints": [
+        "practice",
+        "improvement",
+        "skills",
+        "frustration",
+        "Ron's abilities"
+      ]
+    },
+    {
+      "id": "pp_harry_nervous",
+      "category": "evidence",
+      "description": "Harry kept giving Ron worried glances during tea after the incident",
+      "importance": "medium",
+      "points": 20,
+      "revealedBy": [
+        "hermione_granger"
+      ],
+      "detectionHints": [
+        "behavior",
+        "strange",
+        "acting different",
+        "nervous",
+        "tea time"
+      ]
+    },
+    {
+      "id": "pp_outside_timing",
+      "category": "alibi",
+      "description": "The trio was alone outside while Hagrid prepared more tea inside",
+      "importance": "high",
+      "points": 25,
+      "revealedBy": [
+        "hagrid",
+        "hermione_granger"
+      ],
+      "detectionHints": [
+        "timeline",
+        "where was everyone",
+        "tea time",
+        "location"
+      ]
+    },
+    {
+      "id": "pp_showing_off",
+      "category": "motive",
+      "description": "Students were trying to impress each other with magic near the horse",
+      "importance": "medium",
+      "points": 20,
+      "revealedBy": [
+        "harry_potter",
+        "hermione_granger"
+      ],
+      "detectionHints": [
+        "competition",
+        "showing off",
+        "practice",
+        "horse paddock"
+      ]
+    },
+    {
+      "id": "pp_hermione_distracted",
+      "category": "evidence",
+      "description": "Hermione was examining rare plants when the incident occurred",
+      "importance": "high",
+      "points": 25,
+      "revealedBy": [
+        "harry_potter",
+        "ron_weasley",
+        "hermione_granger"
+      ],
+      "detectionHints": [
+        "plants",
+        "distraction",
+        "what were you doing",
+        "witness"
+      ]
+    },
+    {
+      "id": "pp_stupefy_effects",
+      "category": "evidence",
+      "description": "The horse showed signs consistent with a powerful stunning spell",
+      "importance": "critical",
+      "points": 30,
+      "revealedBy": [
+        "hermione_granger"
+      ],
+      "detectionHints": [
+        "cause of death",
+        "spell damage",
+        "stunning spell",
+        "injuries"
+      ]
+    },
+    {
+      "id": "pp_sudden_silence",
+      "category": "evidence",
+      "description": "The trio became unusually quiet after returning to Hagrid's hut",
+      "importance": "medium",
+      "points": 20,
+      "revealedBy": [
+        "hagrid"
+      ],
+      "detectionHints": [
+        "behavior change",
+        "atmosphere",
+        "evening tea",
+        "strange"
+      ]
+    }
+  ],
+  "minimumPointsToAccuse": 120,
+  "perfectScoreThreshold": 195
+}

@@ -1,0 +1,201 @@
+{
+  "characters": [
+    {
+      "id": "aryan_jain",
+      "name": "Aryan Jain",
+      "role": "Lottery winner turned amateur explorer",
+      "age": 24,
+      "isGuilty": true,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "nervous",
+          "paranoid",
+          "defensive"
+        ],
+        "speechStyle": "Stutters when anxious, speaks quietly, often contradicts himself",
+        "quirks": [
+          "Constantly adjusts his glasses",
+          "Obsessively maintains his nail hygiene"
+        ]
+      },
+      "appearance": {
+        "description": "tall thin indian guy wearing glasses, in his 20s",
+        "imagePrompt": "Portrait of a tall, thin Indian man in his early 20s with wire-rimmed glasses, anxious expression, wearing explorer's gear, high-quality modern hiking clothes, slightly disheveled appearance"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Has complete memory blackout between 3:15-4:45 PM, found unexplained blood on his nail cutter",
+        "knowsAboutOthers": [
+          "Saw Anvith arguing with Neutehayu about land rights",
+          "Noticed Dora having private conversations in tribal language with Neutehayu"
+        ],
+        "alibi": "Claims he was photographing butterflies alone in the western section of ruins"
+      },
+      "secrets": [
+        {
+          "content": "Suffers from undiagnosed Dissociative Identity Disorder",
+          "willingnessToReveal": "never",
+          "revealCondition": "Only revealed through professional psychiatric evaluation"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes increasingly agitated and starts cleaning his nails",
+        "whenCaughtLying": "Experiences severe anxiety attacks",
+        "whenAccused": "Completely shuts down or has panic attacks"
+      },
+      "relationships": {
+        "neutehayu": "Felt intimidated by his knowledge",
+        "anvith_rajput": "Envious of his wealth and status",
+        "dora_black": "Mild attraction, seeks her approval"
+      }
+    },
+    {
+      "id": "neutehayu",
+      "name": "Neutehayu",
+      "role": "Indigenous guide and ruins expert",
+      "age": 45,
+      "isGuilty": false,
+      "isVictim": true,
+      "personality": {
+        "traits": [
+          "wise",
+          "protective",
+          "secretive"
+        ],
+        "speechStyle": "Speaks carefully in broken English, more eloquent in native tongue",
+        "quirks": [
+          "Touches ancient markings while speaking",
+          "Whispers prayers before entering sacred spaces"
+        ]
+      },
+      "appearance": {
+        "description": "Middle-aged indigenous man with traditional face paint and modern hiking gear",
+        "imagePrompt": "Portrait of a weathered indigenous man, mid-40s, wearing mix of traditional tribal clothing and modern expedition gear, tribal face paint, wise expression"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Was examining wall carvings when attacked",
+        "knowsAboutOthers": [
+          "Knew about Anvith's true intentions to exploit tribal lands",
+          "Was aware of Dora's undercover mission"
+        ],
+        "alibi": "None - victim"
+      },
+      "secrets": [
+        {
+          "content": "Discovered the true location of Pandora's Box",
+          "willingnessToReveal": "never",
+          "revealCondition": "Died before revealing"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Maintained calm demeanor",
+        "whenCaughtLying": "Would deflect with ancient proverbs",
+        "whenAccused": "Would stand ground firmly but peacefully"
+      },
+      "relationships": {
+        "aryan_jain": "Saw him as unstable but harmless",
+        "anvith_rajput": "Distrusted his motives",
+        "dora_black": "Secret alliance to protect tribal lands"
+      }
+    },
+    {
+      "id": "anvith_rajput",
+      "name": "Anvith Rajput",
+      "role": "Royal prince seeking land acquisition",
+      "age": 32,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "intelligent",
+          "sharp-witted",
+          "ambitious"
+        ],
+        "speechStyle": "Formal, authoritative, occasionally condescending",
+        "quirks": [
+          "Constantly checks his luxury watch",
+          "Refuses to sit on ground"
+        ]
+      },
+      "appearance": {
+        "description": "short looking indian prince who went to the rainforest to own some land",
+        "imagePrompt": "Portrait of a short, well-groomed Indian man in his early 30s, wearing expensive expedition gear, royal bearing despite short stature, perfectly maintained appearance despite jungle setting"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Heard a strange sound from the chamber at 3:30 PM",
+        "knowsAboutOthers": [
+          "Noticed Aryan's erratic behavior changes",
+          "Discovered Dora's government connections"
+        ],
+        "alibi": "Was documenting potential development sites with his satellite phone's camera, timestamps verify location"
+      },
+      "secrets": [
+        {
+          "content": "Plans to exploit tribal lands for mining operations",
+          "willingnessToReveal": "low",
+          "revealCondition": "When presented with evidence of his land surveys"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes haughty and pulls rank",
+        "whenCaughtLying": "Tries to bribe or threaten",
+        "whenAccused": "Calls his royal lawyers"
+      },
+      "relationships": {
+        "aryan_jain": "Views him as beneath notice",
+        "neutehayu": "Saw him as obstacle to plans",
+        "dora_black": "Suspicious of her true role"
+      }
+    },
+    {
+      "id": "dora_black",
+      "name": "Dora Black",
+      "role": "Undercover government agent posing as ranger",
+      "age": 29,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "sharp-witted",
+          "temperamental",
+          "cold",
+          "calculating"
+        ],
+        "speechStyle": "Direct, professional, occasionally speaks in tribal language",
+        "quirks": [
+          "Touches her eyepatch when thinking",
+          "Takes constant notes in coded language"
+        ]
+      },
+      "appearance": {
+        "description": "black woman in her 20s, has an eyepatch",
+        "imagePrompt": "Portrait of a fit Black woman in her late 20s, wearing ranger uniform, black eyepatch over left eye, stern expression, carrying professional camera and notebook"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Found the body, noticed unusual wound pattern",
+        "knowsAboutOthers": [
+          "Has file on Anvith's illegal land deals",
+          "Documented Aryan's strange behavior patterns"
+        ],
+        "alibi": "Was photographing illegal logging sites, GPS-tagged photos confirm location"
+      },
+      "secrets": [
+        {
+          "content": "Undercover agent investigating illegal land acquisition",
+          "willingnessToReveal": "medium",
+          "revealCondition": "When necessary to prevent tribal land exploitation"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes intensely analytical",
+        "whenCaughtLying": "Redirects questioning skillfully",
+        "whenAccused": "Maintains professional composure while gathering intel"
+      },
+      "relationships": {
+        "aryan_jain": "Views him as mentally unstable",
+        "neutehayu": "Secret alliance and information source",
+        "anvith_rajput": "Target of investigation"
+      }
+    }
+  ]
+}

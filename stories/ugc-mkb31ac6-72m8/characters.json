@@ -1,0 +1,248 @@
+{
+  "characters": [
+    {
+      "id": "david_zhang",
+      "name": "David Zhang",
+      "role": "Chinese delegate",
+      "age": 45,
+      "isGuilty": false,
+      "personality": {
+        "traits": [
+          "cold",
+          "secretive",
+          "intelligent"
+        ],
+        "speechStyle": "formal and measured, speaks in complete sentences with precise word choice",
+        "quirks": [
+          "constantly checks his watch",
+          "arranges items in perfect alignment"
+        ]
+      },
+      "appearance": {
+        "description": "middle aged, short hair chinese astronaut",
+        "imagePrompt": "Professional middle-aged Chinese man, crew cut black hair, stern expression, wearing blue ISS uniform, clean-shaven, wire-rimmed glasses, perfect posture"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Was in observation module at 14:20, saw Shubham acting strangely and stumbling in corridor",
+        "knowsAboutOthers": [
+          "Noticed Shubham's red eyes during afternoon shift",
+          "Heard Omar Khan complaining about Bulldozer in the mess hall"
+        ],
+        "alibi": "Was recording atmospheric readings in observation module, verified by station logs"
+      },
+      "secrets": [
+        {
+          "content": "he likes eating cats, it's his favourite dish that he has told everyone on the space station about",
+          "willingnessToReveal": "high",
+          "revealCondition": "Freely discusses this, sees nothing wrong with it"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes more formally rigid and speaks in clipped tones",
+        "whenCaughtLying": "Maintains composure but speaks more slowly and deliberately",
+        "whenAccused": "Responds with cold logic and station protocols"
+      },
+      "relationships": {
+        "emily_rosewood": "Professional respect but cultural tension",
+        "shubham_sharma": "Disapproves of his casual attitude",
+        "omar_khan": "Allied in their dislike of the cat",
+        "bulldozer": "Viewed as unnecessary distraction to mission"
+      }
+    },
+    {
+      "id": "shubham_sharma",
+      "name": "Shubham Sharma",
+      "role": "Indian delegate",
+      "age": 32,
+      "isGuilty": true,
+      "personality": {
+        "traits": [
+          "impulsive",
+          "intelligent",
+          "pleasure-seeking"
+        ],
+        "speechStyle": "casual and friendly, uses humor to deflect",
+        "quirks": [
+          "fidgets with his glasses when nervous",
+          "laughs at his own jokes"
+        ]
+      },
+      "appearance": {
+        "description": "bearded indian astronaut wearing specs",
+        "imagePrompt": "32-year-old Indian man, full dark beard, rectangular glasses, friendly smile, slightly disheveled ISS uniform, relaxed posture"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Directly responsible for feeding cannabis gummies to Bulldozer",
+        "knowsAboutOthers": [
+          "Knows Emily secretly played with Bulldozer when others weren't watching",
+          "Has seen Omar's aggressive behavior toward the cat"
+        ],
+        "alibi": "Claims he was sleeping off a headache in his quarters during the incident"
+      },
+      "secrets": [
+        {
+          "content": "he bought some edibles on the space station secretly to get high on his job",
+          "willingnessToReveal": "never",
+          "revealCondition": "Only if presented with direct evidence"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes overly jovial and makes inappropriate jokes",
+        "whenCaughtLying": "Starts sweating and adjusting glasses repeatedly",
+        "whenAccused": "Deflects with technical jargon and scientific explanations"
+      },
+      "relationships": {
+        "emily_rosewood": "Friendly but keeps distance due to her cold demeanor",
+        "david_zhang": "Intimidated by his strictness",
+        "omar_khan": "Regular workout partner",
+        "bulldozer": "Found the cat amusing, saw it as entertainment"
+      }
+    },
+    {
+      "id": "bulldozer",
+      "name": "Bulldozer",
+      "role": "Space Station Mascot",
+      "age": 3,
+      "isGuilty": false,
+      "personality": {
+        "traits": [
+          "playful",
+          "attention-seeking",
+          "curious"
+        ],
+        "speechStyle": "Meows and purrs",
+        "quirks": [
+          "followed crew members during maintenance rounds",
+          "slept in zero-gravity bubbles"
+        ]
+      },
+      "appearance": {
+        "description": "persian cat astronaut",
+        "imagePrompt": "Fluffy white Persian cat with flat face, wearing custom-made small space suit accessories, long luxurious fur floating in zero gravity"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Was the victim",
+        "knowsAboutOthers": [
+          "N/A"
+        ],
+        "alibi": "N/A"
+      },
+      "secrets": [
+        {
+          "content": "Had become addicted to treats from Emily's secret stash",
+          "willingnessToReveal": "N/A",
+          "revealCondition": "N/A"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Would hide in ventilation shafts",
+        "whenCaughtLying": "N/A",
+        "whenAccused": "N/A"
+      },
+      "relationships": {
+        "emily_rosewood": "Secret favorite human",
+        "david_zhang": "Avoided due to sensing his dislike",
+        "shubham_sharma": "Trusted food source",
+        "omar_khan": "Feared and avoided"
+      }
+    },
+    {
+      "id": "emily_rosewood",
+      "name": "Emily Rosewood",
+      "role": "US delegate",
+      "age": 29,
+      "isGuilty": false,
+      "personality": {
+        "traits": [
+          "cold",
+          "intelligent",
+          "sharp-witted"
+        ],
+        "speechStyle": "precise and technical, often sarcastic",
+        "quirks": [
+          "drums fingers when thinking",
+          "maintains unnaturally perfect posture"
+        ]
+      },
+      "appearance": {
+        "description": "short haired cold hearted goth girl astronaut from the US",
+        "imagePrompt": "29-year-old woman with short black hair, pale complexion, dark lipstick, stern expression, immaculate ISS uniform, multiple small ear piercings"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Found the body, noticed signs of unusual behavior in Bulldozer earlier",
+        "knowsAboutOthers": [
+          "Saw Shubham acting strangely in recreation area",
+          "Knows David's cultural views on cats make him suspicious"
+        ],
+        "alibi": "Was conducting documented maintenance checks in East module"
+      },
+      "secrets": [
+        {
+          "content": "Secretly loved Bulldozer despite cold exterior",
+          "willingnessToReveal": "low",
+          "revealCondition": "Only if emotional barriers break down during interrogation"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes more clinical and detached",
+        "whenCaughtLying": "Responds with aggressive counter-questioning",
+        "whenAccused": "Lists logical reasons why accusation is flawed"
+      },
+      "relationships": {
+        "david_zhang": "Professional rivalry",
+        "shubham_sharma": "Finds him irritatingly casual",
+        "omar_khan": "Distrusts his temperament",
+        "bulldozer": "Secret affection"
+      }
+    },
+    {
+      "id": "omar_khan",
+      "name": "Omar Khan",
+      "role": "Saudi delegate",
+      "age": 38,
+      "isGuilty": false,
+      "personality": {
+        "traits": [
+          "temperamental",
+          "dedicated",
+          "straightforward"
+        ],
+        "speechStyle": "blunt and direct, sometimes aggressive",
+        "quirks": [
+          "paces when agitated",
+          "speaks with hands"
+        ]
+      },
+      "appearance": {
+        "description": "saudi astronaut",
+        "imagePrompt": "38-year-old Middle Eastern man, athletic build, neatly trimmed beard, serious expression, pristine ISS uniform, military-like bearing"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Was in lab during incident but heard strange noises from recreation area",
+        "knowsAboutOthers": [
+          "Witnessed Shubham hiding something in his quarters",
+          "Knows Emily secretly cared for the cat"
+        ],
+        "alibi": "Working on experiments in the lab, verified by camera footage"
+      },
+      "secrets": [
+        {
+          "content": "he was very open about hating cats",
+          "willingnessToReveal": "high",
+          "revealCondition": "Freely admits this when asked"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes loud and confrontational",
+        "whenCaughtLying": "Raises voice and becomes physically imposing",
+        "whenAccused": "Responds with righteous indignation"
+      },
+      "relationships": {
+        "emily_rosewood": "Respects her work ethic but clashes personally",
+        "david_zhang": "Shares conservative views",
+        "shubham_sharma": "Workout partner but growing suspicious",
+        "bulldozer": "Open disdain"
+      }
+    }
+  ]
+}

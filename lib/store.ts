@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 
 // Types
-export interface Message {
-  role: 'user' | 'character';
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
   content: string;
-  timestamp: Date;
-  highlightedEvidence?: string[];
+  revealedEvidence?: string[];  // Plot point IDs revealed by this message
 }
 
 export interface Story {
@@ -66,6 +66,7 @@ export interface GameState {
   unlockedPlotPoints: string[];
   currentScore: number;
   newEvidenceCount: number;
+  chatHistories: Record<string, ChatMessage[]>;  // characterId -> messages
 
   // UI state
   selectedCharacter: string | null;
@@ -86,6 +87,8 @@ export interface GameState {
   loadStory: (storyId: string) => Promise<void>;
   selectCharacter: (characterId: string | null) => void;
   unlockPlotPoint: (plotPointId: string) => void;
+  addChatMessage: (characterId: string, message: ChatMessage) => void;
+  updateLastMessage: (characterId: string, content: string, revealedEvidence?: string[]) => void;
   toggleNotepad: () => void;
   openAccusation: () => void;
   closeAccusation: () => void;
@@ -105,6 +108,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   unlockedPlotPoints: [],
   currentScore: 0,
   newEvidenceCount: 0,
+  chatHistories: {},
   selectedCharacter: null,
   isNotepadOpen: false,
   isAccusationOpen: false,
@@ -160,6 +164,38 @@ export const useGameStore = create<GameState>((set, get) => ({
       unlockedPlotPoints: [...unlockedPlotPoints, plotPointId],
       currentScore: currentScore + plotPoint.points,
       newEvidenceCount: newEvidenceCount + 1,
+    });
+  },
+
+  addChatMessage: (characterId: string, message: ChatMessage) => {
+    const { chatHistories } = get();
+    const history = chatHistories[characterId] || [];
+    set({
+      chatHistories: {
+        ...chatHistories,
+        [characterId]: [...history, message],
+      },
+    });
+  },
+
+  updateLastMessage: (characterId: string, content: string, revealedEvidence?: string[]) => {
+    const { chatHistories } = get();
+    const history = chatHistories[characterId] || [];
+    if (history.length === 0) return;
+
+    const updatedHistory = [...history];
+    const lastIndex = updatedHistory.length - 1;
+    updatedHistory[lastIndex] = {
+      ...updatedHistory[lastIndex],
+      content,
+      ...(revealedEvidence && { revealedEvidence }),
+    };
+
+    set({
+      chatHistories: {
+        ...chatHistories,
+        [characterId]: updatedHistory,
+      },
     });
   },
 
@@ -219,6 +255,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       unlockedPlotPoints: [],
       currentScore: 0,
       newEvidenceCount: 0,
+      chatHistories: {},
       selectedCharacter: null,
       isNotepadOpen: false,
       isAccusationOpen: false,

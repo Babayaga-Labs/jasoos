@@ -5,7 +5,7 @@ import path from 'path';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
+
     // Support both useChat format (messages array) and legacy format (message + history)
     const { storyId, characterId, messages: useChatMessages, message, history } = body;
 
@@ -14,6 +14,10 @@ export async function POST(request: NextRequest) {
     // Load character data
     const charactersPath = path.join(storyDir, 'characters.json');
     const { characters } = JSON.parse(fs.readFileSync(charactersPath, 'utf-8'));
+
+    // Load plot points for evidence detection
+    const plotPointsPath = path.join(storyDir, 'plot-points.json');
+    const { plotPoints } = JSON.parse(fs.readFileSync(plotPointsPath, 'utf-8'));
 
     const character = characters.find((c: any) => c.id === characterId);
     if (!character) {
@@ -48,29 +52,79 @@ export async function POST(request: NextRequest) {
 
     // Proxy to Python backend
     const pythonBackendUrl = process.env.PYTHON_BACKEND_URL || 'http://localhost:8000';
-    const response = await fetch(`${pythonBackendUrl}/api/chat`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        story_id: storyId,
-        character_id: characterId,
-        messages: messages,
-        system_prompt: systemPrompt,
-      }),
-    });
+    console.log(`[Chat] Sending ${messages.length} messages to Python backend for ${characterId}`);
+
+    let response: Response;
+    try {
+      response = await fetch(`${pythonBackendUrl}/api/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          story_id: storyId,
+          character_id: characterId,
+          messages: messages,
+          system_prompt: systemPrompt,
+        }),
+      });
+    } catch (fetchError) {
+      console.error('[Chat] Failed to connect to Python backend:', fetchError);
+      return new Response(JSON.stringify({ error: 'Backend service unavailable' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
 
     if (!response.ok) {
       const error = await response.text();
+      console.error(`[Chat] Python backend error (${response.status}):`, error);
       return new Response(JSON.stringify({ error }), {
         status: response.status,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    // Stream the response from Python backend
-    return new Response(response.body, {
+    // Create a transform stream to collect the full response and append evidence
+    const reader = response.body?.getReader();
+    if (!reader) {
+      console.error('[Chat] No response body from Python backend');
+      throw new Error('No response body');
+    }
+
+    let fullContent = '';
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+
+    const stream = new ReadableStream({
+      async pull(controller) {
+        try {
+          const { done, value } = await reader.read();
+
+          if (done) {
+            // Stream complete - detect evidence and append marker
+            // Pass isGuilty flag so guilty characters can reveal evidence through confession
+            const revealed = checkForPlotPoints(fullContent, characterId, plotPoints, character.isGuilty);
+            console.log(`[Chat] Evidence detection for ${characterId}: found ${revealed.length} plot points`, revealed);
+            if (revealed.length > 0) {
+              controller.enqueue(encoder.encode(`[[EVIDENCE:${JSON.stringify(revealed)}]]`));
+            }
+            controller.close();
+            return;
+          }
+
+          // Pass through the chunk and accumulate
+          const chunk = decoder.decode(value, { stream: true });
+          fullContent += chunk;
+          controller.enqueue(value);
+        } catch (streamError) {
+          console.error('[Chat] Stream read error:', streamError);
+          controller.error(streamError);
+        }
+      },
+    });
+
+    return new Response(stream, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
@@ -78,8 +132,9 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error in chat:', error);
-    return new Response(JSON.stringify({ error: 'Failed to get response' }), {
+    console.error('[Chat] Unhandled error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return new Response(JSON.stringify({ error: `Failed to get response: ${errorMessage}` }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
@@ -133,14 +188,17 @@ Respond only as ${character.name}. Begin.`;
 function checkForPlotPoints(
   response: string,
   characterId: string,
-  plotPoints: any[]
+  plotPoints: any[],
+  isGuilty: boolean = false
 ): string[] {
   const revealed: string[] = [];
   const responseLower = response.toLowerCase();
 
   for (const pp of plotPoints) {
     // Check if this character can reveal this plot point
-    if (!pp.revealedBy?.includes(characterId)) continue;
+    // Guilty characters can reveal ANY evidence through their confession
+    const canReveal = isGuilty || pp.revealedBy?.includes(characterId);
+    if (!canReveal) continue;
 
     // Check for detection hints
     const hasHint = pp.detectionHints?.some((hint: string) =>

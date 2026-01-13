@@ -3,13 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { Modal } from '@/components/ui/Modal';
-import { useGameStore, Character } from '@/lib/store';
-
-interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-}
+import { useGameStore, Character, ChatMessage } from '@/lib/store';
 
 interface ChatModalProps {
   character: Character;
@@ -20,36 +14,17 @@ interface ChatModalProps {
 export function ChatModal({ character, storyId, onClose }: ChatModalProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { unlockPlotPoint, plotPoints } = useGameStore();
+  const {
+    unlockPlotPoint,
+    chatHistories,
+    addChatMessage,
+    updateLastMessage
+  } = useGameStore();
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Client-side plot point detection function (same logic as server)
-  function checkForPlotPoints(
-    response: string,
-    characterId: string,
-    plotPoints: any[]
-  ): string[] {
-    const revealed: string[] = [];
-    const responseLower = response.toLowerCase();
-
-    for (const pp of plotPoints) {
-      // Check if this character can reveal this plot point
-      if (!pp.revealedBy?.includes(characterId)) continue;
-
-      // Check for detection hints
-      const hasHint = pp.detectionHints?.some((hint: string) =>
-        responseLower.includes(hint.toLowerCase())
-      );
-
-      if (hasHint) {
-        revealed.push(pp.id);
-      }
-    }
-
-    return revealed;
-  }
+  // Get messages for this character from store
+  const messages = chatHistories[character.id] || [];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
@@ -58,30 +33,29 @@ export function ChatModal({ character, storyId, onClose }: ChatModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
-    
+
     const userMessage = input.trim();
     setInput('');
     setIsLoading(true);
 
-    // Add user message
+    // Add user message to store
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
       role: 'user',
       content: userMessage,
     };
-    setMessages((prev) => [...prev, userMsg]);
+    addChatMessage(character.id, userMsg);
 
-    // Add placeholder assistant message
-    const assistantMsgId = (Date.now() + 1).toString();
+    // Add placeholder assistant message to store
     const assistantMsg: ChatMessage = {
-      id: assistantMsgId,
+      id: (Date.now() + 1).toString(),
       role: 'assistant',
       content: '',
     };
-    setMessages((prev) => [...prev, assistantMsg]);
+    addChatMessage(character.id, assistantMsg);
 
     try {
-      // Build messages array for API
+      // Build messages array for API (include the new user message)
       const apiMessages = [...messages, userMsg].map((msg) => ({
         role: msg.role,
         content: msg.content,
@@ -107,6 +81,7 @@ export function ChatModal({ character, storyId, onClose }: ChatModalProps) {
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let fullContent = '';
+      let detectedEvidence: string[] = [];
 
       if (reader) {
         while (true) {
@@ -114,34 +89,36 @@ export function ChatModal({ character, storyId, onClose }: ChatModalProps) {
           if (done) break;
 
           const chunk = decoder.decode(value, { stream: true });
-          fullContent += chunk;
 
-          // Update assistant message with streaming content
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === assistantMsgId
-                ? { ...msg, content: fullContent }
-                : msg
-            )
-          );
+          // Check for evidence marker at end of stream
+          if (chunk.includes('[[EVIDENCE:')) {
+            const match = chunk.match(/\[\[EVIDENCE:(.*?)\]\]/);
+            if (match) {
+              detectedEvidence = JSON.parse(match[1]);
+              // Remove the marker from displayed content
+              fullContent += chunk.replace(/\[\[EVIDENCE:.*?\]\]/, '');
+            } else {
+              fullContent += chunk;
+            }
+          } else {
+            fullContent += chunk;
+          }
+
+          // Update assistant message in store
+          updateLastMessage(character.id, fullContent);
         }
       }
 
-      // Check for plot points after stream completes
-      const plotPointsRevealed = checkForPlotPoints(fullContent, character.id, plotPoints);
-      plotPointsRevealed.forEach((plotPointId: string) => {
-        unlockPlotPoint(plotPointId);
-      });
+      // Unlock any detected evidence
+      if (detectedEvidence.length > 0) {
+        updateLastMessage(character.id, fullContent, detectedEvidence);
+        detectedEvidence.forEach((plotPointId: string) => {
+          unlockPlotPoint(plotPointId);
+        });
+      }
     } catch (error) {
       console.error('Error sending message:', error);
-      // Update assistant message with error
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === assistantMsgId
-            ? { ...msg, content: 'Sorry, I encountered an error. Please try again.' }
-            : msg
-        )
-      );
+      updateLastMessage(character.id, 'Sorry, I encountered an error. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -194,6 +171,7 @@ export function ChatModal({ character, storyId, onClose }: ChatModalProps) {
           const isUser = message.role === 'user';
           const isLast = index === messages.length - 1;
           const isStreaming = isLoading && isLast && !isUser;
+          const hasPlotPoints = (message.revealedEvidence?.length || 0) > 0;
 
           return (
             <MessageBubble
@@ -202,7 +180,7 @@ export function ChatModal({ character, storyId, onClose }: ChatModalProps) {
               isUser={isUser}
               characterName={character.name}
               isStreaming={isStreaming}
-              hasPlotPoints={false}
+              hasPlotPoints={hasPlotPoints}
             />
           );
         })}

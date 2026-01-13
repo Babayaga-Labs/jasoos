@@ -1,0 +1,295 @@
+================================================================================
+STEP: story-generation
+TIME: 2026-01-12T14:16:47.066Z
+================================================================================
+
+You are a mystery story writer. Create the story structure for a detective game based on the following user-provided details.
+
+USER'S STORY DETAILS:
+- Title: pandora's box
+- Setting: amazon rainforest
+- Time Period: amazon rainforest
+- Premise: a gruop of explorers found a body of a tribal whole exploring the ruins of pandora; the group has been living on this adventure with 4 
+- Crime Type: murder
+- Culprit: aryan jain (waiter who got lucky with a lotery ticket)
+- Motive: no motive. he has split personality disorder 
+- Method: stabing the tribal with his nailcutter 
+- Victim: neutehayu (tribal who was murdered)
+
+CHARACTERS:
+- aryan jain: waiter who got lucky with a lotery ticket - tall thin indian guy wearing glases, in his 20s
+- neutehayu: tribal who was murdered - was found dead in the ruins killed by stabbing his neck
+- anvith rajput: royal prince of shah jahah who went on a trip - short looking indina prince who went to the rainforest to own some land
+- dora black : rainforest ranger - black woman in her 20s, has an eyepathc
+
+Generate a JSON object with this structure:
+{
+  "id": "pandoras-box-ygr5",
+  "title": "pandora's box",
+  "difficulty": "easy" | "medium" | "hard",
+  "estimatedMinutes": 20-40,
+  "setting": {
+    "location": "amazon rainforest",
+    "timePeriod": "amazon rainforest",
+    "atmosphere": "Describe the mood and tone fitting the setting"
+  },
+  "premise": "Polish the user's premise into 2-3 compelling sentences shown to the player at the start",
+  "actualEvents": [
+    "Timeline of what actually happened, step by step",
+    "Include times if relevant (e.g., '7:00 PM - Event happens')",
+    "Show what each character was doing",
+    "End with the crime being committed and discovered"
+  ],
+  "solution": {
+    "culprit": "aryan jain",
+    "method": "Expand on: stabing the tribal with his nailcutter ",
+    "motive": "Expand on: no motive. he has split personality disorder ",
+    "explanation": "Full 3-4 sentence explanation for the player after they solve it, connecting all the pieces"
+  }
+}
+
+IMPORTANT:
+- The actualEvents timeline should be detailed (6-10 events minimum)
+- Make the atmosphere fitting for the crime type and setting
+- The explanation should feel satisfying and tie everything together
+
+Respond with ONLY the JSON object, no other text.
+
+
+================================================================================
+STEP: character-generation
+TIME: 2026-01-12T14:17:05.129Z
+================================================================================
+
+You are developing characters for a detective mystery game. The user has provided basic character info. Your job is to ENHANCE these characters with gameplay-relevant details.
+
+STORY CONTEXT:
+- Title: Pandora's Box
+- Setting: Amazon rainforest, Present day
+- Atmosphere: Dense, oppressive jungle environment where ancient ruins loom in shadows. The constant drone of insects and distant animal calls creates an unsettling backdrop, while the suffocating humidity and limited visibility add to the sense of isolation and paranoia.
+- Crime: Aryan Jain committed the crime because Aryan suffers from undiagnosed Dissociative Identity Disorder. His alternate personality committed the murder without any rational motive, leaving his primary personality with no memory of the event.
+- Method: During a dissociative episode, Aryan used his personal nail cutter to repeatedly stab Neutehayu in the neck while the victim was distracted examining ancient wall carvings. The unusual angle and depth of wounds match the unique shape of his nail cutter's blade.
+
+TIMELINE OF EVENTS:
+Day 1, 8:00 AM - Group arrives at the ruins: Aryan Jain, Anvith Rajput, and Dora Black, guided by Neutehayu
+Day 1, 11:30 AM - Neutehayu shows them ancient markings suggesting the location of Pandora's Box
+Day 1, 2:00 PM - Group splits up to explore different sections; Aryan experiences a personality shift
+Day 1, 3:15 PM - Aryan, in his alternate personality, follows Neutehayu to a secluded chamber
+Day 1, 3:30 PM - Aryan attacks Neutehayu with his nail cutter when the tribal member is examining wall carvings
+Day 1, 4:45 PM - Aryan returns to normal personality with no memory of the attack
+Day 1, 5:30 PM - Dora Black discovers Neutehayu's body while searching for him
+Day 1, 5:45 PM - Group reconvenes at the crime scene, all showing genuine shock and horror
+
+USER'S CHARACTERS:
+[
+  {
+    "tempId": "char-1768226901821-a8ez",
+    "name": "aryan jain",
+    "role": "waiter who got lucky with a lotery ticket",
+    "description": "tall thin indian guy wearing glases, in his 20s",
+    "isVictim": false,
+    "isGuilty": true,
+    "personalityTraits": [
+      "nervous",
+      "paranoid",
+      "defensive"
+    ],
+    "secret": "he has a split personality disorder where he becomes an evil version of himself"
+  },
+  {
+    "tempId": "char-1768226901821-dbo2",
+    "name": "neutehayu",
+    "role": "tribal who was murdered",
+    "description": "was found dead in the ruins killed by stabbing his neck",
+    "isVictim": true,
+    "isGuilty": false,
+    "personalityTraits": [],
+    "secret": null
+  },
+  {
+    "tempId": "char-1768226901821-81jt",
+    "name": "anvith rajput",
+    "role": "royal prince of shah jahah who went on a trip",
+    "description": "short looking indina prince who went to the rainforest to own some land",
+    "isVictim": false,
+    "isGuilty": false,
+    "personalityTraits": [
+      "intelligent",
+      "sharp-witted",
+      "ambitious"
+    ],
+    "secret": "he dislikes tribal people very much "
+  },
+  {
+    "tempId": "char-1768227234713-yopo",
+    "name": "dora black ",
+    "role": "rainforest ranger",
+    "description": "black woman in her 20s, has an eyepathc",
+    "isVictim": false,
+    "isGuilty": false,
+    "personalityTraits": [
+      "sharp-witted",
+      "temperamental",
+      "cold",
+      "calculating"
+    ],
+    "secret": "is very serretive about saying anything; has relationships with tribal people "
+  }
+]
+
+For EACH character, generate enhanced details. The output must be a JSON array with this structure for each character:
+[
+  {
+    "id": "snake_case_id_from_name",
+    "tempId": "original tempId from input",
+    "name": "Character name",
+    "role": "Their role",
+    "age": appropriate_age_number,
+    "isGuilty": true/false,
+    "isVictim": true/false,
+    "personality": {
+      "traits": ["use user's traits if provided, or generate 3 appropriate ones"],
+      "speechStyle": "How they talk - formal, casual, nervous, etc.",
+      "quirks": ["2 behavioral quirks or mannerisms"]
+    },
+    "appearance": {
+      "description": "User's description",
+      "imagePrompt": "Detailed prompt for AI portrait generation based on description"
+    },
+    "knowledge": {
+      "knowsAboutCrime": "What this character witnessed, heard, or knows about the crime based on the timeline",
+      "knowsAboutOthers": ["What they know about other characters that could be revealed in interrogation"],
+      "alibi": "Where they claim to have been during the crime"
+    },
+    "secrets": [
+      {
+        "content": "Use user's secret if provided, or generate one",
+        "willingnessToReveal": "low" | "medium" | "high" | "never",
+        "revealCondition": "What makes them reveal this secret"
+      }
+    ],
+    "behaviorUnderPressure": {
+      "defensive": "How they act when feeling defensive",
+      "whenCaughtLying": "How they react when caught in a lie",
+      "whenAccused": "How they respond to direct accusation"
+    },
+    "relationships": {
+      "other_character_id": "Their relationship description"
+    }
+  }
+]
+
+CRITICAL RULES:
+1. The guilty character's alibi must be FALSE or have holes
+2. Innocent characters should have TRUE alibis that can be verified
+3. Each character should KNOW something useful that can be revealed through interrogation
+4. The "knowsAboutOthers" should include actionable information about other suspects
+5. Relationships should create a web of connections between characters
+
+Respond with ONLY the JSON array, no other text.
+
+
+================================================================================
+STEP: plot-points-generation
+TIME: 2026-01-12T14:17:44.221Z
+================================================================================
+
+You are creating clues and evidence for a detective mystery game where the ONLY way to discover information is through CHARACTER INTERROGATION.
+
+VICTIM(S) - Cannot be interrogated:
+- Neutehayu (Indigenous guide and ruins expert)
+
+STORY:
+- Title: Pandora's Box
+- Solution: Aryan Jain did it because Aryan suffers from undiagnosed Dissociative Identity Disorder. His alternate personality committed the murder without any rational motive, leaving his primary personality with no memory of the event.
+- Method: During a dissociative episode, Aryan used his personal nail cutter to repeatedly stab Neutehayu in the neck while the victim was distracted examining ancient wall carvings. The unusual angle and depth of wounds match the unique shape of his nail cutter's blade.
+
+TIMELINE:
+Day 1, 8:00 AM - Group arrives at the ruins: Aryan Jain, Anvith Rajput, and Dora Black, guided by Neutehayu
+Day 1, 11:30 AM - Neutehayu shows them ancient markings suggesting the location of Pandora's Box
+Day 1, 2:00 PM - Group splits up to explore different sections; Aryan experiences a personality shift
+Day 1, 3:15 PM - Aryan, in his alternate personality, follows Neutehayu to a secluded chamber
+Day 1, 3:30 PM - Aryan attacks Neutehayu with his nail cutter when the tribal member is examining wall carvings
+Day 1, 4:45 PM - Aryan returns to normal personality with no memory of the attack
+Day 1, 5:30 PM - Dora Black discovers Neutehayu's body while searching for him
+Day 1, 5:45 PM - Group reconvenes at the crime scene, all showing genuine shock and horror
+
+CHARACTERS AND THEIR KNOWLEDGE:
+[
+  {
+    "id": "aryan_jain",
+    "name": "Aryan Jain",
+    "role": "Lottery winner turned amateur explorer",
+    "isGuilty": true,
+    "knowsAboutCrime": "Has complete memory blackout between 3:15-4:45 PM, found unexplained blood on his nail cutter",
+    "knowsAboutOthers": [
+      "Saw Anvith arguing with Neutehayu about land rights",
+      "Noticed Dora having private conversations in tribal language with Neutehayu"
+    ]
+  },
+  {
+    "id": "anvith_rajput",
+    "name": "Anvith Rajput",
+    "role": "Royal prince seeking land acquisition",
+    "isGuilty": false,
+    "knowsAboutCrime": "Heard a strange sound from the chamber at 3:30 PM",
+    "knowsAboutOthers": [
+      "Noticed Aryan's erratic behavior changes",
+      "Discovered Dora's government connections"
+    ]
+  },
+  {
+    "id": "dora_black",
+    "name": "Dora Black",
+    "role": "Undercover government agent posing as ranger",
+    "isGuilty": false,
+    "knowsAboutCrime": "Found the body, noticed unusual wound pattern",
+    "knowsAboutOthers": [
+      "Has file on Anvith's illegal land deals",
+      "Documented Aryan's strange behavior patterns"
+    ]
+  }
+]
+
+Create 8-12 plot points (clues) that form a solvable mystery. Generate a JSON object:
+
+{
+  "plotPoints": [
+    {
+      "id": "pp_snake_case_id",
+      "category": "motive" | "alibi" | "evidence" | "relationship",
+      "description": "What the player learns when this clue is revealed",
+      "importance": "low" | "medium" | "high" | "critical",
+      "points": 10-30,
+      "revealedBy": ["character_id_who_can_reveal_this"],
+      "detectionHints": ["keywords", "phrases", "topics that trigger this clue"]
+    }
+  ],
+  "minimumPointsToAccuse": 50,
+  "perfectScoreThreshold": calculated_total_of_all_points
+}
+
+CRITICAL RULES FOR CLUE GENERATION:
+1. EVERY clue MUST be assigned to at least one LIVING character who can reveal it
+2. NEVER include victims in revealedBy - they are dead/missing and cannot be interrogated!
+3. Characters can only reveal clues they would realistically know:
+   - They witnessed the event directly
+   - They overheard a conversation
+   - They have expertise to notice something (doctor spots poison, accountant notices fraud)
+   - They know the culprit/victim personally
+   - Another character told them
+4. The player solves this ONLY through interrogation - NO physical evidence found randomly
+5. Critical clues pointing to the culprit must be discoverable through conversation
+6. Include clues that:
+   - Point to the culprit's motive (at least 2)
+   - Expose the culprit's false alibi (at least 1-2)
+   - Show the culprit's opportunity (at least 1)
+   - Provide corroborating evidence (at least 2)
+
+DETECTION HINTS should include:
+- Direct question keywords ("where were you", "what did you see")
+- Topic triggers ("alibi", "that night", "relationship")
+- Character name mentions that might reveal info about them
+
+Respond with ONLY the JSON object, no other text.
+
