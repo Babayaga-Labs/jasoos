@@ -15,10 +15,6 @@ export async function POST(request: NextRequest) {
     const charactersPath = path.join(storyDir, 'characters.json');
     const { characters } = JSON.parse(fs.readFileSync(charactersPath, 'utf-8'));
 
-    // Load plot points for evidence detection
-    const plotPointsPath = path.join(storyDir, 'plot-points.json');
-    const { plotPoints } = JSON.parse(fs.readFileSync(plotPointsPath, 'utf-8'));
-
     const character = characters.find((c: any) => c.id === characterId);
     if (!character) {
       return new Response(JSON.stringify({ error: 'Character not found' }), {
@@ -32,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     // Build message history - use useChat format if available, otherwise legacy format
     let messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
-    
+
     if (useChatMessages && Array.isArray(useChatMessages)) {
       // useChat sends messages array directly
       messages = useChatMessages.map((msg: any) => ({
@@ -85,46 +81,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Create a transform stream to collect the full response and append evidence
-    const reader = response.body?.getReader();
-    if (!reader) {
-      console.error('[Chat] No response body from Python backend');
-      throw new Error('No response body');
-    }
-
-    let fullContent = '';
-    const encoder = new TextEncoder();
-    const decoder = new TextDecoder();
-
-    const stream = new ReadableStream({
-      async pull(controller) {
-        try {
-          const { done, value } = await reader.read();
-
-          if (done) {
-            // Stream complete - detect evidence and append marker
-            // Pass isGuilty flag so guilty characters can reveal evidence through confession
-            const revealed = checkForPlotPoints(fullContent, characterId, plotPoints, character.isGuilty);
-            console.log(`[Chat] Evidence detection for ${characterId}: found ${revealed.length} plot points`, revealed);
-            if (revealed.length > 0) {
-              controller.enqueue(encoder.encode(`[[EVIDENCE:${JSON.stringify(revealed)}]]`));
-            }
-            controller.close();
-            return;
-          }
-
-          // Pass through the chunk and accumulate
-          const chunk = decoder.decode(value, { stream: true });
-          fullContent += chunk;
-          controller.enqueue(value);
-        } catch (streamError) {
-          console.error('[Chat] Stream read error:', streamError);
-          controller.error(streamError);
-        }
-      },
-    });
-
-    return new Response(stream, {
+    // Stream the response directly
+    return new Response(response.body, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
@@ -183,32 +141,4 @@ ${Object.entries(relationships || {}).map(([id, rel]) => `- ${id}: ${rel}`).join
     : 'You are innocent. Cooperate with the investigation while protecting your minor secrets.'}
 
 Respond only as ${character.name}. Begin.`;
-}
-
-function checkForPlotPoints(
-  response: string,
-  characterId: string,
-  plotPoints: any[],
-  isGuilty: boolean = false
-): string[] {
-  const revealed: string[] = [];
-  const responseLower = response.toLowerCase();
-
-  for (const pp of plotPoints) {
-    // Check if this character can reveal this plot point
-    // Guilty characters can reveal ANY evidence through their confession
-    const canReveal = isGuilty || pp.revealedBy?.includes(characterId);
-    if (!canReveal) continue;
-
-    // Check for detection hints
-    const hasHint = pp.detectionHints?.some((hint: string) =>
-      responseLower.includes(hint.toLowerCase())
-    );
-
-    if (hasHint) {
-      revealed.push(pp.id);
-    }
-  }
-
-  return revealed;
 }

@@ -1,23 +1,25 @@
 'use client';
 
 import Image from 'next/image';
-import { CharacterPortrait } from './CharacterPortrait';
+import { CharacterCard } from './CharacterCard';
+import { Timer } from './Timer';
 import { useGameStore, Character } from '@/lib/store';
 
 interface GameSceneProps {
   sceneImage?: string;
   characters: Character[];
   storyId: string;
+  premise?: string;
 }
 
-export function GameScene({ sceneImage, characters, storyId }: GameSceneProps) {
-  const { selectedCharacter, selectCharacter, isNotepadOpen, toggleNotepad, openAccusation, newEvidenceCount, currentScore, unlockedPlotPoints, plotPoints } = useGameStore();
+export function GameScene({ sceneImage, characters, storyId, premise }: GameSceneProps) {
+  const { selectedCharacter, selectCharacter, openAccusation, chatHistories, isTimeUp } = useGameStore();
 
   return (
-    <div className="relative w-full h-screen overflow-hidden">
-      {/* Background scene */}
-      <div className="absolute inset-0">
-        {sceneImage ? (
+    <div className="relative w-full min-h-screen bg-slate-900">
+      {/* Background - subtle scene image */}
+      {sceneImage && (
+        <div className="fixed inset-0 opacity-20">
           <Image
             src={sceneImage}
             alt="Crime scene"
@@ -25,65 +27,68 @@ export function GameScene({ sceneImage, characters, storyId }: GameSceneProps) {
             className="object-cover"
             priority
           />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-800 to-slate-900" />
-        )}
-        {/* Dark overlay for readability */}
-        <div className="absolute inset-0 bg-black/40" />
-      </div>
+        </div>
+      )}
 
       {/* Content */}
-      <div className="relative h-full flex flex-col">
-        {/* Top bar */}
-        <div className="flex items-center justify-between p-4">
-          <a href="/" className="text-slate-400 hover:text-white transition-colors">
-            ← Back
-          </a>
-          <div className="text-amber-400 font-medium">
-            {currentScore} pts
+      <div className="relative z-10 min-h-screen flex flex-col">
+        {/* Header */}
+        <header className="sticky top-0 z-20 bg-slate-900/95 backdrop-blur border-b border-slate-700">
+          <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="/" className="text-slate-400 hover:text-white transition-colors">
+              ← Back to Stories
+            </a>
+            <Timer />
           </div>
-        </div>
+        </header>
 
-        {/* Characters row - centered at bottom third */}
-        <div className="flex-1 flex items-end justify-center pb-32 md:pb-40">
-          <div className="flex gap-3 md:gap-6 px-4 overflow-x-auto pb-4 max-w-full">
+        {/* Main content */}
+        <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-6">
+          {/* Premise */}
+          {premise && (
+            <div className="mb-6 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+              <h2 className="text-amber-400 font-semibold mb-2">The Case</h2>
+              <p className="text-slate-300">{premise}</p>
+            </div>
+          )}
+
+          {/* Section header */}
+          <h2 className="text-lg font-semibold text-slate-300 mb-4">
+            Suspects & Witnesses
+          </h2>
+
+          {/* Character cards grid */}
+          <div className="grid gap-4 md:grid-cols-2">
             {characters.map((character) => (
-              <CharacterPortrait
+              <CharacterCard
                 key={character.id}
-                id={character.id}
-                name={character.name}
-                role={character.role}
-                imageUrl={`/stories/${storyId}/assets/characters/${character.id}.png`}
+                character={character}
+                storyId={storyId}
                 isSelected={selectedCharacter === character.id}
-                onClick={() => selectCharacter(character.id)}
+                hasMessages={(chatHistories[character.id]?.length || 0) > 0}
+                onChat={() => selectCharacter(character.id)}
               />
             ))}
           </div>
-        </div>
+        </main>
 
-        {/* Bottom bar */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 flex items-center justify-between bg-gradient-to-t from-black/80 to-transparent">
-          {/* Notepad button */}
-          <button
-            onClick={toggleNotepad}
-            className="btn btn-secondary relative"
-          >
-            <span className="mr-2">📒</span>
-            Evidence ({unlockedPlotPoints.length}/{plotPoints.length})
-            {newEvidenceCount > 0 && (
-              <span className="badge animate-pulse">{newEvidenceCount}</span>
-            )}
-          </button>
-
-          {/* Accuse button */}
-          <button
-            onClick={openAccusation}
-            className="btn btn-danger"
-          >
-            <span className="mr-2">⚖️</span>
-            Make Accusation
-          </button>
-        </div>
+        {/* Footer - Accusation button */}
+        <footer className="sticky bottom-0 z-20 bg-slate-900/95 backdrop-blur border-t border-slate-700">
+          <div className="max-w-4xl mx-auto px-4 py-4">
+            <button
+              onClick={openAccusation}
+              className={`
+                w-full py-3 px-6 rounded-lg font-semibold text-lg transition-all
+                ${isTimeUp
+                  ? 'bg-red-600 hover:bg-red-500 text-white animate-pulse'
+                  : 'bg-amber-600 hover:bg-amber-500 text-white'
+                }
+              `}
+            >
+              {isTimeUp ? 'Time\'s Up! Make Your Accusation' : 'Make Accusation'}
+            </button>
+          </div>
+        </footer>
       </div>
     </div>
   );

@@ -99,12 +99,14 @@ export interface UGCGeneratedCharacter {
     /** Generated prompt for AI image */
     imagePrompt: string;
   };
-  /** Knowledge (generated) */
+  /** Knowledge (generated - internal, not shown to player) */
   knowledge: {
     knowsAboutCrime: string;
     knowsAboutOthers: string[];
     alibi: string;
   };
+  /** Third-person case summary shown to player (like detective notes) */
+  statement: string;
   /** Secrets (expanded from user input if provided) */
   secrets: Array<{
     content: string;
@@ -267,6 +269,8 @@ export interface UGCFinalCharacter {
     knowsAboutOthers: string[];
     alibi: string;
   };
+  /** Third-person case summary shown to player (like detective notes) */
+  statement: string;
   secrets: Array<{
     content: string;
     willingnessToReveal: 'low' | 'medium' | 'high' | 'never';

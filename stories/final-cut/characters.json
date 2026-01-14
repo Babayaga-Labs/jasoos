@@ -28,7 +28,8 @@
           "Knows about Vikram's embezzlement",
           "Aware of Meera's affair with Raj"
         ],
-        "alibi": "Claims he was on a phone call with international distributors in the garden"
+        "alibi": "Claims he was on a phone call with international distributors in the garden",
+        "statement": "Claims he was on a phone call with international distributors in the garden Knows about Vikram's embezzlement"
       },
       "secrets": [
         {
@@ -46,7 +47,8 @@
         "raj_malhotra": "Resentful mentee",
         "meera_kapoor": "Professional rivalry",
         "vikram_singh": "Secret business dealings"
-      }
+      },
+      "statement": "I was on a phone call with international distributors in the garden"
     },
     {
       "id": "priya_malhotra",
@@ -76,7 +78,8 @@
           "Knows about Meera's affair",
           "Aware of Arjun's gambling debts"
         ],
-        "alibi": "Was hosting VIP guests in the main hall"
+        "alibi": "Was hosting VIP guests in the main hall",
+        "statement": "Was hosting VIP guests in the main hall Knows about Meera's affair"
       },
       "secrets": [
         {
@@ -94,7 +97,8 @@
         "raj_malhotra": "Complicated marriage",
         "meera_kapoor": "Professional rivalry turned personal",
         "arjun_kumar": "Cautious friendship"
-      }
+      },
+      "statement": "I was was hosting vip guests in the main hall"
     },
     {
       "id": "vikram_singh",
@@ -124,7 +128,8 @@
           "Knows about Kabir's script selling",
           "Has dirt on Arjun"
         ],
-        "alibi": "In a video call with investors in his office"
+        "alibi": "In a video call with investors in his office",
+        "statement": "In a video call with investors in his office Knows about Kabir's script selling"
       },
       "secrets": [
         {
@@ -142,7 +147,8 @@
         "raj_malhotra": "Strained partnership",
         "kabir_khan": "Secret conspirator",
         "priya_malhotra": "Subtle flirtation"
-      }
+      },
+      "statement": "I was in a video call with investors in his office"
     },
     {
       "id": "meera_kapoor",
@@ -172,7 +178,8 @@
           "Knows about Priya's comeback plans",
           "Witnessed Vikram's shady meetings"
         ],
-        "alibi": "Doing media interviews in the studio lobby"
+        "alibi": "Doing media interviews in the studio lobby",
+        "statement": "Doing media interviews in the studio lobby Knows about Priya's comeback plans"
       },
       "secrets": [
         {
@@ -190,7 +197,8 @@
         "raj_malhotra": "Secret lover",
         "priya_malhotra": "Public friend, private rival",
         "kabir_khan": "Tense working relationship"
-      }
+      },
+      "statement": "I was doing media interviews in the studio lobby"
     }
   ]
 }

@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { GameScene } from '@/components/game/GameScene';
 import { ChatModal } from '@/components/game/ChatModal';
-import { Notepad } from '@/components/game/Notepad';
 import { AccusationModal } from '@/components/game/AccusationModal';
 import { ResultsModal } from '@/components/game/ResultsModal';
 import { useGameStore } from '@/lib/store';
@@ -51,6 +50,7 @@ export default function GamePage() {
         sceneImage={`/stories/${storyId}/assets/scene.png`}
         characters={characters}
         storyId={storyId}
+        premise={story.premise}
       />
 
       {/* Chat modal */}
@@ -61,9 +61,6 @@ export default function GamePage() {
           onClose={() => selectCharacter(null)}
         />
       )}
-
-      {/* Notepad */}
-      <Notepad premise={story.premise} />
 
       {/* Accusation modal */}
       <AccusationModal characters={characters} storyId={storyId} />

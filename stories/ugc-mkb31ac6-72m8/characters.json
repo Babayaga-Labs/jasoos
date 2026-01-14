@@ -47,7 +47,8 @@
         "shubham_sharma": "Disapproves of his casual attitude",
         "omar_khan": "Allied in their dislike of the cat",
         "bulldozer": "Viewed as unnecessary distraction to mission"
-      }
+      },
+      "statement": "Claims: \"Was recording atmospheric readings in observation module, verified by station logs\""
     },
     {
       "id": "shubham_sharma",
@@ -96,7 +97,8 @@
         "david_zhang": "Intimidated by his strictness",
         "omar_khan": "Regular workout partner",
         "bulldozer": "Found the cat amusing, saw it as entertainment"
-      }
+      },
+      "statement": "Claims he was sleeping off a headache in his quarters during the incident"
     },
     {
       "id": "bulldozer",
@@ -144,7 +146,8 @@
         "david_zhang": "Avoided due to sensing his dislike",
         "shubham_sharma": "Trusted food source",
         "omar_khan": "Feared and avoided"
-      }
+      },
+      "statement": "Bulldozer was present during the incident. No detailed statement provided."
     },
     {
       "id": "emily_rosewood",
@@ -193,7 +196,8 @@
         "shubham_sharma": "Finds him irritatingly casual",
         "omar_khan": "Distrusts his temperament",
         "bulldozer": "Secret affection"
-      }
+      },
+      "statement": "Claims: \"Was conducting documented maintenance checks in East module\""
     },
     {
       "id": "omar_khan",
@@ -242,7 +246,8 @@
         "david_zhang": "Shares conservative views",
         "shubham_sharma": "Workout partner but growing suspicious",
         "bulldozer": "Open disdain"
-      }
+      },
+      "statement": "Claims: \"Working on experiments in the lab, verified by camera footage\""
     }
   ]
 }

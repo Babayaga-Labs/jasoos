@@ -391,8 +391,9 @@ For EACH character, generate enhanced details. The output must be a JSON array w
     "knowledge": {
       "knowsAboutCrime": "What this character witnessed, heard, or knows about the crime based on the timeline",
       "knowsAboutOthers": ["What they know about other characters that could be revealed in interrogation"],
-      "alibi": "Where they claim to have been during the crime"
+      "alibi": "INTERNAL: Where they claim to have been (can include notes like 'false' for guilty character)"
     },
+    "statement": "Third-person case summary shown to player. 1-2 sentences describing their claimed whereabouts and connection to the incident. Like detective notes.",
     "secrets": [
       {
         "content": "Use user's secret if provided, or generate one",
@@ -417,6 +418,30 @@ CRITICAL RULES:
 3. Each character should KNOW something useful that can be revealed through interrogation
 4. The "knowsAboutOthers" should include actionable information about other suspects
 5. Relationships should create a web of connections between characters
+
+STATEMENT FIELD GUIDELINES (CRITICAL - this is shown to players!):
+- Written in THIRD PERSON, like detective case notes or a police report summary
+- 1-2 sentences describing: their claimed whereabouts + their connection to the incident
+- This gives players a starting point for interrogation without revealing the mystery
+
+WHAT TO INCLUDE:
+- Where they claim to be during the incident
+- How they relate to the crime (found body, was nearby, arrived late, etc.)
+- Neutral factual tone
+
+WHAT TO NEVER INCLUDE:
+- "(false)" or "(true)" annotations - those are internal only
+- What they know about OTHER characters - player discovers through interrogation
+- Evidence or clues - player must uncover these
+- Whether their alibi is actually true or not
+
+EXAMPLES:
+- GOOD: "Claims he was practicing basic spells near the paddock. Was present when the incident was discovered."
+- GOOD: "Was inside the hut preparing tea. Found the horse dead the following morning."
+- GOOD: "Says she was examining plants in the garden. Did not directly witness the incident."
+- BAD: "Claims he was far from the horse (false)" - reveals the lie!
+- BAD: "Noticed Ron's broken wand during tea" - reveals evidence!
+- BAD: "Is hiding that she saw everything" - reveals secret!
 
 Respond with ONLY the JSON array, no other text.`;
 

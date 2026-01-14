@@ -5,7 +5,6 @@ export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  revealedEvidence?: string[];  // Plot point IDs revealed by this message
 }
 
 export interface Story {
@@ -41,16 +40,8 @@ export interface Character {
     traits: string[];
     speechStyle: string;
   };
-}
-
-export interface PlotPoint {
-  id: string;
-  category: string;
-  description: string;
-  importance: string;
-  points: number;
-  revealedBy?: string[];
-  detectionHints?: string[];
+  /** Third-person case summary (like detective notes) */
+  statement: string;
 }
 
 export interface GameState {
@@ -58,19 +49,17 @@ export interface GameState {
   storyFolderId: string | null; // The folder name used for API calls
   story: Story | null;
   characters: Character[];
-  plotPoints: PlotPoint[];
-  totalPossiblePoints: number;
-  minimumPointsToAccuse: number;
 
   // Session
-  unlockedPlotPoints: string[];
-  currentScore: number;
-  newEvidenceCount: number;
   chatHistories: Record<string, ChatMessage[]>;  // characterId -> messages
+
+  // Timer
+  timeRemaining: number;  // seconds remaining
+  timerStarted: boolean;
+  isTimeUp: boolean;
 
   // UI state
   selectedCharacter: string | null;
-  isNotepadOpen: boolean;
   isAccusationOpen: boolean;
   isResultsOpen: boolean;
   isLoading: boolean;
@@ -79,38 +68,36 @@ export interface GameState {
   // Results
   accusationResult: {
     isCorrect: boolean;
-    score: number;
-    explanation: string;
+    score: number;           // 0-100 weighted score
+    reasoningScore: number;  // 0-100 how good the reasoning was
+    timeTaken: number;       // seconds taken to solve
   } | null;
 
   // Actions
   loadStory: (storyId: string) => Promise<void>;
   selectCharacter: (characterId: string | null) => void;
-  unlockPlotPoint: (plotPointId: string) => void;
   addChatMessage: (characterId: string, message: ChatMessage) => void;
-  updateLastMessage: (characterId: string, content: string, revealedEvidence?: string[]) => void;
-  toggleNotepad: () => void;
+  updateLastMessage: (characterId: string, content: string) => void;
+  startTimer: () => void;
+  tickTimer: () => void;
   openAccusation: () => void;
   closeAccusation: () => void;
   submitAccusation: (characterId: string, reasoning: string) => Promise<void>;
-  clearNewEvidenceCount: () => void;
   resetGame: () => void;
 }
+
+const GAME_DURATION_SECONDS = 10 * 60; // 10 minutes
 
 export const useGameStore = create<GameState>((set, get) => ({
   // Initial state
   storyFolderId: null,
   story: null,
   characters: [],
-  plotPoints: [],
-  totalPossiblePoints: 0,
-  minimumPointsToAccuse: 0,
-  unlockedPlotPoints: [],
-  currentScore: 0,
-  newEvidenceCount: 0,
   chatHistories: {},
+  timeRemaining: GAME_DURATION_SECONDS,
+  timerStarted: false,
+  isTimeUp: false,
   selectedCharacter: null,
-  isNotepadOpen: false,
   isAccusationOpen: false,
   isResultsOpen: false,
   isLoading: false,
@@ -131,14 +118,13 @@ export const useGameStore = create<GameState>((set, get) => ({
       const data = await response.json();
 
       set({
-        storyFolderId: storyId, // Store the folder name for API calls
+        storyFolderId: storyId,
         story: data.story,
         characters: data.characters,
-        plotPoints: data.plotPoints,
-        totalPossiblePoints: data.totalPossiblePoints,
-        minimumPointsToAccuse: data.minimumPointsToAccuse,
-        unlockedPlotPoints: [],
-        currentScore: 0,
+        chatHistories: {},
+        timeRemaining: GAME_DURATION_SECONDS,
+        timerStarted: false,
+        isTimeUp: false,
         gameStatus: 'playing',
         isLoading: false,
       });
@@ -152,21 +138,6 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ selectedCharacter: characterId });
   },
 
-  unlockPlotPoint: (plotPointId: string) => {
-    const { unlockedPlotPoints, plotPoints, currentScore, newEvidenceCount } = get();
-
-    if (unlockedPlotPoints.includes(plotPointId)) return;
-
-    const plotPoint = plotPoints.find(pp => pp.id === plotPointId);
-    if (!plotPoint) return;
-
-    set({
-      unlockedPlotPoints: [...unlockedPlotPoints, plotPointId],
-      currentScore: currentScore + plotPoint.points,
-      newEvidenceCount: newEvidenceCount + 1,
-    });
-  },
-
   addChatMessage: (characterId: string, message: ChatMessage) => {
     const { chatHistories } = get();
     const history = chatHistories[characterId] || [];
@@ -178,7 +149,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     });
   },
 
-  updateLastMessage: (characterId: string, content: string, revealedEvidence?: string[]) => {
+  updateLastMessage: (characterId: string, content: string) => {
     const { chatHistories } = get();
     const history = chatHistories[characterId] || [];
     if (history.length === 0) return;
@@ -188,7 +159,6 @@ export const useGameStore = create<GameState>((set, get) => ({
     updatedHistory[lastIndex] = {
       ...updatedHistory[lastIndex],
       content,
-      ...(revealedEvidence && { revealedEvidence }),
     };
 
     set({
@@ -199,29 +169,51 @@ export const useGameStore = create<GameState>((set, get) => ({
     });
   },
 
-  toggleNotepad: () => {
-    const { isNotepadOpen } = get();
+  startTimer: () => {
+    const { timerStarted } = get();
+    if (timerStarted) return;
+    set({ timerStarted: true });
+  },
+
+  tickTimer: () => {
+    const { timeRemaining, gameStatus } = get();
+    if (gameStatus !== 'playing') return;
+
+    const newTime = Math.max(0, timeRemaining - 1);
+    const isTimeUp = newTime === 0;
+
     set({
-      isNotepadOpen: !isNotepadOpen,
-      newEvidenceCount: isNotepadOpen ? get().newEvidenceCount : 0,
+      timeRemaining: newTime,
+      isTimeUp,
+      // Auto-open accusation when time runs out
+      isAccusationOpen: isTimeUp ? true : get().isAccusationOpen,
     });
   },
 
   openAccusation: () => set({ isAccusationOpen: true }),
-  closeAccusation: () => set({ isAccusationOpen: false }),
+  closeAccusation: () => {
+    // Can't close if time is up - must make accusation
+    const { isTimeUp } = get();
+    if (!isTimeUp) {
+      set({ isAccusationOpen: false });
+    }
+  },
 
   submitAccusation: async (characterId: string, reasoning: string) => {
     set({ isLoading: true });
+
+    // Calculate time taken (600 seconds - remaining time)
+    const GAME_DURATION = 10 * 60;
+    const timeTaken = GAME_DURATION - get().timeRemaining;
 
     try {
       const response = await fetch('/api/game/accuse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          storyId: get().storyFolderId, // Use folder name, not story.id
+          storyId: get().storyFolderId,
           accusedCharacterId: characterId,
           reasoning,
-          unlockedPlotPoints: get().unlockedPlotPoints,
         }),
       });
 
@@ -231,7 +223,8 @@ export const useGameStore = create<GameState>((set, get) => ({
         accusationResult: {
           isCorrect: data.isCorrect,
           score: data.score,
-          explanation: data.explanation,
+          reasoningScore: data.reasoningScore,
+          timeTaken,
         },
         gameStatus: data.isCorrect ? 'won' : 'lost',
         isAccusationOpen: false,
@@ -244,20 +237,16 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   },
 
-  clearNewEvidenceCount: () => set({ newEvidenceCount: 0 }),
-
   resetGame: () => {
     set({
       storyFolderId: null,
       story: null,
       characters: [],
-      plotPoints: [],
-      unlockedPlotPoints: [],
-      currentScore: 0,
-      newEvidenceCount: 0,
       chatHistories: {},
+      timeRemaining: GAME_DURATION_SECONDS,
+      timerStarted: false,
+      isTimeUp: false,
       selectedCharacter: null,
-      isNotepadOpen: false,
       isAccusationOpen: false,
       isResultsOpen: false,
       gameStatus: 'idle',

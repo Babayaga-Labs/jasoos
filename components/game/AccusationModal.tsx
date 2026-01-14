@@ -14,9 +14,7 @@ export function AccusationModal({ characters, storyId }: AccusationModalProps) {
   const [selectedSuspect, setSelectedSuspect] = useState<string | null>(null);
   const [reasoning, setReasoning] = useState('');
 
-  const { isAccusationOpen, closeAccusation, submitAccusation, isLoading, currentScore, minimumPointsToAccuse } = useGameStore();
-
-  const canAccuse = currentScore >= minimumPointsToAccuse;
+  const { isAccusationOpen, closeAccusation, submitAccusation, isLoading, isTimeUp } = useGameStore();
 
   const handleSubmit = async () => {
     if (!selectedSuspect || !reasoning.trim()) return;
@@ -28,16 +26,17 @@ export function AccusationModal({ characters, storyId }: AccusationModalProps) {
   return (
     <Modal isOpen={true} onClose={closeAccusation} size="lg">
       <div className="p-6">
-        <h2 className="text-2xl font-bold text-amber-400 mb-2">⚖️ Make Your Accusation</h2>
+        <h2 className="text-2xl font-bold text-amber-400 mb-2">
+          {isTimeUp ? "Time's Up! Make Your Final Accusation" : 'Make Your Accusation'}
+        </h2>
         <p className="text-slate-400 mb-6">
           Choose who you believe committed the crime and explain your reasoning.
         </p>
 
-        {!canAccuse && (
-          <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 mb-6">
-            <p className="text-amber-400 text-sm">
-              ⚠️ You need at least {minimumPointsToAccuse} points of evidence to make an accusation.
-              You currently have {currentScore} points.
+        {isTimeUp && (
+          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-6">
+            <p className="text-red-400 text-sm">
+              Time has run out! You must make your accusation now.
             </p>
           </div>
         )}
@@ -82,23 +81,22 @@ export function AccusationModal({ characters, storyId }: AccusationModalProps) {
           <textarea
             value={reasoning}
             onChange={(e) => setReasoning(e.target.value)}
-            placeholder="Explain why you believe this person is guilty. What evidence supports your accusation?"
+            placeholder="Explain why you believe this person is guilty. What did you learn from your interviews?"
             rows={4}
             className="w-full bg-slate-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
           />
-          <p className="text-xs text-slate-500 mt-1">
-            Better reasoning = higher score
-          </p>
         </div>
 
         {/* Actions */}
         <div className="flex gap-3 justify-end">
-          <button onClick={closeAccusation} className="btn btn-secondary">
-            Cancel
-          </button>
+          {!isTimeUp && (
+            <button onClick={closeAccusation} className="btn btn-secondary">
+              Cancel
+            </button>
+          )}
           <button
             onClick={handleSubmit}
-            disabled={!selectedSuspect || !reasoning.trim() || !canAccuse || isLoading}
+            disabled={!selectedSuspect || !reasoning.trim() || isLoading}
             className="btn btn-danger disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? 'Submitting...' : 'Submit Accusation'}

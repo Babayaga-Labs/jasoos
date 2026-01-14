@@ -4,75 +4,63 @@ import path from 'path';
 
 export async function POST(request: NextRequest) {
   try {
-    const { storyId, accusedCharacterId, reasoning, unlockedPlotPoints } = await request.json();
+    const { storyId, accusedCharacterId, reasoning } = await request.json();
 
     const storyDir = path.join(process.cwd(), 'stories', storyId);
 
     // Load story data
     const storyPath = path.join(storyDir, 'story.json');
     const charactersPath = path.join(storyDir, 'characters.json');
-    const plotPointsPath = path.join(storyDir, 'plot-points.json');
 
     const story = JSON.parse(fs.readFileSync(storyPath, 'utf-8'));
     const { characters } = JSON.parse(fs.readFileSync(charactersPath, 'utf-8'));
-    const plotPointsData = JSON.parse(fs.readFileSync(plotPointsPath, 'utf-8'));
 
     // Find the guilty character
     const guiltyCharacter = characters.find((c: any) => c.isGuilty);
     const isCorrect = guiltyCharacter?.id === accusedCharacterId;
 
-    // Calculate evidence score
-    const unlockedPoints = plotPointsData.plotPoints.filter((pp: any) =>
-      unlockedPlotPoints.includes(pp.id)
-    );
-    const evidenceScore = unlockedPoints.reduce((sum: number, pp: any) => sum + pp.points, 0);
+    console.log(`[Accuse] Accused: ${accusedCharacterId}, Guilty: ${guiltyCharacter?.id}, Correct: ${isCorrect}`);
 
-    // Score reasoning using Python backend
-    const pythonBackendUrl = process.env.PYTHON_BACKEND_URL || 'http://localhost:8000';
-    const scoreResponse = await fetch(`${pythonBackendUrl}/api/score`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        reasoning,
-        solution: story.solution,
-        is_correct: isCorrect,
-      }),
-    });
+    // Score the reasoning using Python backend
+    let reasoningScore = 0;
+    try {
+      const pythonBackendUrl = process.env.PYTHON_BACKEND_URL || 'http://localhost:8000';
+      const scoreResponse = await fetch(`${pythonBackendUrl}/api/score`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reasoning,
+          solution: story.solution,
+          is_correct: isCorrect,
+        }),
+      });
 
-    if (!scoreResponse.ok) {
-      throw new Error('Failed to score reasoning');
+      if (scoreResponse.ok) {
+        const scoreData = await scoreResponse.json();
+        reasoningScore = Math.round(scoreData.score || 0);
+      }
+    } catch (err) {
+      console.warn('[Accuse] Failed to score reasoning, using default:', err);
+      // Fallback: give partial credit for length/effort
+      reasoningScore = Math.min(50, Math.round(reasoning.length / 5));
     }
 
-    const scoreData = await scoreResponse.json();
-    const reasoningScore = scoreData.score;
+    // Calculate weighted total score
+    // Correct answer: 60 points max
+    // Reasoning quality: 40 points max
+    const correctPoints = isCorrect ? 60 : 0;
+    const reasoningPoints = Math.round((reasoningScore / 100) * 40);
+    const totalScore = correctPoints + reasoningPoints;
 
-    // Calculate total score
-    // Correct culprit: 50 points base
-    // Reasoning: up to 30 points
-    // Evidence: up to 20 points (scaled from collected)
-    const maxEvidence = plotPointsData.plotPoints.reduce((sum: number, pp: any) => sum + pp.points, 0);
-    const evidencePercentage = evidenceScore / maxEvidence;
-
-    const totalScore = Math.round(
-      (isCorrect ? 50 : 0) +
-      (reasoningScore * 0.3) +
-      (evidencePercentage * 20)
-    );
+    console.log(`[Accuse] Score breakdown - Correct: ${correctPoints}, Reasoning: ${reasoningPoints} (${reasoningScore}%), Total: ${totalScore}`);
 
     return NextResponse.json({
       isCorrect,
       score: totalScore,
-      explanation: story.solution.explanation,
-      breakdown: {
-        culprit: isCorrect ? 50 : 0,
-        reasoning: Math.round(reasoningScore * 0.3),
-        evidence: Math.round(evidencePercentage * 20),
-      },
+      reasoningScore,
     });
   } catch (error) {
-    console.error('Error in accusation:', error);
+    console.error('[Accuse] Error:', error);
     return NextResponse.json({ error: 'Failed to process accusation' }, { status: 500 });
   }
 }

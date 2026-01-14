@@ -15,7 +15,6 @@ export function ChatModal({ character, storyId, onClose }: ChatModalProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const {
-    unlockPlotPoint,
     chatHistories,
     addChatMessage,
     updateLastMessage
@@ -81,7 +80,6 @@ export function ChatModal({ character, storyId, onClose }: ChatModalProps) {
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let fullContent = '';
-      let detectedEvidence: string[] = [];
 
       if (reader) {
         while (true) {
@@ -89,32 +87,11 @@ export function ChatModal({ character, storyId, onClose }: ChatModalProps) {
           if (done) break;
 
           const chunk = decoder.decode(value, { stream: true });
-
-          // Check for evidence marker at end of stream
-          if (chunk.includes('[[EVIDENCE:')) {
-            const match = chunk.match(/\[\[EVIDENCE:(.*?)\]\]/);
-            if (match) {
-              detectedEvidence = JSON.parse(match[1]);
-              // Remove the marker from displayed content
-              fullContent += chunk.replace(/\[\[EVIDENCE:.*?\]\]/, '');
-            } else {
-              fullContent += chunk;
-            }
-          } else {
-            fullContent += chunk;
-          }
+          fullContent += chunk;
 
           // Update assistant message in store
           updateLastMessage(character.id, fullContent);
         }
-      }
-
-      // Unlock any detected evidence
-      if (detectedEvidence.length > 0) {
-        updateLastMessage(character.id, fullContent, detectedEvidence);
-        detectedEvidence.forEach((plotPointId: string) => {
-          unlockPlotPoint(plotPointId);
-        });
       }
     } catch (error) {
       console.error('Error sending message:', error);
@@ -154,7 +131,7 @@ export function ChatModal({ character, storyId, onClose }: ChatModalProps) {
           onClick={onClose}
           className="text-slate-400 hover:text-white transition-colors p-2"
         >
-          ✕
+          Close
         </button>
       </div>
 
@@ -171,7 +148,6 @@ export function ChatModal({ character, storyId, onClose }: ChatModalProps) {
           const isUser = message.role === 'user';
           const isLast = index === messages.length - 1;
           const isStreaming = isLoading && isLast && !isUser;
-          const hasPlotPoints = (message.revealedEvidence?.length || 0) > 0;
 
           return (
             <MessageBubble
@@ -180,7 +156,6 @@ export function ChatModal({ character, storyId, onClose }: ChatModalProps) {
               isUser={isUser}
               characterName={character.name}
               isStreaming={isStreaming}
-              hasPlotPoints={hasPlotPoints}
             />
           );
         })}
@@ -218,13 +193,11 @@ function MessageBubble({
   isUser,
   characterName,
   isStreaming,
-  hasPlotPoints,
 }: {
   content: string;
   isUser: boolean;
   characterName: string;
   isStreaming: boolean;
-  hasPlotPoints: boolean;
 }) {
   return (
     <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
@@ -234,7 +207,7 @@ function MessageBubble({
           isUser ? 'bg-amber-500 text-slate-900' : 'bg-slate-700 text-slate-300'
         }`}
       >
-        {isUser ? '🔍' : characterName[0]}
+        {isUser ? 'You' : characterName[0]}
       </div>
 
       {/* Bubble */}
@@ -243,12 +216,7 @@ function MessageBubble({
           isUser ? 'chat-bubble-user' : 'chat-bubble-character'
         } ${isStreaming ? 'typing-cursor' : ''}`}
       >
-        {content}
-        {hasPlotPoints && (
-          <span className="block mt-2 text-xs text-amber-400">
-            📌 New evidence uncovered!
-          </span>
-        )}
+        {content || (isStreaming ? '...' : '')}
       </div>
     </div>
   );
