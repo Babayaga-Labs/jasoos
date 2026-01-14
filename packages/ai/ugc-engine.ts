@@ -849,6 +849,9 @@ Respond with ONLY the explanation text (no JSON, just the explanation string).`;
 
       onProgress({ step: 'character-images', message: 'Finalizing...', progress: 100 });
 
+      // Generate roleplay prompts for each character
+      this.generateRoleplayPrompts(draft.characters, storyDir);
+
       // Add to stories.config.json
       this.addToStoriesConfig(storyId, draft.story.title);
 
@@ -892,6 +895,87 @@ Respond with ONLY the explanation text (no JSON, just the explanation string).`;
         console.warn(`Failed to generate portrait for ${character.name}:`, error);
       }
     }
+  }
+
+  // ==========================================================================
+  // Roleplay Prompt Generation
+  // ==========================================================================
+
+  /**
+   * Generate roleplay prompt files for each character
+   */
+  private generateRoleplayPrompts(
+    characters: UGCGeneratedCharacter[],
+    storyDir: string
+  ): void {
+    const promptsDir = path.join(storyDir, 'roleplay_prompts');
+    fs.mkdirSync(promptsDir, { recursive: true });
+
+    for (const character of characters) {
+      // Skip victims - they can't be interrogated
+      if (character.isVictim) continue;
+
+      const promptContent = this.buildCharacterPrompt(character);
+      const promptPath = path.join(promptsDir, `${character.id}.txt`);
+      fs.writeFileSync(promptPath, promptContent);
+    }
+  }
+
+  /**
+   * Build the roleplay prompt for a character
+   */
+  private buildCharacterPrompt(character: UGCGeneratedCharacter): string {
+    const { personality, knowledge, secrets, behaviorUnderPressure, relationships } = character;
+
+    const quirksStr = personality.quirks?.join('; ') || 'None';
+    const knowsAboutOthersStr = knowledge.knowsAboutOthers?.map((k: string) => `  - ${k}`).join('\n') || '  - Nothing specific';
+    const secretsStr = secrets?.map((s: { content: string; willingnessToReveal: string; revealCondition: string }) =>
+      `- ${s.content} [Will reveal: ${s.willingnessToReveal}] [Condition: ${s.revealCondition}]`
+    ).join('\n') || '- None';
+    const relationshipsStr = Object.entries(relationships || {}).map(([id, rel]) => `- ${id}: ${rel}`).join('\n') || '- No specific relationships defined';
+
+    const guiltyInstructions = character.isGuilty
+      ? 'You ARE guilty. Be subtle in your deception. Deflect, redirect, but never outright confess unless given absolutely undeniable proof.'
+      : 'You are innocent. Cooperate with the investigation while protecting your minor secrets.';
+
+    return `You are ${character.name}, ${character.role}. You are being interrogated by a detective investigating a crime.
+
+## YOUR IDENTITY
+- Name: ${character.name}
+- Role: ${character.role}
+- Age: ${character.age}
+- Personality: ${personality.traits.join(', ')}
+- Speech style: ${personality.speechStyle}
+- Quirks: ${quirksStr}
+
+## WHAT YOU KNOW
+- About the crime: ${knowledge.knowsAboutCrime}
+- Your alibi: ${knowledge.alibi}
+- About others:
+${knowsAboutOthersStr}
+
+## YOUR SECRETS (Never reveal these directly, only if truly cornered)
+${secretsStr}
+
+## HOW YOU BEHAVE
+- When defensive: ${behaviorUnderPressure?.defensive || 'Get evasive'}
+- When caught in a lie: ${behaviorUnderPressure?.whenCaughtLying || 'Deflect'}
+- When directly accused: ${behaviorUnderPressure?.whenAccused || 'Deny firmly'}
+
+## YOUR RELATIONSHIPS
+${relationshipsStr}
+
+## ROLEPLAY RULES
+1. Stay in character at ALL times. Never break character or acknowledge you're an AI.
+2. Speak naturally in first person as ${character.name}.
+3. Be cooperative but protective of your secrets.
+4. If asked something you don't know, say you don't know - don't make things up.
+5. Show appropriate emotions - nervousness when pressed on lies, indignation when falsely accused.
+6. Keep responses concise (2-4 sentences typically).
+7. ${guiltyInstructions}
+
+Respond only as ${character.name}. Begin.
+`;
   }
 
   // ==========================================================================
