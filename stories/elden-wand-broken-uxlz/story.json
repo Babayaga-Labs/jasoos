@@ -1,0 +1,29 @@
+{
+  "id": "elden-wand-broken-uxlz",
+  "title": "The Broken Elder Wand",
+  "difficulty": "medium",
+  "estimatedMinutes": 30,
+  "setting": {
+    "location": "Hogwarts Castle",
+    "timePeriod": "1990s",
+    "atmosphere": "The ancient stone corridors of Hogwarts echo with whispered secrets and magical residue. Flickering torchlight casts dancing shadows on weathered walls, while portraits murmur amongst themselves about recent events. The air crackles with tension as news of the broken Elder Wand spreads through the castle's winding passages. A storm brews outside, its thunder matching the gravity of the situation within."
+  },
+  "premise": "The legendary Elder Wand, recently inherited by Harry Potter, has been discovered broken in two pieces in the Gryffindor common room. As the most powerful wand in existence, its destruction could only be the result of powerful dark magic or intimate knowledge of its weaknesses. With the wizarding world's most potent magical artifact now compromised, time is of the essence to uncover who had both the means and motive to destroy it.",
+  "actualEvents": [
+    "3:00 PM - Harry places the Elder Wand in his trunk after Defense Against the Dark Arts class",
+    "4:15 PM - Gryffindor Quidditch practice begins, Harry leaves the dormitory",
+    "4:30 PM - Several students are seen entering and leaving Gryffindor Tower",
+    "5:45 PM - A house-elf reports hearing strange noises from the boys' dormitory",
+    "6:00 PM - Two students report seeing a cloaked figure in the corridor near the Fat Lady's portrait",
+    "6:30 PM - Quidditch practice ends, but Harry stays behind to help clean up",
+    "7:15 PM - A bright flash is seen from the Gryffindor Tower window",
+    "7:45 PM - Harry returns to his dormitory and discovers the broken wand",
+    "8:00 PM - The castle is locked down as news of the broken Elder Wand spreads"
+  ],
+  "solution": {
+    "culprit": "Hermione Granger",
+    "method": "Asked ron weasly to get harry's cloak of invisibilty for bunking a class and sneaked into harry's room. Meanwhile to blame it on malfoy she made them both fight by provoking malfoy with a spell",
+    "motive": "she was jealous of harry potter and his new powers",
+    "explanation": "Hermione Granger, driven by jealousy over Harry's increasing magical powers, orchestrated the theft and destruction of the Elder Wand. She borrowed Harry's invisibility cloak from Ron under false pretenses and used it to access the dormitory during Quidditch practice. To deflect suspicion, she magically provoked a fight between Harry and Draco Malfoy, but left traces of her magical signature at the scene. Her carefully constructed library alibi fell apart when cross-referenced with witness testimonies and timing of events."
+  }
+}

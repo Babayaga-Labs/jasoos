@@ -1,0 +1,30 @@
+{
+  "id": "dil-dhadakna-band-1i8g",
+  "title": "Dil dhadakna band",
+  "difficulty": "medium",
+  "estimatedMinutes": 30,
+  "setting": {
+    "location": "vienna",
+    "timePeriod": "modern",
+    "atmosphere": "The opulent cruise ship docked in Vienna creates a stark contrast between the glamorous world of Bollywood and the somber reality of death. The ship's elegant interiors now feel claustrophobic, with the winter fog rolling off the Danube River enveloping the vessel in an ethereal shroud. The once-festive atmosphere has turned tense, as luxury and danger intertwine in this floating palace of secrets."
+  },
+  "premise": "When the cast of 'Dil Dhadakne Do' wraps their final shooting day aboard a luxury cruise ship in Vienna, their celebration turns to horror as Captain Heinrich Weber is found dead in his cabin. The previous night's wrap party puts the entire star-studded cast under suspicion, as they were the last ones seen with the captain during their revelry. As police seal off the ship, it becomes clear that one of Bollywood's finest may be harboring a dark secret.",
+  "actualEvents": [
+    "2:00 PM - Final scene of the movie is shot on the ship's deck",
+    "6:30 PM - Wrap party begins in the ship's main ballroom",
+    "7:45 PM - Captain Weber joins the celebration as guest of honor",
+    "9:15 PM - Captain is seen having intense discussions with several cast members",
+    "10:30 PM - Captain excuses himself from the party, appearing distressed",
+    "11:00 PM - Multiple cast members are seen wandering the officers' deck",
+    "11:45 PM - Last security camera footage of Captain Weber alive",
+    "3:20 AM - Ship's night watchman hears a muffled sound from the captain's quarter",
+    "7:00 AM - Cabin steward discovers Captain Weber's body",
+    "7:15 AM - Ship security locks down the vessel and contacts authorities"
+  ],
+  "solution": {
+    "culprit": "khyati meena",
+    "method": "dharam meena's gun",
+    "motive": "she liked the captain and tried to advance on him, when he refused and threthened to tell her husband she shot him with her husband's gun",
+    "explanation": "Khyati Meena murdered Captain Weber using her husband's gun after he rejected her advances and threatened to expose her behavior to Dharam. She had access to the weapon through knowing her husband's safe combination, and the expertise to use it from her action movie career. Her false alibi was contradicted by multiple witnesses who saw her near the crime scene, and the captain's distressed state before his death corroborates the confrontation that led to his murder."
+  }
+}

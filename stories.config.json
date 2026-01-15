@@ -37,6 +37,20 @@
       "description": "Hagrid's Dead Horse (User Generated)",
       "isUGC": true,
       "createdAt": "2026-01-13T08:23:35.207Z"
+    },
+    {
+      "id": "dil-dhadakna-band-1i8g",
+      "enabled": true,
+      "description": "Dil dhadakna band (User Generated)",
+      "isUGC": true,
+      "createdAt": "2026-01-14T14:51:55.069Z"
+    },
+    {
+      "id": "elden-wand-broken-uxlz",
+      "enabled": true,
+      "description": "The Broken Elder Wand (User Generated)",
+      "isUGC": true,
+      "createdAt": "2026-01-14T19:35:21.869Z"
     }
   ],
   "defaults": {

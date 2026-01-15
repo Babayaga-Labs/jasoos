@@ -1,0 +1,134 @@
+{
+  "plotPoints": [
+    {
+      "id": "pp_library_alibi",
+      "category": "alibi",
+      "description": "Hermione's library alibi is questionable - Madam Pince confirms she only saw Hermione briefly, not for the full evening as claimed",
+      "importance": "high",
+      "points": 25,
+      "revealedBy": [
+        "draco_malfoy"
+      ],
+      "detectionHints": [
+        "library",
+        "where was hermione",
+        "that evening",
+        "alibi"
+      ]
+    },
+    {
+      "id": "pp_borrowed_cloak",
+      "category": "evidence",
+      "description": "Ron admits lending Harry's invisibility cloak to Hermione, who claimed she needed it to secretly attend an extra study session",
+      "importance": "critical",
+      "points": 30,
+      "revealedBy": [
+        "ron_weasly_"
+      ],
+      "detectionHints": [
+        "invisibility cloak",
+        "borrowed",
+        "that afternoon",
+        "study session"
+      ]
+    },
+    {
+      "id": "pp_jealousy_observed",
+      "category": "motive",
+      "description": "Multiple students noticed Hermione's increasing frustration with Harry's growing magical abilities and special treatment",
+      "importance": "high",
+      "points": 25,
+      "revealedBy": [
+        "draco_malfoy",
+        "ron_weasly_"
+      ],
+      "detectionHints": [
+        "hermione's behavior",
+        "harry's powers",
+        "jealous",
+        "recent changes"
+      ]
+    },
+    {
+      "id": "pp_spell_residue",
+      "category": "evidence",
+      "description": "Unique spell residue matches Hermione's signature magical pattern, detected near the scene",
+      "importance": "critical",
+      "points": 30,
+      "revealedBy": [
+        "draco_malfoy"
+      ],
+      "detectionHints": [
+        "magical signature",
+        "spell traces",
+        "residue",
+        "detection"
+      ]
+    },
+    {
+      "id": "pp_provoked_fight",
+      "category": "relationship",
+      "description": "Draco reveals he was magically provoked into confronting Harry, unusual for his recent attempts to avoid conflict",
+      "importance": "medium",
+      "points": 20,
+      "revealedBy": [
+        "draco_malfoy"
+      ],
+      "detectionHints": [
+        "fight with harry",
+        "provocation",
+        "unusual behavior"
+      ]
+    },
+    {
+      "id": "pp_elder_wand_research",
+      "category": "motive",
+      "description": "Hermione had been extensively researching the Elder Wand's powers and limitations in restricted books",
+      "importance": "high",
+      "points": 25,
+      "revealedBy": [
+        "ron_weasly_"
+      ],
+      "detectionHints": [
+        "research",
+        "elder wand",
+        "restricted section",
+        "recent studies"
+      ]
+    },
+    {
+      "id": "pp_tower_timing",
+      "category": "evidence",
+      "description": "The bright flash from Gryffindor Tower coincided with Hermione's brief disappearance from the library",
+      "importance": "high",
+      "points": 25,
+      "revealedBy": [
+        "ron_weasly_"
+      ],
+      "detectionHints": [
+        "bright flash",
+        "where was hermione",
+        "tower",
+        "timing"
+      ]
+    },
+    {
+      "id": "pp_password_knowledge",
+      "category": "evidence",
+      "description": "Only Gryffindor students knew the tower password, eliminating most suspects except those within the house",
+      "importance": "medium",
+      "points": 15,
+      "revealedBy": [
+        "ron_weasly_"
+      ],
+      "detectionHints": [
+        "password",
+        "access",
+        "gryffindor tower",
+        "security"
+      ]
+    }
+  ],
+  "minimumPointsToAccuse": 120,
+  "perfectScoreThreshold": 195
+}
