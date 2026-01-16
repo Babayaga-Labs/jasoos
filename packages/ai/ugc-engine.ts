@@ -25,6 +25,13 @@ import type {
   UGCGeneratedPlotPoint,
   UGCDraftState,
   EditableSection,
+  // New scaffold-based types
+  UGCStoryScaffold,
+  UGCCharacterSuggestion,
+  UGCCharacterFromScaffold,
+  UGCScaffoldFormInput,
+  UGCGeneratedTimeline,
+  UGCGeneratedCharacterKnowledge,
 } from './types/ugc-types';
 
 // ============================================================================
@@ -563,6 +570,540 @@ Respond with ONLY the JSON object, no other text.`;
     });
 
     return this.parseJSONResponse(text);
+  }
+
+  // ==========================================================================
+  // NEW SCAFFOLD-BASED GENERATION (Character-Driven Flow)
+  // ==========================================================================
+
+  /**
+   * Generate story scaffold from a basic premise (LLM Call 1)
+   * Returns title, hook, crime type, and character suggestions
+   */
+  async generateStoryScaffold(premise: string): Promise<UGCStoryScaffold> {
+    const prompt = `You are a mystery story architect. Given a basic premise, generate a story scaffold that provides structure while leaving room for user customization.
+
+USER'S PREMISE:
+${premise}
+
+Generate a JSON object with this structure:
+{
+  "title": "Compelling 3-6 word title for the mystery",
+  "hook": "2-3 sentence polished premise that draws players in. This will be shown at the start of the game.",
+  "crimeType": "murder" | "theft" | "kidnapping" | "fraud" | "sabotage",
+  "setting": {
+    "location": "Specific location inferred from premise (e.g., 'Westbrook Manor', 'The Silver Moon Casino')",
+    "timePeriod": "Time period inferred from premise, or 'modern' if unclear",
+    "atmosphere": "Mood and tone fitting the crime type (e.g., 'tense and claustrophobic', 'glamorous yet dangerous')"
+  },
+  "suggestedCharacters": [
+    {
+      "suggestionId": "char_1",
+      "suggestedName": "Appropriate name for the setting/era",
+      "role": "Their role/occupation (e.g., 'The Business Partner', 'The Butler', 'The Ex-Spouse')",
+      "connectionToCrime": "Why they might be involved or suspected",
+      "potentialMotive": "Vague hint at what could drive them to crime (user will elaborate)"
+    }
+  ],
+  "victimContext": "Brief description of the victim if applicable (1-2 sentences about who they were)"
+}
+
+RULES:
+1. Suggest 4-5 character ARCHETYPES - these are starting points, not fully formed characters
+2. DO NOT decide who the culprit is - that's the user's choice
+3. Character names should fit the setting and time period
+4. Each character should have a DISTINCT connection to the crime (not just "was there")
+5. Include variety: someone with clear motive, someone with access, a red herring, an insider
+6. potentialMotive should be VAGUE - just a hint (e.g., "financial troubles", "old grudge") not a full backstory
+7. If the crime type isn't clear from the premise, infer the most fitting one
+
+Respond with ONLY the JSON object, no other text.`;
+
+    this.tracePrompt('scaffold-generation', prompt);
+
+    const { text } = await generateText({
+      config: this.config.llm,
+      prompt,
+      maxTokens: 2000,
+      temperature: 0.7,
+    });
+
+    return this.parseJSONResponse(text);
+  }
+
+  /**
+   * Generate complete story from scaffold-based input (new flow)
+   * This is the main entry point for the character-driven generation
+   */
+  async generateFromScaffold(
+    formInput: UGCScaffoldFormInput,
+    onProgress: (progress: GenerationProgress) => void
+  ): Promise<StructuredGenerationResult> {
+    this.resetPromptTraces();
+
+    // Generate story ID from title
+    const storyId = this.generateStoryIdFromTitle(formInput.scaffold.title);
+
+    // Find the culprit character
+    const culprit = formInput.characters.find(c => c.isCulprit);
+    if (!culprit) {
+      throw new Error('No culprit selected');
+    }
+
+    // Step 1: Generate timeline from character secrets (LLM Call 2)
+    onProgress({ step: 'story', message: 'Building timeline from character secrets...', progress: 0 });
+    const timeline = await this.generateTimelineFromCharacters(formInput, culprit);
+    onProgress({ step: 'story', message: 'Timeline created', progress: 25 });
+
+    // Build the story object
+    const story: UGCGeneratedStory = {
+      id: storyId,
+      title: formInput.scaffold.title,
+      difficulty: this.calculateDifficulty(formInput.characters.length),
+      estimatedMinutes: 25 + (formInput.characters.length * 5),
+      setting: formInput.scaffold.setting,
+      premise: formInput.scaffold.hook,
+      actualEvents: timeline.actualEvents,
+      solution: timeline.solution,
+    };
+
+    // Step 2: Generate character knowledge from timeline (LLM Call 4)
+    onProgress({ step: 'characters', message: 'Deriving character knowledge from timeline...', progress: 25 });
+    const characterKnowledge = await this.generateCharacterKnowledgeFromTimeline(
+      formInput,
+      story,
+      culprit
+    );
+    onProgress({ step: 'characters', message: 'Character details generated', progress: 50 });
+
+    // Build full character objects
+    const characters = this.buildCharactersFromScaffold(formInput, characterKnowledge, culprit);
+
+    // Step 3: Generate plot points (LLM Call 3)
+    onProgress({ step: 'plot-points', message: 'Creating discoverable clues...', progress: 50 });
+    const plotPoints = await this.generatePlotPointsFromScaffold(story, characters);
+    onProgress({ step: 'plot-points', message: 'Clues created', progress: 75 });
+
+    onProgress({ step: 'scene-image', message: 'Ready for review', progress: 90 });
+    onProgress({ step: 'character-images', message: 'Generation complete', progress: 100 });
+
+    return {
+      storyId,
+      data: {
+        story,
+        characters,
+        plotPoints,
+      },
+      promptTraces: this.getPromptTraces(),
+    };
+  }
+
+  /**
+   * Generate timeline based on character secrets (LLM Call 2)
+   * This is the key change - timeline emerges FROM character details
+   */
+  private async generateTimelineFromCharacters(
+    formInput: UGCScaffoldFormInput,
+    culprit: UGCCharacterFromScaffold
+  ): Promise<UGCGeneratedTimeline> {
+    const characterDetails = formInput.characters.map(c => ({
+      name: c.name,
+      role: c.role,
+      personalityTraits: c.personalityTraits,
+      secret: c.secret,
+      isCulprit: c.isCulprit,
+    }));
+
+    const prompt = `You are a mystery timeline architect. Create a detailed timeline that integrates ALL character secrets and the crime.
+
+STORY SCAFFOLD:
+- Title: ${formInput.scaffold.title}
+- Setting: ${formInput.scaffold.setting.location}, ${formInput.scaffold.setting.timePeriod}
+- Atmosphere: ${formInput.scaffold.setting.atmosphere}
+- Crime Type: ${formInput.scaffold.crimeType}
+${formInput.scaffold.victimContext ? `- Victim: ${formInput.scaffold.victimContext}` : ''}
+
+CRIME DETAILS (CONFIDENTIAL - timeline must support this):
+- Culprit: ${culprit.name} (${culprit.role})
+- Motive: ${formInput.crimeDetails.motive}
+- Method: ${formInput.crimeDetails.method}
+
+CHARACTERS WITH THEIR SECRETS:
+${characterDetails.map(c => `
+### ${c.name} (${c.role})
+- Personality: ${c.personalityTraits.join(', ')}
+- Secret: ${c.secret}
+- Is Culprit: ${c.isCulprit}
+`).join('\n')}
+
+Generate a JSON object:
+{
+  "actualEvents": [
+    "TIME - Event description showing what happened"
+  ],
+  "solution": {
+    "culprit": "${culprit.name}",
+    "method": "Expanded description of the method",
+    "motive": "Expanded description of the motive",
+    "explanation": "3-4 sentence explanation shown to player after solving"
+  }
+}
+
+CRITICAL TIMELINE RULES:
+
+1. SECRET MANIFESTATION: Every character's SECRET must influence at least one timeline event
+   - If secret is "gambling debt", show them acting suspiciously about money
+   - If secret is "affair with victim", show a private moment or suspicious behavior
+
+2. WITNESS MOMENTS: Include moments where characters could observe others
+   - "7:15 PM - Sarah passes the study and notices the door ajar"
+   - These become the basis for clues during interrogation
+
+3. CULPRIT REQUIREMENTS:
+   - Must have an OPPORTUNITY WINDOW (time alone/unobserved near the crime scene)
+   - Actions that can CONTRADICT their alibi when witnesses reveal what they saw
+   - Alibi must have HOLES that can be exposed
+
+4. INNOCENT CHARACTER REQUIREMENTS:
+   - Activities that serve as VERIFIABLE alibis
+   - Moments where they OBSERVE something relevant (even unknowingly)
+
+5. STRUCTURE:
+   - 8-12 timestamped events
+   - Events BEFORE the crime (setup, tensions, movements)
+   - The CRIME itself (culprit's opportunity window)
+   - Events AFTER (discovery, reactions)
+
+EXAMPLE SECRET-TO-TIMELINE MAPPING:
+- Secret: "Thomas has gambling debts"
+  → "6:30 PM - Thomas receives a phone call and steps away, looking worried"
+  → "7:00 PM - Sarah overhears Thomas arguing about money in the hallway"
+
+- Secret: "Emily was having an affair with the victim"
+  → "6:45 PM - Emily is seen leaving the victim's room, looking flustered"
+  → "8:30 PM - Emily's reaction to the news seems 'too grief-stricken' to others"
+
+Respond with ONLY the JSON object, no other text.`;
+
+    this.tracePrompt('timeline-from-characters', prompt);
+
+    const { text } = await generateText({
+      config: this.config.llm,
+      prompt,
+      maxTokens: 2500,
+      temperature: 0.7,
+    });
+
+    return this.parseJSONResponse(text);
+  }
+
+  /**
+   * Generate character knowledge based on timeline (LLM Call 4)
+   * Alibis and knowledge are DERIVED from the timeline, not invented separately
+   */
+  private async generateCharacterKnowledgeFromTimeline(
+    formInput: UGCScaffoldFormInput,
+    story: UGCGeneratedStory,
+    culprit: UGCCharacterFromScaffold
+  ): Promise<UGCGeneratedCharacterKnowledge[]> {
+    const characterBasics = formInput.characters.map(c => ({
+      tempId: c.tempId,
+      name: c.name,
+      role: c.role,
+      personalityTraits: c.personalityTraits,
+      secret: c.secret,
+      isCulprit: c.isCulprit,
+    }));
+
+    const prompt = `You are generating interrogation-ready character knowledge based on a finalized timeline.
+
+TIMELINE OF EVENTS:
+${story.actualEvents.join('\n')}
+
+SOLUTION:
+- Culprit: ${story.solution.culprit}
+- Method: ${story.solution.method}
+- Motive: ${story.solution.motive}
+
+CHARACTERS:
+${characterBasics.map(c => `
+### ${c.name} (${c.role}) [tempId: ${c.tempId}]
+- Personality: ${c.personalityTraits.join(', ')}
+- Secret: ${c.secret}
+- Is Culprit: ${c.isCulprit}
+`).join('\n')}
+
+For EACH character, analyze the timeline and determine:
+1. What they DIRECTLY WITNESSED (they were present at the event)
+2. What they could have HEARD ABOUT (gossip, aftermath, overheard conversations)
+3. What they KNOW about other characters
+4. Their ALIBI based on timeline (where they claim to be)
+
+Generate a JSON array:
+[
+  {
+    "characterId": "tempId from above",
+    "knowsAboutCrime": "What they directly witnessed or know about the crime from the timeline",
+    "knowsAboutOthers": ["Specific info about other characters they could reveal"],
+    "alibi": "Their claimed whereabouts during the crime (based on timeline)",
+    "statement": "1-2 sentence third-person case summary for player display",
+    "behaviorUnderPressure": {
+      "defensive": "How they deflect based on personality and secret",
+      "whenCaughtLying": "Reaction based on personality",
+      "whenAccused": "Response based on guilt status and personality"
+    }
+  }
+]
+
+CRITICAL RULES:
+
+FOR THE GUILTY CHARACTER (${culprit.name}):
+- alibi must be FALSE or have VERIFIABLE HOLES based on timeline
+- knowsAboutCrime should be VAGUE/DEFLECTING (they're hiding their involvement)
+- behaviorUnderPressure should show SUBTLE TELLS (overcompensating, specific denials)
+
+FOR INNOCENT CHARACTERS:
+- alibi should be TRUE and match their timeline position
+- knowsAboutCrime should include what they ACTUALLY witnessed per timeline
+- knowsAboutOthers should include ACTIONABLE info (things that help solve the mystery)
+- They may protect their OWN secret but should be honest about the crime
+
+STATEMENT GUIDELINES (shown to players):
+- Third person, like detective case notes
+- 1-2 sentences: claimed whereabouts + connection to incident
+- NEVER include: "(false)" markers, other characters' knowledge, evidence, secrets
+
+EXAMPLE STATEMENTS:
+- GOOD: "Claims to have been in the garden during the incident. Discovered the body when returning to the house."
+- BAD: "Claims to be in the garden (false alibi)" - reveals the lie!
+
+Respond with ONLY the JSON array, no other text.`;
+
+    this.tracePrompt('character-knowledge-from-timeline', prompt);
+
+    const { text } = await generateText({
+      config: this.config.llm,
+      prompt,
+      maxTokens: 3500,
+      temperature: 0.7,
+    });
+
+    return this.parseJSONResponse(text);
+  }
+
+  /**
+   * Build full character objects from scaffold input and generated knowledge
+   */
+  private buildCharactersFromScaffold(
+    formInput: UGCScaffoldFormInput,
+    knowledge: UGCGeneratedCharacterKnowledge[],
+    culprit: UGCCharacterFromScaffold
+  ): UGCGeneratedCharacter[] {
+    return formInput.characters.map(char => {
+      const charKnowledge = knowledge.find(k => k.characterId === char.tempId);
+      if (!charKnowledge) {
+        throw new Error(`No knowledge generated for character ${char.name}`);
+      }
+
+      const id = char.name
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .replace(/\s+/g, '_');
+
+      return {
+        id,
+        tempId: char.tempId,
+        name: char.name,
+        role: char.role,
+        age: this.generateAge(char.role),
+        isGuilty: char.isCulprit,
+        isVictim: false, // No victims in new flow
+        personality: {
+          traits: char.personalityTraits,
+          speechStyle: this.inferSpeechStyle(char.personalityTraits),
+          quirks: this.generateQuirks(char.personalityTraits),
+        },
+        appearance: {
+          description: char.appearance,
+          imagePrompt: this.buildImagePrompt(char),
+        },
+        knowledge: {
+          knowsAboutCrime: charKnowledge.knowsAboutCrime,
+          knowsAboutOthers: charKnowledge.knowsAboutOthers,
+          alibi: charKnowledge.alibi,
+        },
+        statement: charKnowledge.statement,
+        secrets: [{
+          content: char.secret,
+          willingnessToReveal: char.isCulprit ? 'never' : 'medium',
+          revealCondition: char.isCulprit
+            ? 'Only if confronted with undeniable evidence'
+            : 'If pressed hard or if it helps clear their name',
+        }],
+        behaviorUnderPressure: charKnowledge.behaviorUnderPressure,
+        relationships: {}, // Will be populated by relationships generation if needed
+        imageUrl: char.uploadedImageUrl || undefined,
+      };
+    });
+  }
+
+  /**
+   * Generate plot points from scaffold-based data
+   */
+  private async generatePlotPointsFromScaffold(
+    story: UGCGeneratedStory,
+    characters: UGCGeneratedCharacter[]
+  ): Promise<{
+    plotPoints: UGCGeneratedPlotPoint[];
+    minimumPointsToAccuse: number;
+    perfectScoreThreshold: number;
+  }> {
+    const characterInfo = characters.map(c => ({
+      id: c.id,
+      name: c.name,
+      role: c.role,
+      isGuilty: c.isGuilty,
+      knowsAboutCrime: c.knowledge.knowsAboutCrime,
+      knowsAboutOthers: c.knowledge.knowsAboutOthers,
+      secret: c.secrets[0]?.content,
+    }));
+
+    const prompt = `You are creating clues for a detective mystery where ALL information is discovered through CHARACTER INTERROGATION.
+
+TIMELINE OF EVENTS:
+${story.actualEvents.join('\n')}
+
+SOLUTION:
+- Culprit: ${story.solution.culprit}
+- Method: ${story.solution.method}
+- Motive: ${story.solution.motive}
+
+CHARACTERS AND WHAT THEY KNOW:
+${JSON.stringify(characterInfo, null, 2)}
+
+Create 8-12 plot points (clues) that form a solvable mystery.
+
+{
+  "plotPoints": [
+    {
+      "id": "pp_snake_case_id",
+      "category": "motive" | "alibi" | "evidence" | "relationship",
+      "description": "What the player learns when this clue is revealed",
+      "importance": "low" | "medium" | "high" | "critical",
+      "points": 10-30,
+      "revealedBy": ["character_id_who_can_reveal"],
+      "detectionHints": ["keywords", "phrases", "topics that trigger"]
+    }
+  ],
+  "minimumPointsToAccuse": 50,
+  "perfectScoreThreshold": sum_of_all_points
+}
+
+CRITICAL RULES:
+
+1. EVERY clue must be assignable to at least one character based on their knowsAboutCrime or knowsAboutOthers
+2. Characters can only reveal what they REALISTICALLY know:
+   - They witnessed it directly (per timeline)
+   - They have expertise to notice it
+   - Another character told them
+   - They know the culprit/others personally
+
+3. REQUIRED CLUES (minimum):
+   - 2+ MOTIVE clues pointing to why culprit did it
+   - 2+ ALIBI clues exposing holes in culprit's story
+   - 1+ OPPORTUNITY clue showing culprit could do it
+   - 2+ CORROBORATION clues supporting the solution
+
+4. Detection hints should include:
+   - Direct question keywords ("where were you", "what did you see")
+   - Topic triggers ("that night", "alibi", "relationship")
+   - Character names (asking about them might reveal info)
+
+5. Each clue's description should be ACTIONABLE information that helps solve the mystery
+
+Respond with ONLY the JSON object, no other text.`;
+
+    this.tracePrompt('plot-points-from-scaffold', prompt);
+
+    const { text } = await generateText({
+      config: this.config.llm,
+      prompt,
+      maxTokens: 3000,
+      temperature: 0.7,
+    });
+
+    return this.parseJSONResponse(text);
+  }
+
+  // Helper methods for character building
+  private calculateDifficulty(numCharacters: number): 'easy' | 'medium' | 'hard' {
+    if (numCharacters <= 3) return 'easy';
+    if (numCharacters <= 4) return 'medium';
+    return 'hard';
+  }
+
+  private generateAge(role: string): number {
+    // Generate appropriate age based on role
+    const roleLower = role.toLowerCase();
+    if (roleLower.includes('young') || roleLower.includes('intern') || roleLower.includes('assistant')) {
+      return 22 + Math.floor(Math.random() * 8);
+    }
+    if (roleLower.includes('elderly') || roleLower.includes('retired') || roleLower.includes('grandmother')) {
+      return 60 + Math.floor(Math.random() * 20);
+    }
+    return 30 + Math.floor(Math.random() * 25);
+  }
+
+  private inferSpeechStyle(traits: string[]): string {
+    const traitsLower = traits.map(t => t.toLowerCase());
+    if (traitsLower.some(t => t.includes('formal') || t.includes('elegant'))) {
+      return 'Formal and measured, chooses words carefully';
+    }
+    if (traitsLower.some(t => t.includes('nervous') || t.includes('anxious'))) {
+      return 'Hesitant, often trails off, speaks quickly when stressed';
+    }
+    if (traitsLower.some(t => t.includes('charming') || t.includes('smooth'))) {
+      return 'Confident and persuasive, uses flattery';
+    }
+    if (traitsLower.some(t => t.includes('cold') || t.includes('calculating'))) {
+      return 'Direct and emotionless, clinical word choice';
+    }
+    return 'Conversational, adapts to the situation';
+  }
+
+  private generateQuirks(traits: string[]): string[] {
+    const quirks: string[] = [];
+    const traitsLower = traits.map(t => t.toLowerCase());
+
+    if (traitsLower.some(t => t.includes('nervous'))) {
+      quirks.push('Fidgets with hands when lying');
+    }
+    if (traitsLower.some(t => t.includes('arrogant'))) {
+      quirks.push('Tends to talk down to others');
+    }
+    if (traitsLower.some(t => t.includes('secretive'))) {
+      quirks.push('Avoids eye contact when discussing sensitive topics');
+    }
+
+    // Add generic quirks if we don't have enough
+    const genericQuirks = [
+      'Pauses before answering difficult questions',
+      'Has a habit of deflecting with humor',
+      'Becomes more formal when uncomfortable',
+    ];
+
+    while (quirks.length < 2) {
+      const randomQuirk = genericQuirks[Math.floor(Math.random() * genericQuirks.length)];
+      if (!quirks.includes(randomQuirk)) {
+        quirks.push(randomQuirk);
+      }
+    }
+
+    return quirks.slice(0, 2);
+  }
+
+  private buildImagePrompt(char: UGCCharacterFromScaffold): string {
+    return `Portrait of ${char.name}, ${char.role}. ${char.appearance}. Personality: ${char.personalityTraits.join(', ')}. Professional headshot style, detailed face, high quality.`;
   }
 
   // ==========================================================================

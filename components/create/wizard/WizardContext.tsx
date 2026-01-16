@@ -7,6 +7,9 @@ import type {
   UGCGeneratedStory,
   UGCGeneratedCharacter,
   UGCGeneratedPlotPoint,
+  // New scaffold-based types
+  UGCStoryScaffold,
+  UGCCharacterFromScaffold,
 } from '@/packages/ai/types/ugc-types';
 
 // ============================================================================
@@ -23,6 +26,26 @@ export interface StoryInput {
   premise: string;
 }
 
+// New scaffold-based character input (user fills these)
+export interface ScaffoldCharacterItem {
+  // From scaffold suggestion
+  suggestionId: string;
+  suggestedName: string;
+  suggestedRole: string;
+  connectionToCrime: string;
+  potentialMotive: string;
+  // User fills these
+  name: string;
+  role: string;
+  appearance: string;
+  personalityTraits: string[];
+  secret: string;
+  isCulprit: boolean;
+  uploadedImageUrl: string | null;
+  // State
+  isComplete: boolean;
+}
+
 export interface CharacterWizardItem {
   input: UGCCharacterInput;
   generated: UGCGeneratedCharacter | null;
@@ -35,28 +58,46 @@ export interface WizardState {
   currentStage: WizardStage;
   storyId: string | null;
 
-  // Stage 1: Story
+  // NEW: Scaffold-based flow flag
+  useScaffoldFlow: boolean;
+
+  // Stage 1: Story (Legacy flow)
   storyInput: StoryInput;
   generatedStory: UGCGeneratedStory | null;
   storyGenerating: boolean;
   storyComplete: boolean;
 
-  // Stage 2: Characters
+  // Stage 1: Scaffold flow - premise and scaffold
+  initialPremise: string;
+  scaffold: UGCStoryScaffold | null;
+  scaffoldGenerating: boolean;
+  scaffoldComplete: boolean;
+
+  // Stage 2: Characters (Legacy)
   characters: CharacterWizardItem[];
   currentCharacterInput: UGCCharacterInput | null;
 
-  // Stage 3: Clues
+  // Stage 2: Characters (Scaffold flow)
+  scaffoldCharacters: ScaffoldCharacterItem[];
+
+  // Stage 3: Clues / Crime
   crimeInput: UGCCrimeInput;
+  // Scaffold flow crime details
+  crimeDetails: {
+    motive: string;
+    method: string;
+  };
   generatedPlotPoints: UGCGeneratedPlotPoint[] | null;
   minimumPointsToAccuse: number;
   perfectScoreThreshold: number;
   cluesGenerating: boolean;
   cluesComplete: boolean;
 
-  // Stage 4: World
+  // Stage 4: World / Final Generation
   sceneImageUrl: string | null;
   sceneGenerating: boolean;
   worldComplete: boolean;
+  finalGenerating: boolean;
 
   // Global
   error: string | null;
@@ -72,7 +113,7 @@ type WizardAction =
   | { type: 'GO_TO_STAGE'; stage: WizardStage }
   | { type: 'SET_STORY_ID'; storyId: string }
 
-  // Story Stage
+  // Story Stage (Legacy)
   | { type: 'UPDATE_STORY_INPUT'; field: keyof StoryInput; value: string }
   | { type: 'START_STORY_GENERATION' }
   | { type: 'COMPLETE_STORY_GENERATION'; story: UGCGeneratedStory; storyId: string }
@@ -83,7 +124,19 @@ type WizardAction =
   | { type: 'UPDATE_TIMELINE_EVENT'; index: number; event: string }
   | { type: 'DELETE_TIMELINE_EVENT'; index: number }
 
-  // Characters Stage
+  // NEW: Scaffold Flow Actions
+  | { type: 'SET_USE_SCAFFOLD_FLOW'; useScaffold: boolean }
+  | { type: 'UPDATE_INITIAL_PREMISE'; premise: string }
+  | { type: 'START_SCAFFOLD_GENERATION' }
+  | { type: 'COMPLETE_SCAFFOLD_GENERATION'; scaffold: UGCStoryScaffold }
+  | { type: 'UPDATE_SCAFFOLD'; updates: Partial<UGCStoryScaffold> }
+  | { type: 'UPDATE_SCAFFOLD_CHARACTER'; suggestionId: string; updates: Partial<ScaffoldCharacterItem> }
+  | { type: 'SET_CULPRIT'; suggestionId: string }
+  | { type: 'UPDATE_CRIME_DETAILS'; field: 'motive' | 'method'; value: string }
+  | { type: 'START_FINAL_GENERATION' }
+  | { type: 'COMPLETE_FINAL_GENERATION'; story: UGCGeneratedStory; characters: UGCGeneratedCharacter[]; plotPoints: UGCGeneratedPlotPoint[]; minPoints: number; perfectScore: number; storyId: string }
+
+  // Characters Stage (Legacy)
   | { type: 'SET_CURRENT_CHARACTER_INPUT'; input: UGCCharacterInput }
   | { type: 'CLEAR_CURRENT_CHARACTER_INPUT' }
   | { type: 'START_CHARACTER_GENERATION'; input: UGCCharacterInput }
@@ -92,11 +145,21 @@ type WizardAction =
   | { type: 'DELETE_CHARACTER'; tempId: string }
   | { type: 'REGENERATE_CHARACTER'; tempId: string }
 
-  // Clues Stage
+  // Clues Stage (Legacy)
   | { type: 'UPDATE_CRIME_INPUT'; field: keyof UGCCrimeInput; value: string }
   | { type: 'START_CLUES_GENERATION' }
   | { type: 'COMPLETE_CLUES_GENERATION'; plotPoints: UGCGeneratedPlotPoint[]; minPoints: number; perfectScore: number; updatedStory: UGCGeneratedStory; updatedCharacters: UGCGeneratedCharacter[] }
   | { type: 'UPDATE_PLOT_POINT'; id: string; updates: Partial<UGCGeneratedPlotPoint> }
+
+  // Post-generation editing (Story Bible)
+  | { type: 'UPDATE_TIMELINE_EVENT_AT'; index: number; value: string }
+  | { type: 'ADD_TIMELINE_EVENT_AT'; index: number; value: string }
+  | { type: 'DELETE_TIMELINE_EVENT_AT'; index: number }
+  | { type: 'UPDATE_CHARACTER_KNOWLEDGE'; characterId: string; field: 'knowsAboutCrime' | 'alibi'; value: string }
+  | { type: 'UPDATE_CHARACTER_KNOWS_ABOUT_OTHERS'; characterId: string; index: number; value: string }
+  | { type: 'ADD_CHARACTER_KNOWS_ABOUT_OTHERS'; characterId: string; value: string }
+  | { type: 'DELETE_CHARACTER_KNOWS_ABOUT_OTHERS'; characterId: string; index: number }
+  | { type: 'UPDATE_SOLUTION'; field: 'culprit' | 'method' | 'motive' | 'explanation'; value: string }
 
   // World Stage
   | { type: 'START_SCENE_GENERATION' }
@@ -118,6 +181,10 @@ function createInitialState(): WizardState {
     currentStage: 'story',
     storyId: null,
 
+    // NEW: Default to scaffold flow
+    useScaffoldFlow: true,
+
+    // Legacy story input
     storyInput: {
       title: '',
       settingLocation: '',
@@ -129,12 +196,28 @@ function createInitialState(): WizardState {
     storyGenerating: false,
     storyComplete: false,
 
+    // Scaffold flow
+    initialPremise: '',
+    scaffold: null,
+    scaffoldGenerating: false,
+    scaffoldComplete: false,
+
+    // Legacy characters
     characters: [],
     currentCharacterInput: null,
 
+    // Scaffold characters
+    scaffoldCharacters: [],
+
+    // Crime input (legacy)
     crimeInput: {
       crimeType: 'murder',
       culpritId: '',
+      motive: '',
+      method: '',
+    },
+    // Crime details (scaffold flow)
+    crimeDetails: {
       motive: '',
       method: '',
     },
@@ -147,6 +230,7 @@ function createInitialState(): WizardState {
     sceneImageUrl: null,
     sceneGenerating: false,
     worldComplete: false,
+    finalGenerating: false,
 
     error: null,
     isSaving: false,
@@ -238,7 +322,122 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
         },
       };
 
-    // Characters Stage
+    // ========== NEW: Scaffold Flow Actions ==========
+    case 'SET_USE_SCAFFOLD_FLOW':
+      return { ...state, useScaffoldFlow: action.useScaffold };
+
+    case 'UPDATE_INITIAL_PREMISE':
+      return { ...state, initialPremise: action.premise };
+
+    case 'START_SCAFFOLD_GENERATION':
+      return { ...state, scaffoldGenerating: true, error: null };
+
+    case 'COMPLETE_SCAFFOLD_GENERATION': {
+      // Convert scaffold suggestions to ScaffoldCharacterItems
+      const scaffoldChars: ScaffoldCharacterItem[] = action.scaffold.suggestedCharacters.map(s => ({
+        suggestionId: s.suggestionId,
+        suggestedName: s.suggestedName,
+        suggestedRole: s.role,
+        connectionToCrime: s.connectionToCrime,
+        potentialMotive: s.potentialMotive,
+        // Pre-fill with suggestions
+        name: s.suggestedName,
+        role: s.role,
+        appearance: '',
+        personalityTraits: [],
+        secret: '',
+        isCulprit: false,
+        uploadedImageUrl: null,
+        isComplete: false,
+      }));
+
+      return {
+        ...state,
+        scaffoldGenerating: false,
+        scaffoldComplete: true,
+        scaffold: action.scaffold,
+        scaffoldCharacters: scaffoldChars,
+      };
+    }
+
+    case 'UPDATE_SCAFFOLD':
+      if (!state.scaffold) return state;
+      return {
+        ...state,
+        scaffold: { ...state.scaffold, ...action.updates },
+      };
+
+    case 'UPDATE_SCAFFOLD_CHARACTER':
+      return {
+        ...state,
+        scaffoldCharacters: state.scaffoldCharacters.map(c =>
+          c.suggestionId === action.suggestionId
+            ? {
+                ...c,
+                ...action.updates,
+                // Auto-calculate isComplete
+                isComplete: Boolean(
+                  (action.updates.name ?? c.name)?.trim() &&
+                  (action.updates.role ?? c.role)?.trim() &&
+                  (action.updates.appearance ?? c.appearance)?.trim() &&
+                  ((action.updates.personalityTraits ?? c.personalityTraits)?.length > 0) &&
+                  (action.updates.secret ?? c.secret)?.trim()
+                ),
+              }
+            : c
+        ),
+      };
+
+    case 'SET_CULPRIT':
+      return {
+        ...state,
+        scaffoldCharacters: state.scaffoldCharacters.map(c => ({
+          ...c,
+          isCulprit: c.suggestionId === action.suggestionId,
+        })),
+      };
+
+    case 'UPDATE_CRIME_DETAILS':
+      return {
+        ...state,
+        crimeDetails: { ...state.crimeDetails, [action.field]: action.value },
+      };
+
+    case 'START_FINAL_GENERATION':
+      return { ...state, finalGenerating: true, error: null };
+
+    case 'COMPLETE_FINAL_GENERATION':
+      return {
+        ...state,
+        finalGenerating: false,
+        storyId: action.storyId,
+        generatedStory: action.story,
+        generatedPlotPoints: action.plotPoints,
+        minimumPointsToAccuse: action.minPoints,
+        perfectScoreThreshold: action.perfectScore,
+        cluesComplete: true,
+        storyComplete: true,
+        // Convert generated characters to legacy format for display
+        characters: action.characters.map(gc => ({
+          input: {
+            tempId: gc.tempId,
+            name: gc.name,
+            role: gc.role,
+            description: gc.appearance.description,
+            uploadedImageUrl: gc.imageUrl || null,
+            isVictim: gc.isVictim,
+            personalityTraits: gc.personality.traits,
+            secret: gc.secrets[0]?.content || '',
+          },
+          generated: gc,
+          isGenerating: false,
+          isComplete: true,
+        })),
+      };
+
+    // ========== End Scaffold Flow Actions ==========
+
+    // Characters Stage (Legacy)
     case 'SET_CURRENT_CHARACTER_INPUT':
       return { ...state, currentCharacterInput: action.input };
 
@@ -341,6 +540,134 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
         ),
       };
 
+    // ========== Post-generation editing (Story Bible) ==========
+    case 'UPDATE_TIMELINE_EVENT_AT':
+      if (!state.generatedStory) return state;
+      return {
+        ...state,
+        generatedStory: {
+          ...state.generatedStory,
+          actualEvents: state.generatedStory.actualEvents.map((e, i) =>
+            i === action.index ? action.value : e
+          ),
+        },
+      };
+
+    case 'ADD_TIMELINE_EVENT_AT':
+      if (!state.generatedStory) return state;
+      return {
+        ...state,
+        generatedStory: {
+          ...state.generatedStory,
+          actualEvents: [
+            ...state.generatedStory.actualEvents.slice(0, action.index + 1),
+            action.value,
+            ...state.generatedStory.actualEvents.slice(action.index + 1),
+          ],
+        },
+      };
+
+    case 'DELETE_TIMELINE_EVENT_AT':
+      if (!state.generatedStory) return state;
+      return {
+        ...state,
+        generatedStory: {
+          ...state.generatedStory,
+          actualEvents: state.generatedStory.actualEvents.filter((_, i) => i !== action.index),
+        },
+      };
+
+    case 'UPDATE_CHARACTER_KNOWLEDGE': {
+      return {
+        ...state,
+        characters: state.characters.map((c) => {
+          if (c.generated?.id !== action.characterId) return c;
+          return {
+            ...c,
+            generated: c.generated ? {
+              ...c.generated,
+              knowledge: {
+                ...c.generated.knowledge,
+                [action.field]: action.value,
+              },
+            } : null,
+          };
+        }),
+      };
+    }
+
+    case 'UPDATE_CHARACTER_KNOWS_ABOUT_OTHERS': {
+      return {
+        ...state,
+        characters: state.characters.map((c) => {
+          if (c.generated?.id !== action.characterId) return c;
+          return {
+            ...c,
+            generated: c.generated ? {
+              ...c.generated,
+              knowledge: {
+                ...c.generated.knowledge,
+                knowsAboutOthers: c.generated.knowledge.knowsAboutOthers.map((item, i) =>
+                  i === action.index ? action.value : item
+                ),
+              },
+            } : null,
+          };
+        }),
+      };
+    }
+
+    case 'ADD_CHARACTER_KNOWS_ABOUT_OTHERS': {
+      return {
+        ...state,
+        characters: state.characters.map((c) => {
+          if (c.generated?.id !== action.characterId) return c;
+          return {
+            ...c,
+            generated: c.generated ? {
+              ...c.generated,
+              knowledge: {
+                ...c.generated.knowledge,
+                knowsAboutOthers: [...c.generated.knowledge.knowsAboutOthers, action.value],
+              },
+            } : null,
+          };
+        }),
+      };
+    }
+
+    case 'DELETE_CHARACTER_KNOWS_ABOUT_OTHERS': {
+      return {
+        ...state,
+        characters: state.characters.map((c) => {
+          if (c.generated?.id !== action.characterId) return c;
+          return {
+            ...c,
+            generated: c.generated ? {
+              ...c.generated,
+              knowledge: {
+                ...c.generated.knowledge,
+                knowsAboutOthers: c.generated.knowledge.knowsAboutOthers.filter((_, i) => i !== action.index),
+              },
+            } : null,
+          };
+        }),
+      };
+    }
+
+    case 'UPDATE_SOLUTION':
+      if (!state.generatedStory) return state;
+      return {
+        ...state,
+        generatedStory: {
+          ...state.generatedStory,
+          solution: {
+            ...state.generatedStory.solution,
+            [action.field]: action.value,
+          },
+        },
+      };
+
     // World Stage
     case 'START_SCENE_GENERATION':
       return { ...state, sceneGenerating: true, error: null };
@@ -359,6 +686,8 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
         ...state,
         error: action.error,
         storyGenerating: false,
+        scaffoldGenerating: false,
+        finalGenerating: false,
         cluesGenerating: false,
         sceneGenerating: false,
         characters: state.characters.map((c) => ({ ...c, isGenerating: false })),
@@ -389,12 +718,19 @@ interface WizardContextValue {
   state: WizardState;
   dispatch: React.Dispatch<WizardAction>;
 
-  // Computed helpers
+  // Computed helpers (legacy flow)
   canProceedFromStory: boolean;
   canProceedFromCharacters: boolean;
   canProceedFromClues: boolean;
   completedCharacters: UGCGeneratedCharacter[];
   nonVictimCharacters: UGCGeneratedCharacter[];
+
+  // Computed helpers (scaffold flow)
+  canProceedFromScaffold: boolean;
+  canProceedFromScaffoldCharacters: boolean;
+  canGenerateFinal: boolean;
+  completedScaffoldCharacters: ScaffoldCharacterItem[];
+  selectedCulprit: ScaffoldCharacterItem | null;
 }
 
 const WizardContext = createContext<WizardContextValue | null>(null);
@@ -402,7 +738,7 @@ const WizardContext = createContext<WizardContextValue | null>(null);
 export function WizardProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(wizardReducer, undefined, createInitialState);
 
-  // Computed values
+  // Computed values (legacy)
   const completedCharacters = state.characters
     .filter((c) => c.isComplete && c.generated)
     .map((c) => c.generated!);
@@ -416,6 +752,21 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 
   const canProceedFromClues = state.cluesComplete && state.generatedPlotPoints !== null;
 
+  // Computed values (scaffold flow)
+  const canProceedFromScaffold = state.scaffoldComplete && state.scaffold !== null;
+
+  const completedScaffoldCharacters = state.scaffoldCharacters.filter(c => c.isComplete);
+
+  const canProceedFromScaffoldCharacters = completedScaffoldCharacters.length >= 3;
+
+  const selectedCulprit = state.scaffoldCharacters.find(c => c.isCulprit) || null;
+
+  const canGenerateFinal =
+    canProceedFromScaffoldCharacters &&
+    selectedCulprit !== null &&
+    state.crimeDetails.motive.trim().length > 0 &&
+    state.crimeDetails.method.trim().length > 0;
+
   const value: WizardContextValue = {
     state,
     dispatch,
@@ -424,6 +775,12 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     canProceedFromClues,
     completedCharacters,
     nonVictimCharacters,
+    // Scaffold flow
+    canProceedFromScaffold,
+    canProceedFromScaffoldCharacters,
+    canGenerateFinal,
+    completedScaffoldCharacters,
+    selectedCulprit,
   };
 
   return (

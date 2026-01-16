@@ -7,6 +7,7 @@ import {
   MIN_CHARACTERS,
   MAX_CHARACTERS,
 } from '@/packages/ai';
+import type { UGCScaffoldFormInput } from '@/packages/ai/types/ugc-types';
 
 export const maxDuration = 300; // 5 minutes max for story generation
 
@@ -74,14 +75,149 @@ function validateFormInput(formInput: UGCFormInput): string | null {
   return null; // Valid
 }
 
+/**
+ * Validate scaffold-based form input (new character-driven flow)
+ */
+function validateScaffoldFormInput(formInput: UGCScaffoldFormInput): string | null {
+  if (!formInput.initialPremise?.trim()) {
+    return 'Initial premise is required';
+  }
+  if (!formInput.scaffold) {
+    return 'Scaffold is required - generate it first';
+  }
+  if (!formInput.scaffold.title?.trim()) {
+    return 'Scaffold title is required';
+  }
+  if (!formInput.characters || formInput.characters.length < MIN_CHARACTERS) {
+    return `At least ${MIN_CHARACTERS} characters are required`;
+  }
+  if (formInput.characters.length > MAX_CHARACTERS) {
+    return `Maximum ${MAX_CHARACTERS} characters allowed`;
+  }
+
+  // Check for culprit
+  const culprit = formInput.characters.find(c => c.isCulprit);
+  if (!culprit) {
+    return 'One character must be marked as the culprit';
+  }
+
+  // Validate each character
+  for (let i = 0; i < formInput.characters.length; i++) {
+    const char = formInput.characters[i];
+    if (!char.name?.trim()) {
+      return `Character ${i + 1}: Name is required`;
+    }
+    if (!char.role?.trim()) {
+      return `Character ${i + 1}: Role is required`;
+    }
+    if (!char.appearance?.trim()) {
+      return `Character ${i + 1}: Appearance is required`;
+    }
+    if (!char.personalityTraits || char.personalityTraits.length === 0) {
+      return `Character ${i + 1}: At least one personality trait is required`;
+    }
+    if (!char.secret?.trim()) {
+      return `Character ${i + 1}: Secret is required - this drives the mystery`;
+    }
+    if (char.secret.length < 10) {
+      return `Character ${i + 1}: Secret should be more specific (at least 10 characters)`;
+    }
+  }
+
+  // Validate crime details
+  if (!formInput.crimeDetails) {
+    return 'Crime details are required';
+  }
+  if (!formInput.crimeDetails.motive?.trim()) {
+    return 'Motive is required';
+  }
+  if (!formInput.crimeDetails.method?.trim()) {
+    return 'Method is required';
+  }
+
+  return null; // Valid
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // Check if this is a structured input (new flow) or synopsis (legacy flow)
+    // Check which flow: scaffold (new), structured (current), or synopsis (legacy)
+    const isScaffoldInput = body.scaffoldFormInput !== undefined;
     const isStructuredInput = body.formInput !== undefined;
 
-    if (isStructuredInput) {
+    if (isScaffoldInput) {
+      // NEW: Scaffold-based character-driven flow
+      const { scaffoldFormInput } = body as { scaffoldFormInput: UGCScaffoldFormInput };
+
+      // Validate scaffold form input
+      const validationError = validateScaffoldFormInput(scaffoldFormInput);
+      if (validationError) {
+        return new Response(
+          JSON.stringify({ error: validationError }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Load AI config
+      const config = loadAIConfig();
+      if (!config.llm.apiKey) {
+        return new Response(
+          JSON.stringify({ error: 'LLM API key not configured' }),
+          { status: 500, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Create SSE stream for scaffold-based generation
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        async start(controller) {
+          const sendEvent = (data: object) => {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+          };
+
+          try {
+            const ugcEngine = new UGCEngine(config);
+
+            const result = await ugcEngine.generateFromScaffold(
+              scaffoldFormInput,
+              (progress: GenerationProgress) => {
+                sendEvent({
+                  type: 'progress',
+                  step: progress.step,
+                  message: progress.message,
+                  progress: progress.progress,
+                });
+              }
+            );
+
+            // Send complete event with full generated data for review
+            sendEvent({
+              type: 'complete',
+              storyId: result.storyId,
+              data: result.data,
+              promptTraces: result.promptTraces,
+            });
+          } catch (error) {
+            console.error('UGC scaffold generation error:', error);
+            sendEvent({
+              type: 'error',
+              message: error instanceof Error ? error.message : 'Generation failed',
+            });
+          } finally {
+            controller.close();
+          }
+        },
+      });
+
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+        },
+      });
+    } else if (isStructuredInput) {
       // New structured input flow
       const { formInput } = body as { formInput: UGCFormInput };
 

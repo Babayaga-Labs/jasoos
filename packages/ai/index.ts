@@ -26,6 +26,7 @@ export type {
 
 // UGC Types - Structured input/output types
 export type {
+  // Legacy/current types
   UGCFormInput,
   UGCCharacterInput,
   UGCCrimeInput,
@@ -47,6 +48,19 @@ export type {
   RegenerateSectionResponse,
   SaveRequest,
   SaveResponse,
+  // NEW: Scaffold-based types (character-driven flow)
+  UGCStoryScaffold,
+  UGCCharacterSuggestion,
+  UGCCharacterFromScaffold,
+  UGCScaffoldFormInput,
+  UGCGeneratedTimeline,
+  UGCGeneratedCharacterKnowledge,
+  GenerateScaffoldRequest,
+  GenerateScaffoldResponse,
+  GenerateFromScaffoldRequest,
+  ScaffoldGenerateProgressEvent,
+  ScaffoldGenerateCompleteEvent,
+  ScaffoldGenerateSSEEvent,
 } from './types/ugc-types';
 export {
   TIME_PERIODS,

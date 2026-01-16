@@ -1,0 +1,32 @@
+{
+  "id": "honors-deadly-price-qgjg",
+  "title": "Honor's Deadly Price",
+  "difficulty": "hard",
+  "estimatedMinutes": 50,
+  "setting": {
+    "location": "Rajanpur Town, Northern India",
+    "timePeriod": "modern",
+    "atmosphere": "suffocating small-town conservatism mixed with political corruption"
+  },
+  "premise": "In a conservative small town, the brutal murder of 19-year-old Priya Sharma has shocked the community. Her body was found in an abandoned factory, bearing signs of extreme violence, with evidence suggesting the killer was someone who knew her well.",
+  "actualEvents": [
+    "4:30 PM - Priya meets Maya at the college cafe, discussing her investigation into local corruption. Maya texts her father about the meeting",
+    "5:15 PM - Vikram Malhotra nervously watches Priya photographing documents outside his office",
+    "6:00 PM - Arjun meets Priya at the party venue, acting distant and checking his phone frequently",
+    "6:30 PM - Rajesh Sharma is seen arguing with Priya about family honor in the garden",
+    "7:00 PM - Inspector Kumar arrives at the party, Maya providing him an alibi by introducing him as her father to other guests",
+    "7:15 PM - Priya is seen rejecting Inspector Kumar's advances in a secluded corner",
+    "7:45 PM - Rajesh attempts to poison Priya's drink but is interrupted by other guests",
+    "8:00 PM - Inspector Kumar uses the distraction of Vikram's speech to spike Priya's champagne",
+    "8:15 PM - Arjun receives a call from his parents and leaves the party without saying goodbye to Priya",
+    "8:30 PM - Priya drinks the poisoned champagne while alone",
+    "9:00 PM - Maya finds Priya unconscious in the garden",
+    "9:15 PM - Inspector Kumar takes charge of the crime scene, immediately suggesting honor killing as the motive"
+  ],
+  "solution": {
+    "culprit": "Inspector Suresh Kumar",
+    "method": "Inspector Kumar poisoned Priya's champagne during Vikram's speech, knowing she would drink alone after Arjun's departure. He used his position to manipulate the investigation afterward.",
+    "motive": "After Priya rejected his advances and threatened to expose his harassment, Kumar decided to eliminate her before she could damage his reputation or reveal his misconduct.",
+    "explanation": "Inspector Kumar orchestrated the perfect crime by using his daughter Maya as an unwitting alibi and exploiting local honor killing prejudices as a cover. He deliberately steered the investigation toward Rajesh Sharma, knowing the father's conservative views would make him an ideal suspect. The inspector's true motive was revealed through witness accounts of his rejected advances and Priya's documentation of local corruption, which she threatened to expose."
+  }
+}

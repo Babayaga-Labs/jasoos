@@ -65,7 +65,129 @@ export interface UGCFormInput {
 }
 
 // ============================================================================
-// Phase 2: LLM Generated Data
+// NEW FLOW: Scaffold-Based Generation (Character-Driven)
+// ============================================================================
+
+/**
+ * Character suggestion from scaffold - minimal, for user to expand
+ */
+export interface UGCCharacterSuggestion {
+  /** Suggested ID for tracking */
+  suggestionId: string;
+  /** Suggested name (user can change) */
+  suggestedName: string;
+  /** Role/archetype */
+  role: string;
+  /** Why they're connected to the crime */
+  connectionToCrime: string;
+  /** Hint at possible motive (vague) */
+  potentialMotive: string;
+}
+
+/**
+ * Generated scaffold from initial premise (LLM Call 1)
+ */
+export interface UGCStoryScaffold {
+  /** Generated story title */
+  title: string;
+  /** Polished hook/premise */
+  hook: string;
+  /** Inferred crime type */
+  crimeType: 'murder' | 'theft' | 'kidnapping' | 'fraud' | 'sabotage' | 'other';
+  /** Setting details */
+  setting: {
+    location: string;
+    timePeriod: string;
+    atmosphere: string;
+  };
+  /** Suggested characters - user can modify/replace */
+  suggestedCharacters: UGCCharacterSuggestion[];
+  /** Brief victim context (name, who they were - not playable) */
+  victimContext?: string;
+}
+
+/**
+ * User's filled character based on scaffold (Phase 2 - user fills this)
+ */
+export interface UGCCharacterFromScaffold {
+  /** Links to original suggestion (or null if user-added) */
+  fromSuggestionId: string | null;
+  /** Temp ID for form tracking */
+  tempId: string;
+  /** Finalized name */
+  name: string;
+  /** Finalized role */
+  role: string;
+  /** Appearance description */
+  appearance: string;
+  /** Personality traits */
+  personalityTraits: string[];
+  /** The character's secret - CRITICAL for timeline coherence */
+  secret: string;
+  /** Is this the culprit? */
+  isCulprit: boolean;
+  /** Optional uploaded image */
+  uploadedImageUrl: string | null;
+}
+
+/**
+ * New form input for scaffold-based flow
+ */
+export interface UGCScaffoldFormInput {
+  /** User's initial premise */
+  initialPremise: string;
+  /** Generated scaffold (from LLM Call 1) */
+  scaffold: UGCStoryScaffold;
+  /** User-filled characters based on scaffold */
+  characters: UGCCharacterFromScaffold[];
+  /** Crime details (user fills after picking culprit) */
+  crimeDetails: {
+    /** Why the culprit did it */
+    motive: string;
+    /** How they did it (the clever method/twist) */
+    method: string;
+  };
+}
+
+/**
+ * Generated timeline from character details (LLM Call 2)
+ */
+export interface UGCGeneratedTimeline {
+  /** Chronological events (8-12 timestamped) */
+  actualEvents: string[];
+  /** Solution derived from timeline */
+  solution: {
+    culprit: string;
+    method: string;
+    motive: string;
+    explanation: string;
+  };
+}
+
+/**
+ * Generated character knowledge from timeline (LLM Call 4)
+ */
+export interface UGCGeneratedCharacterKnowledge {
+  /** Character ID this knowledge belongs to */
+  characterId: string;
+  /** What they directly witnessed */
+  knowsAboutCrime: string;
+  /** Info about other characters */
+  knowsAboutOthers: string[];
+  /** Their alibi (FALSE for culprit) */
+  alibi: string;
+  /** Third-person statement for player display */
+  statement: string;
+  /** Behavior patterns */
+  behaviorUnderPressure: {
+    defensive: string;
+    whenCaughtLying: string;
+    whenAccused: string;
+  };
+}
+
+// ============================================================================
+// Phase 2: LLM Generated Data (Legacy - keeping for backward compatibility)
 // ============================================================================
 
 /**
@@ -319,7 +441,54 @@ export interface PromptTrace {
 // ============================================================================
 
 /**
- * Request body for /api/ugc/generate
+ * Request body for /api/ugc/generate-scaffold (NEW)
+ */
+export interface GenerateScaffoldRequest {
+  /** User's initial premise (1-3 sentences) */
+  premise: string;
+}
+
+/**
+ * Response from /api/ugc/generate-scaffold (NEW)
+ */
+export interface GenerateScaffoldResponse {
+  scaffold: UGCStoryScaffold;
+}
+
+/**
+ * Request body for /api/ugc/generate (NEW FLOW)
+ */
+export interface GenerateFromScaffoldRequest {
+  formInput: UGCScaffoldFormInput;
+}
+
+/**
+ * SSE progress event for new flow generation
+ */
+export interface ScaffoldGenerateProgressEvent {
+  type: 'progress';
+  step: 'timeline' | 'plot-points' | 'character-knowledge' | 'images';
+  message: string;
+  progress: number;
+}
+
+/**
+ * SSE complete event for new flow generation
+ */
+export interface ScaffoldGenerateCompleteEvent {
+  type: 'complete';
+  storyId: string;
+  data: UGCGeneratedData;
+  promptTraces?: PromptTrace[];
+}
+
+export type ScaffoldGenerateSSEEvent =
+  | ScaffoldGenerateProgressEvent
+  | ScaffoldGenerateCompleteEvent
+  | GenerateErrorEvent;
+
+/**
+ * Request body for /api/ugc/generate (LEGACY)
  */
 export interface GenerateRequest {
   formInput: UGCFormInput;
