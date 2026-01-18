@@ -1,0 +1,152 @@
+{
+  "plotPoints": [
+    {
+      "id": "pp_heated_argument",
+      "category": "motive",
+      "description": "Holmes and Watson had fierce argument about Mrs. Watson's death, with Watson shouting 'You promised to protect her!'",
+      "importance": "high",
+      "points": 25,
+      "revealedBy": [
+        "mrs_hudson"
+      ],
+      "detectionHints": [
+        "argument",
+        "that afternoon",
+        "Mrs. Watson",
+        "shouting"
+      ]
+    },
+    {
+      "id": "pp_lestrade_nervousness",
+      "category": "relationship",
+      "description": "Lestrade showed unusual discomfort when discussing Mrs. Watson, suggesting personal involvement",
+      "importance": "medium",
+      "points": 15,
+      "revealedBy": [
+        "mrs_hudson",
+        "dr_john_watson"
+      ],
+      "detectionHints": [
+        "Lestrade",
+        "Mrs. Watson",
+        "behavior",
+        "uncomfortable"
+      ]
+    },
+    {
+      "id": "pp_gas_inspection",
+      "category": "evidence",
+      "description": "Gas lines were confirmed working perfectly at 4:30 PM, ruling out accidental malfunction",
+      "importance": "critical",
+      "points": 30,
+      "revealedBy": [
+        "thomas_crawford"
+      ],
+      "detectionHints": [
+        "gas inspection",
+        "maintenance",
+        "working order",
+        "safety check"
+      ]
+    },
+    {
+      "id": "pp_roof_activity",
+      "category": "evidence",
+      "description": "Watson was seen leaving from roof access at 7:45 PM, despite claiming to have left at 7:00 PM",
+      "importance": "critical",
+      "points": 30,
+      "revealedBy": [
+        "james_moriarty_jr"
+      ],
+      "detectionHints": [
+        "roof",
+        "Watson",
+        "leaving",
+        "where was Watson"
+      ]
+    },
+    {
+      "id": "pp_medical_bag",
+      "category": "evidence",
+      "description": "Watson brought his medical bag, unusual for a social visit",
+      "importance": "medium",
+      "points": 20,
+      "revealedBy": [
+        "inspector_lestrade"
+      ],
+      "detectionHints": [
+        "medical bag",
+        "Watson's visit",
+        "equipment",
+        "unusual items"
+      ]
+    },
+    {
+      "id": "pp_false_exit",
+      "category": "alibi",
+      "description": "Watson deliberately left through front door at 7:00 PM to establish alibi, witnessed by Lestrade",
+      "importance": "high",
+      "points": 25,
+      "revealedBy": [
+        "inspector_lestrade"
+      ],
+      "detectionHints": [
+        "Watson leaving",
+        "front door",
+        "what time",
+        "witness"
+      ]
+    },
+    {
+      "id": "pp_secret_return",
+      "category": "alibi",
+      "description": "Watson returned through back entrance at 7:30 PM unseen",
+      "importance": "critical",
+      "points": 30,
+      "revealedBy": [
+        "mrs_hudson"
+      ],
+      "detectionHints": [
+        "back door",
+        "return",
+        "sneaking",
+        "second visit"
+      ]
+    },
+    {
+      "id": "pp_movement_sounds",
+      "category": "evidence",
+      "description": "Holmes was heard moving at 7:15 PM, proving he was alive after Watson's apparent departure",
+      "importance": "high",
+      "points": 25,
+      "revealedBy": [
+        "mrs_hudson"
+      ],
+      "detectionHints": [
+        "movements",
+        "sounds",
+        "last seen alive",
+        "timeline"
+      ]
+    },
+    {
+      "id": "pp_revenge_motive",
+      "category": "motive",
+      "description": "Watson blamed Holmes for failing to protect his wife from a dangerous criminal",
+      "importance": "critical",
+      "points": 30,
+      "revealedBy": [
+        "inspector_lestrade",
+        "mrs_hudson"
+      ],
+      "detectionHints": [
+        "Mrs. Watson's death",
+        "blame",
+        "protection",
+        "promises"
+      ]
+    }
+  ],
+  "minimumPointsToAccuse": 150,
+  "perfectScoreThreshold": 230
+}

@@ -263,15 +263,22 @@ export function CharactersStage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Dark Secret <span className="text-slate-500">(Optional)</span>
+              <label className="block text-sm font-medium text-amber-300 mb-2 flex items-center gap-2">
+                <span className="text-lg">🤫</span>
+                Their Secret <span className="text-slate-500">(Optional but recommended)</span>
               </label>
-              <input
-                type="text"
+              <textarea
                 value={formData.secret || ''}
                 onChange={(e) => handleInputChange('secret', e.target.value)}
-                placeholder="Has been secretly selling the family heirlooms..."
-                className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 focus:outline-none transition-all"
+                placeholder="Their secret... (what they were doing, what they saw, what they're hiding)"
+                rows={2}
+                className={`
+                  w-full px-4 py-3 rounded-xl text-white focus:outline-none transition-all resize-none
+                  ${!formData.secret?.trim()
+                    ? 'bg-amber-500/10 border-2 border-amber-500/40 placeholder-amber-300/60 focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20'
+                    : 'bg-slate-800/50 border border-slate-700/50 placeholder-slate-500 focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20'
+                  }
+                `}
               />
             </div>
 
@@ -350,6 +357,14 @@ function ScaffoldCharactersStage({
     dispatch({ type: 'SET_CULPRIT', suggestionId });
   };
 
+  const handleAddCharacter = () => {
+    dispatch({ type: 'ADD_SCAFFOLD_CHARACTER' });
+  };
+
+  const handleDeleteCharacter = (suggestionId: string) => {
+    dispatch({ type: 'DELETE_SCAFFOLD_CHARACTER', suggestionId });
+  };
+
   const handleProceed = () => {
     dispatch({ type: 'GO_TO_STAGE', stage: 'clues' });
   };
@@ -366,7 +381,7 @@ function ScaffoldCharactersStage({
           Flesh Out Your Characters
         </h2>
         <p className="text-slate-400">
-          Give each character a personality, appearance, and most importantly - a secret
+          Name your characters. Add details like appearance, personality, and secrets for richer stories.
         </p>
         <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/50 border border-slate-700/50">
           <span className="text-slate-400">Completed:</span>
@@ -380,7 +395,7 @@ function ScaffoldCharactersStage({
       </div>
 
       {/* Character Cards */}
-      <div className="space-y-4 mb-8">
+      <div className="space-y-4 mb-4">
         {scaffoldCharacters.map((char, index) => (
           <ScaffoldCharacterCard
             key={char.suggestionId}
@@ -392,10 +407,21 @@ function ScaffoldCharactersStage({
             )}
             onUpdate={(updates) => handleUpdateCharacter(char.suggestionId, updates)}
             onSetCulprit={() => handleSetCulprit(char.suggestionId)}
+            onDelete={() => handleDeleteCharacter(char.suggestionId)}
             isCulprit={char.isCulprit}
+            canDelete={scaffoldCharacters.length > 3}
           />
         ))}
       </div>
+
+      {/* Add Character Button */}
+      <button
+        onClick={handleAddCharacter}
+        className="w-full mb-8 py-4 px-6 rounded-xl border-2 border-dashed border-slate-600 text-slate-400 hover:border-violet-500/50 hover:text-violet-300 transition-all flex items-center justify-center gap-2"
+      >
+        <span className="text-xl">+</span>
+        <span>Add Character</span>
+      </button>
 
       {/* Culprit Selection Reminder */}
       {!selectedCulprit && completedCount >= 3 && (
@@ -447,7 +473,9 @@ interface ScaffoldCharacterCardProps {
   onToggle: () => void;
   onUpdate: (updates: Partial<ScaffoldCharacterItem>) => void;
   onSetCulprit: () => void;
+  onDelete: () => void;
   isCulprit: boolean;
+  canDelete: boolean;
 }
 
 function ScaffoldCharacterCard({
@@ -457,7 +485,9 @@ function ScaffoldCharacterCard({
   onToggle,
   onUpdate,
   onSetCulprit,
+  onDelete,
   isCulprit,
+  canDelete,
 }: ScaffoldCharacterCardProps) {
   const [localTraits, setLocalTraits] = useState<string[]>(character.personalityTraits);
 
@@ -484,44 +514,60 @@ function ScaffoldCharacterCard({
       `}
     >
       {/* Header - Always visible */}
-      <button
-        onClick={onToggle}
-        className="w-full p-4 flex items-center gap-4 text-left"
-      >
-        <div className={`
-          w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold
-          ${isCulprit
-            ? 'bg-red-500/30 text-red-300'
-            : isComplete
-            ? 'bg-emerald-500/30 text-emerald-300'
-            : 'bg-slate-700/50 text-slate-400'
-          }
-        `}>
-          {index + 1}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-white">{character.name || character.suggestedName}</span>
-            {isCulprit && (
-              <span className="px-2 py-0.5 text-xs rounded-full bg-red-500/30 text-red-300 border border-red-500/50">
-                CULPRIT
-              </span>
-            )}
-            {isComplete && !isCulprit && (
-              <span className="text-emerald-400 text-sm">Complete</span>
-            )}
-          </div>
-          <p className="text-slate-400 text-sm">{character.role || character.suggestedRole}</p>
-        </div>
-        <svg
-          className={`w-5 h-5 text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+      <div className="flex items-center">
+        <button
+          onClick={onToggle}
+          className="flex-1 p-4 flex items-center gap-4 text-left"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
+          <div className={`
+            w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold
+            ${isCulprit
+              ? 'bg-red-500/30 text-red-300'
+              : isComplete
+              ? 'bg-emerald-500/30 text-emerald-300'
+              : 'bg-slate-700/50 text-slate-400'
+            }
+          `}>
+            {index + 1}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-white">{character.name || character.suggestedName || 'New Character'}</span>
+              {isCulprit && (
+                <span className="px-2 py-0.5 text-xs rounded-full bg-red-500/30 text-red-300 border border-red-500/50">
+                  CULPRIT
+                </span>
+              )}
+              {isComplete && !isCulprit && (
+                <span className="text-emerald-400 text-sm">Complete</span>
+              )}
+            </div>
+            <p className="text-slate-400 text-sm">{character.role || character.suggestedRole || 'No role'}</p>
+          </div>
+          <svg
+            className={`w-5 h-5 text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        {canDelete && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            className="p-4 text-slate-500 hover:text-red-400 transition-colors"
+            title="Remove character"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        )}
+      </div>
 
       {/* Expanded Content */}
       {isExpanded && (
@@ -557,7 +603,7 @@ function ScaffoldCharacterCard({
           {/* Appearance */}
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
-              Appearance <span className="text-red-400">*</span>
+              Appearance <span className="text-slate-500 font-normal">(optional)</span>
             </label>
             <textarea
               value={character.appearance}
@@ -571,8 +617,7 @@ function ScaffoldCharacterCard({
           {/* Personality Traits */}
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
-              Personality Traits <span className="text-red-400">*</span>
-              <span className="text-slate-500 font-normal ml-2">(Pick 1-5)</span>
+              Personality Traits <span className="text-slate-500 font-normal">(optional, up to 5)</span>
             </label>
             <div className="flex flex-wrap gap-2">
               {PERSONALITY_TRAITS.map((trait) => (
@@ -594,25 +639,30 @@ function ScaffoldCharacterCard({
             </div>
           </div>
 
-          {/* Secret - THE KEY FIELD */}
+          {/* Secret - Encouraged but optional */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Their Secret <span className="text-red-400">*</span>
-              <span className="text-slate-500 font-normal ml-2">(This drives the mystery!)</span>
+            <label className="block text-sm font-medium text-amber-300 mb-2 flex items-center gap-2">
+              <span className="text-lg">🤫</span>
+              Their Secret <span className="text-slate-500 font-normal">(recommended)</span>
             </label>
             <textarea
               value={character.secret}
               onChange={(e) => onUpdate({ secret: e.target.value })}
-              placeholder={character.potentialMotive
-                ? `Hint: ${character.potentialMotive}. What's the full story behind this?`
-                : "What are they hiding? This will shape the timeline and clues..."
-              }
-              rows={2}
-              className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 focus:outline-none transition-all resize-none"
+              placeholder="Their secret... (what they were doing, what they saw, what they're hiding)"
+              rows={3}
+              className={`
+                w-full px-4 py-3 rounded-xl text-white focus:outline-none transition-all resize-none
+                ${!character.secret.trim()
+                  ? 'bg-amber-500/10 border-2 border-amber-500/40 placeholder-amber-300/60 focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20'
+                  : 'bg-slate-800/50 border border-slate-700/50 placeholder-slate-500 focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20'
+                }
+              `}
             />
-            <p className="text-xs text-slate-500 mt-1">
-              Be specific! This secret will appear in the timeline and become discoverable through interrogation.
-            </p>
+            {!character.secret.trim() && (
+              <p className="text-xs text-amber-400/80 mt-2">
+                This is the most important field! Include what they were doing, what they witnessed, and what they&apos;re hiding.
+              </p>
+            )}
           </div>
 
           {/* Culprit Toggle */}

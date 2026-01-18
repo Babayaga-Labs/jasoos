@@ -1,0 +1,136 @@
+{
+  "characters": [
+    {
+      "id": "victoria_sterling",
+      "name": "Victoria Sterling",
+      "role": "Wealthy Socialite",
+      "age": 32,
+      "isGuilty": true,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "ambitious"
+        ],
+        "speechStyle": "Conversational, adapts to the situation",
+        "quirks": [
+          "Has a habit of deflecting with humor",
+          "Becomes more formal when uncomfortable"
+        ]
+      },
+      "appearance": {
+        "description": "Looks like a Dragon ball z character",
+        "imagePrompt": "Portrait of Victoria Sterling, Wealthy Socialite. Looks like a Dragon ball z character. Personality: ambitious. Professional headshot style, detailed face, high quality."
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Claims to have only heard about Pierce's death after the fact while mingling at the gala",
+        "knowsAboutOthers": [
+          "Suggests Webb was distracted from his duties",
+          "Notes Grayson seemed unusually nervous all evening"
+        ],
+        "alibi": "Claims to have returned to the gala after getting fresh air and remained there until the body was found"
+      },
+      "statement": "States she was mingling with gala guests at the time of the incident. Reports having a professional disagreement with Pierce earlier in the evening.",
+      "secrets": [
+        {
+          "content": "They had a blowjob before in the batcabe",
+          "willingnessToReveal": "never",
+          "revealCondition": "Only if confronted with undeniable evidence"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Emphasizes her social status and questions the propriety of such accusations",
+        "whenCaughtLying": "Quickly redirects attention to others' suspicious behavior",
+        "whenAccused": "Becomes indignant and threatens legal action"
+      },
+      "relationships": {}
+    },
+    {
+      "id": "marcus_webb",
+      "name": "Marcus Webb",
+      "role": "New Security Chief",
+      "age": 45,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "perfectionist"
+        ],
+        "speechStyle": "Conversational, adapts to the situation",
+        "quirks": [
+          "Has a habit of deflecting with humor",
+          "Pauses before answering difficult questions"
+        ]
+      },
+      "appearance": {
+        "description": "Looks like a Dragon ball z character",
+        "imagePrompt": "Portrait of Marcus Webb, New Security Chief. Looks like a Dragon ball z character. Personality: perfectionist. Professional headshot style, detailed face, high quality."
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Witnessed Victoria entering Pierce's office, heard the argument, discovered camera tampering",
+        "knowsAboutOthers": [
+          "Knows Victoria was acting suspiciously all evening",
+          "Aware of Grayson's hidden recording devices"
+        ],
+        "alibi": "Was investigating security system issues in various manor locations"
+      },
+      "statement": "Reports being occupied with security system maintenance during the incident. Confirms hearing a heated argument from Pierce's office.",
+      "secrets": [
+        {
+          "content": "He was giving the blowjob in the batcave",
+          "willingnessToReveal": "medium",
+          "revealCondition": "If pressed hard or if it helps clear their name"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Focuses on technical details of security protocols",
+        "whenCaughtLying": "Admits to procedural oversights but maintains innocence",
+        "whenAccused": "Becomes technically precise and documentation-focused"
+      },
+      "relationships": {}
+    },
+    {
+      "id": "richard_dick_grayson",
+      "name": "Richard 'Dick' Grayson",
+      "role": "Wayne's Ward",
+      "age": 40,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "anxious"
+        ],
+        "speechStyle": "Hesitant, often trails off, speaks quickly when stressed",
+        "quirks": [
+          "Becomes more formal when uncomfortable",
+          "Has a habit of deflecting with humor"
+        ]
+      },
+      "appearance": {
+        "description": "Looks like a Dragon ball z character",
+        "imagePrompt": "Portrait of Richard 'Dick' Grayson, Wayne's Ward. Looks like a Dragon ball z character. Personality: anxious. Professional headshot style, detailed face, high quality."
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Has recording evidence of earlier events, saw Victoria's suspicious behavior",
+        "knowsAboutOthers": [
+          "Knows Webb neglected security protocols",
+          "Observed Victoria's unusual dress and behavior"
+        ],
+        "alibi": "Was monitoring his recording equipment during the time of death"
+      },
+      "statement": "Reports being in various locations setting up and monitoring security equipment throughout the evening. Notes unusual activity on his devices.",
+      "secrets": [
+        {
+          "content": "He was recording the blowjob session",
+          "willingnessToReveal": "medium",
+          "revealCondition": "If pressed hard or if it helps clear their name"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes fidgety and talks about technical difficulties",
+        "whenCaughtLying": "Stutters and tries to change the subject",
+        "whenAccused": "Offers to share partial evidence while protecting his own involvement"
+      },
+      "relationships": {}
+    }
+  ]
+}

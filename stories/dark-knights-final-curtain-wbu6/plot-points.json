@@ -1,0 +1,128 @@
+{
+  "plotPoints": [
+    {
+      "id": "pp_compromising_footage",
+      "category": "motive",
+      "description": "Pierce discovered footage of intimate acts in the Batcave involving Victoria Sterling",
+      "importance": "critical",
+      "points": 30,
+      "revealedBy": [
+        "richard_dick_grayson"
+      ],
+      "detectionHints": [
+        "security footage",
+        "recordings",
+        "batcave incident",
+        "what did Pierce find"
+      ]
+    },
+    {
+      "id": "pp_camera_shutdown",
+      "category": "evidence",
+      "description": "Security cameras in Batcave sector were deliberately disabled before the incident",
+      "importance": "high",
+      "points": 25,
+      "revealedBy": [
+        "marcus_webb"
+      ],
+      "detectionHints": [
+        "security cameras",
+        "surveillance",
+        "batcave security"
+      ]
+    },
+    {
+      "id": "pp_heated_argument",
+      "category": "evidence",
+      "description": "Victoria and Pierce had intense argument about 'destroying reputations' shortly before his death",
+      "importance": "high",
+      "points": 25,
+      "revealedBy": [
+        "marcus_webb"
+      ],
+      "detectionHints": [
+        "argument",
+        "Pierce's office",
+        "last conversation"
+      ]
+    },
+    {
+      "id": "pp_false_alibi",
+      "category": "alibi",
+      "description": "Victoria claims to be mingling at gala during murder, but was seen entering Pierce's office",
+      "importance": "critical",
+      "points": 30,
+      "revealedBy": [
+        "marcus_webb"
+      ],
+      "detectionHints": [
+        "Victoria's whereabouts",
+        "gala attendance",
+        "where was Victoria"
+      ]
+    },
+    {
+      "id": "pp_seduction_pattern",
+      "category": "evidence",
+      "description": "Victoria deliberately wore revealing dress and flirted with security staff all evening",
+      "importance": "medium",
+      "points": 20,
+      "revealedBy": [
+        "richard_dick_grayson"
+      ],
+      "detectionHints": [
+        "Victoria's behavior",
+        "dress",
+        "flirting"
+      ]
+    },
+    {
+      "id": "pp_deleted_evidence",
+      "category": "evidence",
+      "description": "Multiple security recordings were deleted after Pierce's death",
+      "importance": "high",
+      "points": 25,
+      "revealedBy": [
+        "marcus_webb",
+        "richard_dick_grayson"
+      ],
+      "detectionHints": [
+        "deleted files",
+        "missing footage",
+        "evidence tampering"
+      ]
+    },
+    {
+      "id": "pp_blackmail_threat",
+      "category": "motive",
+      "description": "Pierce threatened to expose scandal involving multiple high-society figures",
+      "importance": "high",
+      "points": 25,
+      "revealedBy": [
+        "victoria_sterling"
+      ],
+      "detectionHints": [
+        "blackmail",
+        "threats",
+        "Pierce's intentions"
+      ]
+    },
+    {
+      "id": "pp_fresh_air_lie",
+      "category": "alibi",
+      "description": "Victoria's 'fresh air' excuse coincided with Batcave incident timing",
+      "importance": "medium",
+      "points": 20,
+      "revealedBy": [
+        "richard_dick_grayson"
+      ],
+      "detectionHints": [
+        "Victoria's excuse",
+        "fresh air",
+        "where did Victoria go"
+      ]
+    }
+  ],
+  "minimumPointsToAccuse": 120,
+  "perfectScoreThreshold": 200
+}

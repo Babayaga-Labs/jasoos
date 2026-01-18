@@ -58,6 +58,20 @@
       "description": "Honor's Deadly Price (User Generated)",
       "isUGC": true,
       "createdAt": "2026-01-15T14:35:29.897Z"
+    },
+    {
+      "id": "the-last-case-of-holmes-iqjs",
+      "enabled": true,
+      "description": "The Last Case of Holmes (User Generated)",
+      "isUGC": true,
+      "createdAt": "2026-01-17T19:47:38.527Z"
+    },
+    {
+      "id": "dark-knights-final-curtain-wbu6",
+      "enabled": true,
+      "description": "Dark Knight's Final Curtain (User Generated)",
+      "isUGC": true,
+      "createdAt": "2026-01-18T15:12:45.782Z"
     }
   ],
   "defaults": {

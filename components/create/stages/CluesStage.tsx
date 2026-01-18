@@ -4,9 +4,70 @@ import { useState } from 'react';
 import { useWizard } from '../wizard/WizardContext';
 import { ClueCard, ClueSummary } from '../cards/ClueCard';
 import { SkeletonCard } from '../cards/FadeInCard';
-import { StoryBible } from '../cards/StoryBible';
+import { TimelineSection, CharacterKnowledgeSection, SolutionSection } from '../cards/StoryBible';
 import { CRIME_TYPES } from '@/packages/ai/types/ugc-types';
 import type { UGCScaffoldFormInput, ScaffoldGenerateSSEEvent } from '@/packages/ai/types/ugc-types';
+import type { ValidationWarning } from '@/packages/ai';
+
+// ============================================================================
+// Validation Results Component
+// ============================================================================
+
+function ValidationResults({ warnings }: { warnings: ValidationWarning[] }) {
+  const criticalCount = warnings.filter(w => w.severity === 'critical').length;
+  const warningCount = warnings.filter(w => w.severity === 'warning').length;
+  const infoCount = warnings.filter(w => w.severity === 'info').length;
+
+  const getSeverityIcon = (severity: string) => {
+    switch (severity) {
+      case 'critical': return '❌';
+      case 'warning': return '⚠️';
+      case 'info': return 'ℹ️';
+      default: return '⚠️';
+    }
+  };
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'critical': return 'text-red-300';
+      case 'warning': return 'text-amber-200';
+      case 'info': return 'text-blue-200';
+      default: return 'text-amber-200';
+    }
+  };
+
+  return (
+    <div className={`p-4 rounded-xl ${criticalCount > 0 ? 'bg-red-500/10 border border-red-500/30' : 'bg-amber-500/10 border border-amber-500/30'}`}>
+      <div className="flex items-center gap-3 mb-3">
+        <span className="text-lg">🔍</span>
+        <span className={`font-semibold ${criticalCount > 0 ? 'text-red-300' : 'text-amber-300'}`}>
+          Validation Results
+        </span>
+        <div className="flex gap-2">
+          {criticalCount > 0 && <span className="px-1.5 py-0.5 rounded bg-red-500/30 text-red-300 text-xs">{criticalCount} critical</span>}
+          {warningCount > 0 && <span className="px-1.5 py-0.5 rounded bg-amber-500/30 text-amber-300 text-xs">{warningCount} warnings</span>}
+          {infoCount > 0 && <span className="px-1.5 py-0.5 rounded bg-blue-500/30 text-blue-300 text-xs">{infoCount} info</span>}
+        </div>
+      </div>
+      <div className="space-y-2">
+        {warnings.map((warning, index) => (
+          <div key={index} className={`flex items-start gap-2 text-sm ${getSeverityColor(warning.severity)}`}>
+            <span className="flex-shrink-0">{getSeverityIcon(warning.severity)}</span>
+            <div className="flex-1">
+              <span>{warning.message}</span>
+              {warning.suggestion && (
+                <p className="text-xs text-slate-400 mt-0.5">💡 {warning.suggestion}</p>
+              )}
+            </div>
+            <span className="px-1.5 py-0.5 rounded bg-slate-700/50 text-xs text-slate-400 capitalize">
+              {warning.category}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 // ============================================================================
 // Scaffold Flow - Crime Details & Final Generation
@@ -40,6 +101,42 @@ function ScaffoldCluesStage() {
     message: string;
     progress: number;
   } | null>(null);
+
+  const [validationWarnings, setValidationWarnings] = useState<ValidationWarning[] | null>(null);
+  const [isValidating, setIsValidating] = useState(false);
+  const [activeTab, setActiveTab] = useState<'timeline' | 'characters' | 'clues' | 'validate'>('timeline');
+
+  const handleValidate = async () => {
+    if (!state.generatedStory || !state.generatedPlotPoints) return;
+
+    setIsValidating(true);
+    try {
+      const response = await fetch('/api/ugc/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          story: state.generatedStory,
+          characters: completedCharacters,
+          plotPoints: {
+            plotPoints: state.generatedPlotPoints,
+            minimumPointsToAccuse: minimumPointsToAccuse,
+            perfectScoreThreshold: perfectScoreThreshold,
+          },
+        }),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        setValidationWarnings(result.warnings);
+      } else {
+        console.error('Validation failed:', result.error);
+      }
+    } catch (error) {
+      console.error('Validation error:', error);
+    } finally {
+      setIsValidating(false);
+    }
+  };
 
   const handleCrimeDetailsChange = (field: 'motive' | 'method', value: string) => {
     dispatch({ type: 'UPDATE_CRIME_DETAILS', field, value });
@@ -185,78 +282,157 @@ function ScaffoldCluesStage() {
     );
   }
 
-  // Show generated results
+  // Show generated results with tabbed layout
   if (cluesComplete && generatedPlotPoints) {
+    const tabs = [
+      { id: 'timeline' as const, label: 'Timeline', icon: '📅', count: state.generatedStory?.actualEvents.length },
+      { id: 'characters' as const, label: 'Characters', icon: '👥', count: completedCharacters.length },
+      { id: 'clues' as const, label: 'Clues', icon: '🔎', count: generatedPlotPoints.length },
+      { id: 'validate' as const, label: 'Validate', icon: '✓', count: validationWarnings?.length },
+    ];
+
     return (
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-white mb-3">
+        {/* Header */}
+        <div className="text-center mb-6">
+          <h2 className="text-3xl font-bold text-white mb-2">
             Review Your Mystery
           </h2>
-          <p className="text-slate-400">
-            Review the timeline, character knowledge, and clues before publishing
+          <p className="text-slate-400 text-sm">
+            Check each section before publishing
           </p>
         </div>
 
-        <div className="space-y-8">
-          {/* Story Bible - Timeline, Character Knowledge, Solution */}
-          <StoryBible />
-
-          {/* Divider */}
-          <div className="border-t border-slate-700/50" />
-
-          {/* Clues Section */}
-          <div>
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-white mb-2">
-                Evidence & Clues
-              </h2>
-              <p className="text-slate-400">
-                Players will discover these through interrogation
-              </p>
-            </div>
-
-            {/* Summary */}
-            <ClueSummary
-              plotPoints={generatedPlotPoints}
-              minimumPointsToAccuse={minimumPointsToAccuse}
-              perfectScoreThreshold={perfectScoreThreshold}
-              delay={0}
-            />
-
-            {/* Clue cards */}
-            <div className="space-y-4 mt-6">
-              {generatedPlotPoints.map((pp, index) => (
-                <ClueCard
-                  key={pp.id}
-                  plotPoint={pp}
-                  characters={completedCharacters}
-                  delay={100 + index * 80}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Navigation */}
-          <div
-            className="flex items-center gap-4 pt-6 opacity-0 animate-fade-in-up"
-            style={{ animationDelay: `${100 + generatedPlotPoints.length * 80 + 200}ms`, animationFillMode: 'forwards' }}
-          >
+        {/* Tab Bar */}
+        <div className="flex gap-2 mb-6 p-1 rounded-xl bg-slate-800/50 border border-slate-700/50">
+          {tabs.map((tab) => (
             <button
-              onClick={handleBack}
-              className="px-6 py-3 rounded-xl font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all"
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`
+                flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-all
+                ${activeTab === tab.id
+                  ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                }
+              `}
             >
-              ← Back to Characters
+              <span>{tab.icon}</span>
+              <span className="hidden sm:inline">{tab.label}</span>
+              {tab.count !== undefined && tab.count > 0 && (
+                <span className={`px-1.5 py-0.5 rounded-full text-xs ${
+                  tab.id === 'validate' && validationWarnings && validationWarnings.some(w => w.severity === 'critical')
+                    ? 'bg-red-500/30 text-red-300'
+                    : 'bg-slate-700/50 text-slate-400'
+                }`}>
+                  {tab.count}
+                </span>
+              )}
             </button>
+          ))}
+        </div>
 
-            <button
-              onClick={handleProceed}
-              disabled={!canProceedFromClues}
-              className="flex-1 py-4 px-6 rounded-xl font-semibold text-lg bg-gradient-to-r from-amber-500 via-violet-500 to-pink-500 text-white hover:scale-[1.02] hover:shadow-lg hover:shadow-violet-500/25 active:scale-[0.98] transition-all transform"
-            >
-              Continue to World
-            </button>
-          </div>
+        {/* Tab Content */}
+        <div className="min-h-[400px]">
+          {activeTab === 'timeline' && (
+            <div className="p-4 rounded-xl bg-slate-800/20 border border-slate-700/30">
+              <TimelineSection />
+            </div>
+          )}
+
+          {activeTab === 'characters' && (
+            <div className="p-4 rounded-xl bg-slate-800/20 border border-slate-700/30">
+              <CharacterKnowledgeSection />
+            </div>
+          )}
+
+          {activeTab === 'clues' && (
+            <div className="space-y-6">
+              <ClueSummary
+                plotPoints={generatedPlotPoints}
+                minimumPointsToAccuse={minimumPointsToAccuse}
+                perfectScoreThreshold={perfectScoreThreshold}
+                delay={0}
+              />
+              <div className="space-y-4">
+                {generatedPlotPoints.map((pp, index) => (
+                  <ClueCard
+                    key={pp.id}
+                    plotPoint={pp}
+                    characters={completedCharacters}
+                    delay={0}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'validate' && (
+            <div className="space-y-6">
+              {/* Validate Button */}
+              <div className="flex justify-center">
+                <button
+                  onClick={handleValidate}
+                  disabled={isValidating}
+                  className={`
+                    flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all
+                    ${isValidating
+                      ? 'bg-slate-700/50 text-slate-400 cursor-wait'
+                      : 'bg-violet-500/20 border border-violet-500/30 text-violet-300 hover:bg-violet-500/30 hover:border-violet-500/50'
+                    }
+                  `}
+                >
+                  {isValidating ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+                      Validating...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {validationWarnings ? 'Re-validate' : 'Run Validation'}
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Validation Results */}
+              {validationWarnings && validationWarnings.length > 0 && (
+                <ValidationResults warnings={validationWarnings} />
+              )}
+
+              {validationWarnings && validationWarnings.length === 0 && (
+                <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center">
+                  <span className="text-emerald-300">All checks passed! Your mystery is ready.</span>
+                </div>
+              )}
+
+              {/* Solution Preview */}
+              <div className="p-4 rounded-xl bg-slate-800/20 border border-slate-700/30">
+                <SolutionSection />
+              </div>
+
+              {/* Navigation */}
+              <div className="flex items-center gap-4 pt-4">
+                <button
+                  onClick={handleBack}
+                  className="px-6 py-3 rounded-xl font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all"
+                >
+                  ← Back
+                </button>
+
+                <button
+                  onClick={handleProceed}
+                  disabled={!canProceedFromClues}
+                  className="flex-1 py-4 px-6 rounded-xl font-semibold text-lg bg-gradient-to-r from-amber-500 via-violet-500 to-pink-500 text-white hover:scale-[1.02] hover:shadow-lg hover:shadow-violet-500/25 active:scale-[0.98] transition-all transform"
+                >
+                  Continue to World
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -356,27 +532,6 @@ function ScaffoldCluesStage() {
           />
         </div>
 
-        {/* Characters Summary */}
-        <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/30">
-          <p className="text-sm text-slate-400 mb-2">
-            {completedScaffoldCharacters.length} characters ready for generation:
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {completedScaffoldCharacters.map((c) => (
-              <span
-                key={c.suggestionId}
-                className={`px-3 py-1 rounded-full text-sm ${
-                  c.isCulprit
-                    ? 'bg-red-500/20 text-red-300 border border-red-500/30'
-                    : 'bg-slate-700/50 text-slate-300'
-                }`}
-              >
-                {c.name}
-              </span>
-            ))}
-          </div>
-        </div>
-
         {/* Navigation */}
         <div className="flex items-center gap-4 pt-4">
           <button
@@ -427,6 +582,42 @@ function LegacyCluesStage() {
     cluesGenerating,
     cluesComplete,
   } = state;
+
+  const [validationWarnings, setValidationWarnings] = useState<ValidationWarning[] | null>(null);
+  const [isValidating, setIsValidating] = useState(false);
+  const [activeTab, setActiveTab] = useState<'timeline' | 'characters' | 'clues' | 'validate'>('timeline');
+
+  const handleValidate = async () => {
+    if (!generatedStory || !generatedPlotPoints) return;
+
+    setIsValidating(true);
+    try {
+      const response = await fetch('/api/ugc/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          story: generatedStory,
+          characters: completedCharacters,
+          plotPoints: {
+            plotPoints: generatedPlotPoints,
+            minimumPointsToAccuse,
+            perfectScoreThreshold,
+          },
+        }),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        setValidationWarnings(result.warnings);
+      } else {
+        console.error('Validation failed:', result.error);
+      }
+    } catch (error) {
+      console.error('Validation error:', error);
+    } finally {
+      setIsValidating(false);
+    }
+  };
 
   const handleInputChange = (field: keyof typeof crimeInput, value: string) => {
     dispatch({ type: 'UPDATE_CRIME_INPUT', field, value });
@@ -631,80 +822,161 @@ function LegacyCluesStage() {
     );
   }
 
-  // Show generated results
+  // Show generated results with tabbed layout
+  if (!generatedPlotPoints) {
+    return null;
+  }
+
+  const tabs = [
+    { id: 'timeline' as const, label: 'Timeline', icon: '📅', count: generatedStory?.actualEvents.length },
+    { id: 'characters' as const, label: 'Characters', icon: '👥', count: completedCharacters.length },
+    { id: 'clues' as const, label: 'Clues', icon: '🔎', count: generatedPlotPoints.length },
+    { id: 'validate' as const, label: 'Validate', icon: '✓', count: validationWarnings?.length },
+  ];
+
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-white mb-3">
+      {/* Header */}
+      <div className="text-center mb-6">
+        <h2 className="text-3xl font-bold text-white mb-2">
           Review Your Mystery
         </h2>
-        <p className="text-slate-400">
-          Review the timeline, character knowledge, and clues before publishing
+        <p className="text-slate-400 text-sm">
+          Check each section before publishing
         </p>
       </div>
 
-      {generatedPlotPoints && (
-        <div className="space-y-8">
-          {/* Story Bible - Timeline, Character Knowledge, Solution */}
-          <StoryBible />
+      {/* Tab Bar */}
+      <div className="flex gap-2 mb-6 p-1 rounded-xl bg-slate-800/50 border border-slate-700/50">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`
+              flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-all
+              ${activeTab === tab.id
+                ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30'
+                : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+              }
+            `}
+          >
+            <span>{tab.icon}</span>
+            <span className="hidden sm:inline">{tab.label}</span>
+            {tab.count !== undefined && tab.count > 0 && (
+              <span className={`px-1.5 py-0.5 rounded-full text-xs ${
+                tab.id === 'validate' && validationWarnings && validationWarnings.some(w => w.severity === 'critical')
+                  ? 'bg-red-500/30 text-red-300'
+                  : 'bg-slate-700/50 text-slate-400'
+              }`}>
+                {tab.count}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
 
-          {/* Divider */}
-          <div className="border-t border-slate-700/50" />
+      {/* Tab Content */}
+      <div className="min-h-[400px]">
+        {activeTab === 'timeline' && (
+          <div className="p-4 rounded-xl bg-slate-800/20 border border-slate-700/30">
+            <TimelineSection />
+          </div>
+        )}
 
-          {/* Clues Section */}
-          <div>
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-white mb-2">
-                Evidence & Clues
-              </h2>
-              <p className="text-slate-400">
-                Players will discover these through interrogation
-              </p>
-            </div>
+        {activeTab === 'characters' && (
+          <div className="p-4 rounded-xl bg-slate-800/20 border border-slate-700/30">
+            <CharacterKnowledgeSection />
+          </div>
+        )}
 
-            {/* Summary */}
+        {activeTab === 'clues' && (
+          <div className="space-y-6">
             <ClueSummary
               plotPoints={generatedPlotPoints}
               minimumPointsToAccuse={minimumPointsToAccuse}
               perfectScoreThreshold={perfectScoreThreshold}
               delay={0}
             />
-
-            {/* Clue cards */}
-            <div className="space-y-4 mt-6">
-              {generatedPlotPoints.map((pp, index) => (
+            <div className="space-y-4">
+              {generatedPlotPoints.map((pp) => (
                 <ClueCard
                   key={pp.id}
                   plotPoint={pp}
                   characters={completedCharacters}
-                  delay={100 + index * 80}
+                  delay={0}
                 />
               ))}
             </div>
           </div>
+        )}
 
-          {/* Navigation */}
-          <div
-            className="flex items-center gap-4 pt-6 opacity-0 animate-fade-in-up"
-            style={{ animationDelay: `${100 + generatedPlotPoints.length * 80 + 200}ms`, animationFillMode: 'forwards' }}
-          >
-            <button
-              onClick={handleBack}
-              className="px-6 py-3 rounded-xl font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all"
-            >
-              ← Back to Characters
-            </button>
+        {activeTab === 'validate' && (
+          <div className="space-y-6">
+            {/* Validate Button */}
+            <div className="flex justify-center">
+              <button
+                onClick={handleValidate}
+                disabled={isValidating}
+                className={`
+                  flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all
+                  ${isValidating
+                    ? 'bg-slate-700/50 text-slate-400 cursor-wait'
+                    : 'bg-violet-500/20 border border-violet-500/30 text-violet-300 hover:bg-violet-500/30 hover:border-violet-500/50'
+                  }
+                `}
+              >
+                {isValidating ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+                    Validating...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {validationWarnings ? 'Re-validate' : 'Run Validation'}
+                  </>
+                )}
+              </button>
+            </div>
 
-            <button
-              onClick={handleProceed}
-              disabled={!canProceedFromClues}
-              className="flex-1 py-4 px-6 rounded-xl font-semibold text-lg bg-gradient-to-r from-amber-500 via-violet-500 to-pink-500 text-white hover:scale-[1.02] hover:shadow-lg hover:shadow-violet-500/25 active:scale-[0.98] transition-all transform"
-            >
-              Continue to World
-            </button>
+            {/* Validation Results */}
+            {validationWarnings && validationWarnings.length > 0 && (
+              <ValidationResults warnings={validationWarnings} />
+            )}
+
+            {validationWarnings && validationWarnings.length === 0 && (
+              <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center">
+                <span className="text-emerald-300">All checks passed! Your mystery is ready.</span>
+              </div>
+            )}
+
+            {/* Solution Preview */}
+            <div className="p-4 rounded-xl bg-slate-800/20 border border-slate-700/30">
+              <SolutionSection />
+            </div>
+
+            {/* Navigation */}
+            <div className="flex items-center gap-4 pt-4">
+              <button
+                onClick={handleBack}
+                className="px-6 py-3 rounded-xl font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all"
+              >
+                ← Back
+              </button>
+
+              <button
+                onClick={handleProceed}
+                disabled={!canProceedFromClues}
+                className="flex-1 py-4 px-6 rounded-xl font-semibold text-lg bg-gradient-to-r from-amber-500 via-violet-500 to-pink-500 text-white hover:scale-[1.02] hover:shadow-lg hover:shadow-violet-500/25 active:scale-[0.98] transition-all transform"
+              >
+                Continue to World
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

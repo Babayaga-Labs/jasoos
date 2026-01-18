@@ -74,3 +74,14 @@ export {
 export { ImageClient } from './image-client';
 export type { ImageGenerationOptions, ImageResult } from './image-client';
 export { ImageGenerator } from './image-generator';
+
+// UGC Validation
+export {
+  validateStoryConsistency,
+  validateClueRevealers,
+  validateClueKnowledgeAlignment,
+  validateKnowledgeCoherence,
+  validateSolvability,
+  validateCulpritAlibi,
+} from './ugc-validation';
+export type { ValidationWarning, ValidationResult } from './ugc-validation';

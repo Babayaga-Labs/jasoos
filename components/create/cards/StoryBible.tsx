@@ -3,12 +3,17 @@
 import { useState } from 'react';
 import { useWizard } from '../wizard/WizardContext';
 import type { UGCGeneratedCharacter } from '@/packages/ai/types/ugc-types';
+import type { ValidationWarning } from '@/packages/ai';
+
+interface StoryBibleProps {
+  validationWarnings?: ValidationWarning[] | null;
+}
 
 // ============================================================================
-// Timeline Section
+// Timeline Section (Exported for tabbed view)
 // ============================================================================
 
-function TimelineSection() {
+export function TimelineSection() {
   const { state, dispatch } = useWizard();
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editValue, setEditValue] = useState('');
@@ -179,10 +184,10 @@ function TimelineSection() {
 }
 
 // ============================================================================
-// Character Knowledge Panel
+// Character Knowledge Panel (Exported for tabbed view)
 // ============================================================================
 
-function CharacterKnowledgePanel({ character }: { character: UGCGeneratedCharacter }) {
+export function CharacterKnowledgePanel({ character }: { character: UGCGeneratedCharacter }) {
   const { dispatch } = useWizard();
   const [isExpanded, setIsExpanded] = useState(false);
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -425,10 +430,38 @@ function CharacterKnowledgePanel({ character }: { character: UGCGeneratedCharact
 }
 
 // ============================================================================
+// Character Knowledge Section (Exported wrapper for all characters)
+// ============================================================================
+
+export function CharacterKnowledgeSection() {
+  const { completedCharacters } = useWizard();
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+          <span className="text-xl">👥</span>
+          Character Knowledge
+        </h3>
+        <span className="text-xs text-slate-500">{completedCharacters.length} characters</span>
+      </div>
+      <p className="text-sm text-slate-400">
+        What each character knows for roleplay. Click to expand and edit.
+      </p>
+      <div className="space-y-2">
+        {completedCharacters.map((character) => (
+          <CharacterKnowledgePanel key={character.id} character={character} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
 // Solution Section
 // ============================================================================
 
-function SolutionSection() {
+export function SolutionSection() {
   const { state, dispatch } = useWizard();
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
@@ -515,9 +548,9 @@ function SolutionSection() {
 // Main Story Bible Component
 // ============================================================================
 
-type BibleSection = 'timeline' | 'characters' | 'solution' | 'clues';
+type BibleSection = 'timeline' | 'characters' | 'solution';
 
-export function StoryBible() {
+export function StoryBible({ validationWarnings }: StoryBibleProps) {
   const { state, completedCharacters } = useWizard();
   const [expandedSections, setExpandedSections] = useState<Set<BibleSection>>(new Set(['timeline', 'characters']));
 
@@ -535,7 +568,6 @@ export function StoryBible() {
     { id: 'timeline', title: 'Timeline of Events', icon: '📅', count: state.generatedStory?.actualEvents.length },
     { id: 'characters', title: 'Character Knowledge', icon: '👥', count: completedCharacters.length },
     { id: 'solution', title: 'Solution', icon: '🔍' },
-    { id: 'clues', title: 'Clues & Evidence', icon: '🔎', count: state.generatedPlotPoints?.length },
   ];
 
   return (
@@ -604,34 +636,10 @@ export function StoryBible() {
           </div>
         )}
 
-        {expandedSections.has('clues') && state.generatedPlotPoints && (
-          <div className="p-4 rounded-xl bg-slate-800/20 border border-slate-700/30">
-            <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-3">
-              <span className="text-xl">🔎</span>
-              Clues & Evidence
-            </h3>
-            <p className="text-sm text-slate-400 mb-4">
-              These are shown in the main view above. Click any clue card to edit.
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {(['motive', 'alibi', 'evidence', 'relationship'] as const).map((category) => {
-                const count = state.generatedPlotPoints?.filter(p => p.category === category).length || 0;
-                const points = state.generatedPlotPoints?.filter(p => p.category === category).reduce((sum, p) => sum + p.points, 0) || 0;
-                return (
-                  <div key={category} className="p-3 rounded-lg bg-slate-900/30 border border-slate-700/50">
-                    <p className="text-xs text-slate-500 uppercase">{category}</p>
-                    <p className="text-lg font-semibold text-white">{count} clues</p>
-                    <p className="text-xs text-slate-400">{points} points</p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Warnings section */}
-      <WarningsSection />
+      <WarningsSection validationWarnings={validationWarnings} />
     </div>
   );
 }
@@ -640,26 +648,30 @@ export function StoryBible() {
 // Warnings Section - Flag potential issues
 // ============================================================================
 
-function WarningsSection() {
-  const { state, completedCharacters } = useWizard();
-  const warnings: { type: 'error' | 'warning'; message: string }[] = [];
+interface WarningSectionProps {
+  validationWarnings?: ValidationWarning[] | null;
+}
 
-  // Check for characters with empty knowledge
+function WarningsSection({ validationWarnings }: WarningSectionProps) {
+  const { state, completedCharacters } = useWizard();
+  const localWarnings: { type: 'error' | 'warning'; message: string }[] = [];
+
+  // Check for characters with empty knowledge (basic local checks)
   completedCharacters.forEach((char) => {
     if (!char.knowledge.knowsAboutCrime) {
-      warnings.push({
+      localWarnings.push({
         type: 'warning',
         message: `${char.name} has no "knowsAboutCrime" - they may feel hollow in roleplay`,
       });
     }
     if (!char.knowledge.alibi) {
-      warnings.push({
+      localWarnings.push({
         type: 'warning',
         message: `${char.name} has no alibi defined`,
       });
     }
     if (char.knowledge.knowsAboutOthers.length === 0) {
-      warnings.push({
+      localWarnings.push({
         type: 'warning',
         message: `${char.name} knows nothing about other characters`,
       });
@@ -669,7 +681,7 @@ function WarningsSection() {
   // Check if guilty character's alibi seems too solid
   const guiltyChar = completedCharacters.find((c) => c.isGuilty);
   if (guiltyChar && guiltyChar.knowledge.alibi && !guiltyChar.knowledge.alibi.toLowerCase().includes('claim')) {
-    warnings.push({
+    localWarnings.push({
       type: 'warning',
       message: `${guiltyChar.name}'s alibi may be too solid - it should have holes players can discover`,
     });
@@ -678,34 +690,99 @@ function WarningsSection() {
   // Check clues are assigned to characters who know them
   state.generatedPlotPoints?.forEach((clue) => {
     if (clue.revealedBy.length === 0) {
-      warnings.push({
+      localWarnings.push({
         type: 'error',
         message: `Clue "${clue.description.slice(0, 40)}..." has no character assigned to reveal it`,
       });
     }
   });
 
-  if (warnings.length === 0) return null;
+  // If no validation has been run and no local warnings, show nothing
+  const hasApiWarnings = validationWarnings && validationWarnings.length > 0;
+  const hasLocalWarnings = localWarnings.length > 0;
+
+  if (!hasApiWarnings && !hasLocalWarnings) return null;
+
+  // Determine the severity color for API warnings
+  const getSeverityIcon = (severity: string) => {
+    switch (severity) {
+      case 'critical': return '❌';
+      case 'warning': return '⚠️';
+      case 'info': return 'ℹ️';
+      default: return '⚠️';
+    }
+  };
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'critical': return 'text-red-300';
+      case 'warning': return 'text-amber-200';
+      case 'info': return 'text-blue-200';
+      default: return 'text-amber-200';
+    }
+  };
+
+  // Count by severity
+  const criticalCount = validationWarnings?.filter(w => w.severity === 'critical').length || 0;
+  const warningCount = validationWarnings?.filter(w => w.severity === 'warning').length || 0;
+  const infoCount = validationWarnings?.filter(w => w.severity === 'info').length || 0;
 
   return (
-    <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
-      <h3 className="text-sm font-semibold text-amber-300 flex items-center gap-2 mb-3">
-        <span>⚠️</span>
-        Potential Issues ({warnings.length})
-      </h3>
-      <div className="space-y-2">
-        {warnings.map((warning, index) => (
-          <div
-            key={index}
-            className={`flex items-start gap-2 text-sm ${
-              warning.type === 'error' ? 'text-red-300' : 'text-amber-200'
-            }`}
-          >
-            <span>{warning.type === 'error' ? '❌' : '⚠️'}</span>
-            <span>{warning.message}</span>
+    <div className="space-y-4">
+      {/* API Validation Results */}
+      {hasApiWarnings && (
+        <div className={`p-4 rounded-xl ${criticalCount > 0 ? 'bg-red-500/10 border border-red-500/30' : 'bg-amber-500/10 border border-amber-500/30'}`}>
+          <h3 className={`text-sm font-semibold flex items-center gap-2 mb-3 ${criticalCount > 0 ? 'text-red-300' : 'text-amber-300'}`}>
+            <span>🔍</span>
+            Validation Results
+            <span className="flex gap-2 ml-2">
+              {criticalCount > 0 && <span className="px-1.5 py-0.5 rounded bg-red-500/30 text-xs">{criticalCount} critical</span>}
+              {warningCount > 0 && <span className="px-1.5 py-0.5 rounded bg-amber-500/30 text-xs">{warningCount} warnings</span>}
+              {infoCount > 0 && <span className="px-1.5 py-0.5 rounded bg-blue-500/30 text-xs">{infoCount} info</span>}
+            </span>
+          </h3>
+          <div className="space-y-2">
+            {validationWarnings!.map((warning, index) => (
+              <div key={index} className={`flex items-start gap-2 text-sm ${getSeverityColor(warning.severity)}`}>
+                <span className="flex-shrink-0">{getSeverityIcon(warning.severity)}</span>
+                <div className="flex-1">
+                  <span>{warning.message}</span>
+                  {warning.suggestion && (
+                    <p className="text-xs text-slate-400 mt-0.5">💡 {warning.suggestion}</p>
+                  )}
+                </div>
+                <span className="px-1.5 py-0.5 rounded bg-slate-700/50 text-xs text-slate-400 capitalize">
+                  {warning.category}
+                </span>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      )}
+
+      {/* Local Quick Checks (if no API validation yet) */}
+      {!hasApiWarnings && hasLocalWarnings && (
+        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
+          <h3 className="text-sm font-semibold text-amber-300 flex items-center gap-2 mb-3">
+            <span>⚠️</span>
+            Quick Checks ({localWarnings.length})
+            <span className="text-xs text-slate-400 font-normal">Click &quot;Validate&quot; for full analysis</span>
+          </h3>
+          <div className="space-y-2">
+            {localWarnings.map((warning, index) => (
+              <div
+                key={index}
+                className={`flex items-start gap-2 text-sm ${
+                  warning.type === 'error' ? 'text-red-300' : 'text-amber-200'
+                }`}
+              >
+                <span>{warning.type === 'error' ? '❌' : '⚠️'}</span>
+                <span>{warning.message}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

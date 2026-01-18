@@ -131,6 +131,8 @@ type WizardAction =
   | { type: 'COMPLETE_SCAFFOLD_GENERATION'; scaffold: UGCStoryScaffold }
   | { type: 'UPDATE_SCAFFOLD'; updates: Partial<UGCStoryScaffold> }
   | { type: 'UPDATE_SCAFFOLD_CHARACTER'; suggestionId: string; updates: Partial<ScaffoldCharacterItem> }
+  | { type: 'ADD_SCAFFOLD_CHARACTER' }
+  | { type: 'DELETE_SCAFFOLD_CHARACTER'; suggestionId: string }
   | { type: 'SET_CULPRIT'; suggestionId: string }
   | { type: 'UPDATE_CRIME_DETAILS'; field: 'motive' | 'method'; value: string }
   | { type: 'START_FINAL_GENERATION' }
@@ -375,16 +377,43 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
             ? {
                 ...c,
                 ...action.updates,
-                // Auto-calculate isComplete
+                // Auto-calculate isComplete (only name is required - engine handles empty fields)
                 isComplete: Boolean(
-                  (action.updates.name ?? c.name)?.trim() &&
-                  (action.updates.role ?? c.role)?.trim() &&
-                  (action.updates.appearance ?? c.appearance)?.trim() &&
-                  ((action.updates.personalityTraits ?? c.personalityTraits)?.length > 0) &&
-                  (action.updates.secret ?? c.secret)?.trim()
+                  (action.updates.name ?? c.name)?.trim()
                 ),
               }
             : c
+        ),
+      };
+
+    case 'ADD_SCAFFOLD_CHARACTER': {
+      const newId = `custom_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+      const newChar: ScaffoldCharacterItem = {
+        suggestionId: newId,
+        suggestedName: '',
+        suggestedRole: '',
+        connectionToCrime: 'Custom character',
+        potentialMotive: '',
+        name: '',
+        role: '',
+        appearance: '',
+        personalityTraits: [],
+        secret: '',
+        isCulprit: false,
+        uploadedImageUrl: null,
+        isComplete: false,
+      };
+      return {
+        ...state,
+        scaffoldCharacters: [...state.scaffoldCharacters, newChar],
+      };
+    }
+
+    case 'DELETE_SCAFFOLD_CHARACTER':
+      return {
+        ...state,
+        scaffoldCharacters: state.scaffoldCharacters.filter(
+          c => c.suggestionId !== action.suggestionId
         ),
       };
 
