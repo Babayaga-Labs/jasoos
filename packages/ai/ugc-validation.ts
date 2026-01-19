@@ -13,7 +13,26 @@ import type {
   UGCGeneratedPlotPoint,
   UGCGeneratedStory,
   UGCGeneratedData,
+  // New types for foundation-based flow
+  UGCGeneratedClue,
+  UGCSolution,
 } from './types/ugc-types';
+
+/**
+ * Helper to safely get alibi as a string (LLM might return object)
+ */
+function getAlibiString(alibi: unknown): string {
+  if (typeof alibi === 'string') return alibi;
+  if (alibi && typeof alibi === 'object') {
+    // Handle cases where LLM returns { claim: "...", isTrue: false }
+    if ('claim' in alibi && typeof (alibi as Record<string, unknown>).claim === 'string') {
+      return (alibi as Record<string, unknown>).claim as string;
+    }
+    // Try to stringify for any other object structure
+    return JSON.stringify(alibi);
+  }
+  return '';
+}
 
 // ============================================================================
 // Types
@@ -112,7 +131,7 @@ export function validateClueKnowledgeAlignment(
       const knowledgeText = [
         character.knowledge?.knowsAboutCrime || '',
         ...(character.knowledge?.knowsAboutOthers || []),
-        character.knowledge?.alibi || '',
+        getAlibiString(character.knowledge?.alibi),
       ].join(' ').toLowerCase();
 
       const hasRelatedKnowledge = clueKeywords.some((keyword) =>
@@ -162,7 +181,8 @@ export function validateKnowledgeCoherence(
       });
     }
 
-    if (!character.knowledge?.alibi || character.knowledge.alibi.trim() === '') {
+    const alibiStr = getAlibiString(character.knowledge?.alibi);
+    if (!alibiStr || alibiStr.trim() === '') {
       warnings.push({
         category: 'knowledge',
         severity: 'warning',
@@ -183,11 +203,11 @@ export function validateKnowledgeCoherence(
     }
 
     // Check if alibi contradicts timeline (for non-guilty)
-    if (!character.isGuilty && character.knowledge?.alibi && timeline.length > 0) {
+    if (!character.isGuilty && alibiStr && timeline.length > 0) {
       const alibiMentionsOthers = characters.some(
         (other) =>
           other.id !== character.id &&
-          character.knowledge.alibi.toLowerCase().includes(other.name.toLowerCase())
+          alibiStr.toLowerCase().includes(other.name.toLowerCase())
       );
 
       if (!alibiMentionsOthers) {
@@ -332,7 +352,7 @@ export function validateCulpritAlibi(
     return warnings;
   }
 
-  const alibi = culprit.knowledge?.alibi || '';
+  const alibi = getAlibiString(culprit.knowledge?.alibi);
 
   if (!alibi || alibi.trim() === '') {
     warnings.push({
@@ -360,7 +380,7 @@ export function validateCulpritAlibi(
   const alibiMentionsLocation = extractLocations(alibi);
   const otherCharactersAtLocations = characters.filter((c) => {
     if (c.id === culprit.id || c.isVictim) return false;
-    const theirAlibi = c.knowledge?.alibi || '';
+    const theirAlibi = getAlibiString(c.knowledge?.alibi);
     return alibiMentionsLocation.some((loc) => theirAlibi.toLowerCase().includes(loc.toLowerCase()));
   });
 
@@ -480,4 +500,261 @@ function extractLocations(text: string): string[] {
   }
 
   return [...new Set(locations)];
+}
+
+// ============================================================================
+// New Validation Functions (Foundation-based flow - UGC Pipeline Redesign v2)
+// ============================================================================
+
+/**
+ * Simplified validation for the new clue format (without categories)
+ */
+export interface FoundationValidationInput {
+  clues: UGCGeneratedClue[];
+  characters: UGCGeneratedCharacter[];
+  timeline: string[];
+  solution: UGCSolution;
+  minimumPointsToAccuse: number;
+  perfectScoreThreshold: number;
+}
+
+/**
+ * Validates clue revealers for the new UGCGeneratedClue format
+ */
+export function validateNewClueRevealers(
+  clues: UGCGeneratedClue[],
+  characters: UGCGeneratedCharacter[]
+): ValidationWarning[] {
+  const warnings: ValidationWarning[] = [];
+  const characterIds = new Set(characters.map((c) => c.id));
+  const victimIds = new Set(characters.filter((c) => c.isVictim).map((c) => c.id));
+
+  for (const clue of clues) {
+    // Check for empty revealedBy
+    if (!clue.revealedBy || clue.revealedBy.length === 0) {
+      warnings.push({
+        category: 'clue',
+        severity: 'warning',
+        message: `Clue "${clue.description.substring(0, 50)}..." has no one to reveal it`,
+        suggestion: 'Assign at least one character who can reveal this clue',
+        clueId: clue.id,
+      });
+      continue;
+    }
+
+    for (const revealerId of clue.revealedBy) {
+      // Check if character exists
+      if (!characterIds.has(revealerId)) {
+        warnings.push({
+          category: 'clue',
+          severity: 'critical',
+          message: `Clue references non-existent character`,
+          suggestion: 'Remove this character from revealers or check character IDs',
+          clueId: clue.id,
+          characterId: revealerId,
+        });
+      }
+      // Check if character is a victim
+      else if (victimIds.has(revealerId)) {
+        const victimName = characters.find(c => c.id === revealerId)?.name || 'Unknown';
+        warnings.push({
+          category: 'clue',
+          severity: 'warning',
+          message: `Clue assigned to victim "${victimName}" who cannot be interrogated`,
+          suggestion: 'Reassign this clue to a living character',
+          clueId: clue.id,
+          characterId: revealerId,
+        });
+      }
+    }
+  }
+
+  return warnings;
+}
+
+/**
+ * Validates solvability for new clue format (without categories)
+ */
+export function validateNewSolvability(
+  input: FoundationValidationInput
+): ValidationWarning[] {
+  const warnings: ValidationWarning[] = [];
+  const { clues, solution, characters, minimumPointsToAccuse, perfectScoreThreshold } = input;
+
+  let totalPoints = 0;
+  let culpritPoints = 0;
+  const culpritCharacter = characters.find((c) => c.isGuilty);
+  const culpritName = culpritCharacter?.name.toLowerCase() || solution.culprit.toLowerCase();
+
+  for (const clue of clues) {
+    totalPoints += clue.points;
+
+    // Check if clue points to culprit
+    const clueText = clue.description.toLowerCase();
+    if (clueText.includes(culpritName) || clueText.includes('guilty') || clueText.includes('culprit')) {
+      culpritPoints += clue.points;
+    }
+  }
+
+  // Check total points vs thresholds
+  if (totalPoints < perfectScoreThreshold) {
+    warnings.push({
+      category: 'solvability',
+      severity: 'info',
+      message: `Total points (${totalPoints}) is less than perfect score (${perfectScoreThreshold})`,
+      suggestion: 'Add more clues or increase point values for a more rewarding experience',
+    });
+  }
+
+  if (totalPoints < minimumPointsToAccuse) {
+    warnings.push({
+      category: 'solvability',
+      severity: 'critical',
+      message: `Total points (${totalPoints}) is less than minimum to accuse (${minimumPointsToAccuse})`,
+      suggestion: 'Add more clues - players cannot currently gather enough evidence',
+    });
+  }
+
+  // Check if culprit can be identified
+  if (culpritPoints === 0) {
+    warnings.push({
+      category: 'solvability',
+      severity: 'warning',
+      message: 'No clues directly mention the culprit',
+      suggestion: 'Ensure some clues mention or implicate the guilty character',
+    });
+  }
+
+  // Check minimum clue count
+  if (clues.length < 3) {
+    warnings.push({
+      category: 'solvability',
+      severity: 'warning',
+      message: `Only ${clues.length} clues - mystery may be too short`,
+      suggestion: 'Consider adding more clues for a richer experience',
+    });
+  }
+
+  return warnings;
+}
+
+/**
+ * Validates culprit exists and has proper setup
+ */
+export function validateNewCulprit(
+  characters: UGCGeneratedCharacter[],
+  solution: UGCSolution
+): ValidationWarning[] {
+  const warnings: ValidationWarning[] = [];
+  const culprit = characters.find((c) => c.isGuilty);
+
+  if (!culprit) {
+    warnings.push({
+      category: 'alibi',
+      severity: 'critical',
+      message: 'No culprit found in characters',
+      suggestion: 'Mark one character as guilty',
+    });
+    return warnings;
+  }
+
+  // Check culprit has alibi
+  const alibi = getAlibiString(culprit.knowledge?.alibi);
+  if (!alibi || alibi.trim() === '') {
+    warnings.push({
+      category: 'alibi',
+      severity: 'warning',
+      message: `Culprit ${culprit.name} has no alibi`,
+      suggestion: 'Add a false alibi that can be broken through interrogation',
+      characterId: culprit.id,
+    });
+  }
+
+  // Check solution fields
+  if (!solution.motive?.trim()) {
+    warnings.push({
+      category: 'solvability',
+      severity: 'warning',
+      message: 'Solution is missing motive',
+      suggestion: 'Add why the culprit committed the crime',
+    });
+  }
+
+  if (!solution.method?.trim()) {
+    warnings.push({
+      category: 'solvability',
+      severity: 'warning',
+      message: 'Solution is missing method',
+      suggestion: 'Add how the culprit committed the crime',
+    });
+  }
+
+  return warnings;
+}
+
+/**
+ * Validates timeline has enough events
+ */
+export function validateNewTimeline(timeline: string[]): ValidationWarning[] {
+  const warnings: ValidationWarning[] = [];
+
+  if (timeline.length === 0) {
+    warnings.push({
+      category: 'timeline',
+      severity: 'critical',
+      message: 'Timeline is empty',
+      suggestion: 'Add events to the timeline',
+    });
+  } else if (timeline.length < 3) {
+    warnings.push({
+      category: 'timeline',
+      severity: 'info',
+      message: `Timeline only has ${timeline.length} events`,
+      suggestion: 'Consider adding more events for context',
+    });
+  }
+
+  // Check for empty events
+  const emptyEvents = timeline.filter(e => !e.trim()).length;
+  if (emptyEvents > 0) {
+    warnings.push({
+      category: 'timeline',
+      severity: 'warning',
+      message: `${emptyEvents} timeline events are empty`,
+      suggestion: 'Fill in or remove empty timeline events',
+    });
+  }
+
+  return warnings;
+}
+
+/**
+ * Master validation for new foundation-based flow
+ */
+export function validateFoundationStory(input: FoundationValidationInput): ValidationResult {
+  const warnings: ValidationWarning[] = [];
+
+  // Clue validation
+  warnings.push(...validateNewClueRevealers(input.clues, input.characters));
+
+  // Solvability
+  warnings.push(...validateNewSolvability(input));
+
+  // Culprit validation
+  warnings.push(...validateNewCulprit(input.characters, input.solution));
+
+  // Timeline validation
+  warnings.push(...validateNewTimeline(input.timeline));
+
+  // Knowledge coherence (reuse existing)
+  warnings.push(...validateKnowledgeCoherence(input.characters, input.timeline));
+
+  // Sort by severity
+  const severityOrder = { critical: 0, warning: 1, info: 2 };
+  warnings.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity]);
+
+  return {
+    warnings,
+    isPublishable: true, // Never block publishing
+  };
 }

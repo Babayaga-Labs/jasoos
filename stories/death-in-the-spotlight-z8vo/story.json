@@ -1,0 +1,37 @@
+{
+  "id": "death-in-the-spotlight-z8vo",
+  "title": "Death in the Spotlight",
+  "synopsis": "Rising supermodel Jade Chen is found dead during a high-profile Victoria's Secret campaign shoot, her body discovered in her private dressing room between takes. With millions of dollars and reputations at stake, all eyes turn to her three roommates - each with unique access to her life and potential reasons to want her gone.",
+  "crimeType": "murder",
+  "setting": {
+    "location": "Luminous Studios, Manhattan",
+    "timePeriod": "modern",
+    "atmosphere": "glamorous yet cutthroat, where beauty masks darkness"
+  },
+  "victimParagraph": "Jade Chen was the fashion industry's newest sensation, landing the coveted Victoria's Secret contract after just two years in the business. Known for her philanthropic work with Asian youth organizations and her meteoric rise from humble beginnings, she seemed to have it all. But beneath her picture-perfect Instagram feed and dazzling smile, Jade was preparing to make a controversial announcement that would shake the fashion industry to its core.",
+  "sceneImageUrl": "https://v3b.fal.media/files/b/0a8af537/Np_aStFADN0nLRxs6eltH.jpg",
+  "timeline": [
+    "8:30 AM - Morning meeting where Olivia makes agitated comments about Asian representation, witnessed by Sofia and Natasha who were seated nearby",
+    "9:15 AM - Jade shows Sofia draft of exposé article during coffee break, seeking feedback on section about industry discrimination",
+    "10:30 AM - Olivia and Jade have loud argument about industry practices in makeup room, overheard by Natasha who was organizing supplies",
+    "11:45 AM - Marcus and Sofia discuss Jade's consistent habit of using her distinctive water bottle, noting Olivia's recent bitter comments about losing contracts",
+    "12:00 PM - Lunch break begins; Natasha sees Olivia enter break room alone despite claiming she had makeup test",
+    "12:15 PM - Natasha checks makeup department schedule for afternoon tests, finding none scheduled",
+    "12:30 PM - Olivia poisons Jade's water bottle while alone in break room",
+    "1:00 PM - Lunch break ends; Sofia and Marcus return from nearby café",
+    "1:15 PM - Natasha observes Olivia intently watching Jade drink from water bottle during afternoon shoot setup",
+    "1:30 PM - Jade begins showing symptoms during photo shoot",
+    "1:45 PM - Jade collapses; emergency services called"
+  ],
+  "solution": {
+    "culprit": "Olivia Zhang",
+    "method": "During lunch break, Olivia slipped concentrated cyanide into Jade's personal water bottle, knowing she always drinks it during afternoon shoots. She obtained the poison through black market fashion industry contacts, leaving no trace.",
+    "motive": "Professional jealousy intensified by racial dynamics - Olivia resented being constantly compared to Jade and overlooked for contracts. When she discovered Jade's planned industry exposé would feature her own failed auditions as examples of Asian stereotyping, she decided to eliminate her rival.",
+    "explanation": "Olivia Zhang, driven by deep-seated jealousy and fear of exposure, poisoned Jade Chen's water bottle during an unobserved window at lunch. The timing of events shows only Olivia had both motive and opportunity, with her pointed comments about 'authentic representation' revealing her resentment. The discovery of Jade's draft exposé provides the final piece - Olivia killed to protect both her career and her dignity from what she saw as another humiliation by her more successful peer."
+  },
+  "scoring": {
+    "minimumPointsToAccuse": 100,
+    "perfectScoreThreshold": 180
+  },
+  "createdAt": "2026-01-19T02:17:19.229Z"
+}

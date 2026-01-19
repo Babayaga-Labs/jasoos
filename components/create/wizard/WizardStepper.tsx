@@ -5,35 +5,40 @@ import { useWizard, type WizardStage } from './WizardContext';
 interface StepConfig {
   id: WizardStage;
   label: string;
-  icon: string;
-  activeLabel: string;
+  shortLabel: string;
 }
 
 const STEPS: StepConfig[] = [
-  { id: 'story', label: 'Story', icon: '📖', activeLabel: 'Crafting your story...' },
-  { id: 'characters', label: 'Characters', icon: '🎭', activeLabel: 'Bringing characters to life...' },
-  { id: 'clues', label: 'Clues', icon: '🔍', activeLabel: 'Planting the clues...' },
-  { id: 'world', label: 'World', icon: '🌍', activeLabel: 'Building your world...' },
+  { id: 'prompt', label: 'Your Idea', shortLabel: 'Idea' },
+  { id: 'foundation', label: 'Mystery Foundation', shortLabel: 'Foundation' },
+  { id: 'characters', label: 'Characters', shortLabel: 'Characters' },
+  { id: 'clues', label: 'Clues & Publish', shortLabel: 'Clues' },
 ];
 
-const STAGE_ORDER: WizardStage[] = ['story', 'characters', 'clues', 'world'];
+const STAGE_ORDER: WizardStage[] = ['prompt', 'foundation', 'characters', 'clues'];
 
 export function WizardStepper() {
-  const { state, dispatch, canProceedFromStory, canProceedFromCharacters, canProceedFromClues } = useWizard();
+  const { state, dispatch, canProceedFromFoundation, canProceedFromCharacters } = useWizard();
+
   const currentIndex = STAGE_ORDER.indexOf(state.currentStage);
 
   const isStageAccessible = (stage: WizardStage): boolean => {
     const targetIndex = STAGE_ORDER.indexOf(stage);
-    if (targetIndex <= currentIndex) return true;
 
-    // Can only go forward if previous stage is complete
+    // Can always go back
+    if (targetIndex < currentIndex) return true;
+
+    // Current stage is always accessible
+    if (targetIndex === currentIndex) return true;
+
+    // Forward navigation rules
     switch (stage) {
+      case 'foundation':
+        return state.foundation !== null; // Can go to foundation after scaffold is generated
       case 'characters':
-        return canProceedFromStory;
+        return state.hasGeneratedOnce; // Can go to characters after generation
       case 'clues':
-        return canProceedFromStory && canProceedFromCharacters;
-      case 'world':
-        return canProceedFromStory && canProceedFromCharacters && canProceedFromClues;
+        return state.hasGeneratedOnce && state.generatedCharacters.length >= 3;
       default:
         return true;
     }
@@ -41,14 +46,14 @@ export function WizardStepper() {
 
   const isStageComplete = (stage: WizardStage): boolean => {
     switch (stage) {
-      case 'story':
-        return state.storyComplete;
+      case 'prompt':
+        return state.foundation !== null;
+      case 'foundation':
+        return canProceedFromFoundation && state.hasGeneratedOnce;
       case 'characters':
-        return state.characters.filter(c => c.isComplete).length >= 3;
+        return canProceedFromCharacters && state.clues.length > 0;
       case 'clues':
-        return state.cluesComplete;
-      case 'world':
-        return state.worldComplete;
+        return state.storyId !== null;
     }
   };
 
@@ -89,16 +94,16 @@ export function WizardStepper() {
                   ${isAccessible ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}
                 `}
               >
-                {/* Icon circle */}
+                {/* Step number circle */}
                 <div
                   className={`
-                    relative w-12 h-12 rounded-full flex items-center justify-center text-2xl
+                    relative w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold
                     transition-all duration-300 transform
                     ${isActive
-                      ? 'bg-gradient-to-br from-amber-400 via-violet-500 to-pink-500 scale-110 shadow-lg shadow-violet-500/30'
+                      ? 'bg-gradient-to-br from-amber-400 via-violet-500 to-pink-500 scale-110 shadow-lg shadow-violet-500/30 text-white'
                       : isComplete || isPast
-                        ? 'bg-gradient-to-br from-emerald-400 to-teal-500 shadow-md shadow-emerald-500/20'
-                        : 'bg-slate-700/80 border-2 border-slate-600'
+                        ? 'bg-gradient-to-br from-emerald-400 to-teal-500 shadow-md shadow-emerald-500/20 text-white'
+                        : 'bg-slate-700/80 border-2 border-slate-600 text-slate-400'
                     }
                     ${isAccessible && !isActive ? 'group-hover:scale-105 group-hover:border-violet-400' : ''}
                   `}
@@ -106,7 +111,7 @@ export function WizardStepper() {
                   {isComplete && !isActive ? (
                     <span className="text-white text-lg">✓</span>
                   ) : (
-                    <span className={isActive || isPast ? '' : 'opacity-60'}>{step.icon}</span>
+                    <span>{index + 1}</span>
                   )}
 
                   {/* Pulse animation for active */}
@@ -118,7 +123,7 @@ export function WizardStepper() {
                 {/* Label */}
                 <span
                   className={`
-                    text-sm font-medium transition-colors duration-300
+                    text-sm font-medium transition-colors duration-300 hidden sm:block
                     ${isActive
                       ? 'text-white'
                       : isComplete || isPast
@@ -128,6 +133,19 @@ export function WizardStepper() {
                   `}
                 >
                   {step.label}
+                </span>
+                <span
+                  className={`
+                    text-sm font-medium transition-colors duration-300 sm:hidden
+                    ${isActive
+                      ? 'text-white'
+                      : isComplete || isPast
+                        ? 'text-emerald-400'
+                        : 'text-slate-500'
+                    }
+                  `}
+                >
+                  {step.shortLabel}
                 </span>
               </button>
             );

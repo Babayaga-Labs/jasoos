@@ -1,0 +1,133 @@
+[
+  {
+    "id": "security_system_vulnerability",
+    "description": "Dr. Winters recently discovered a manual override flaw in Lucy's window system using a specific type of metal, like a spoon",
+    "points": 25,
+    "revealedBy": [
+      "char_1"
+    ],
+    "detectionHints": [
+      "security system",
+      "windows",
+      "weaknesses",
+      "override",
+      "flaws"
+    ]
+  },
+  {
+    "id": "corruption_investigation",
+    "description": "Lucy was gathering evidence of financial irregularities and planned to present findings to the board",
+    "points": 30,
+    "revealedBy": [
+      "char_3"
+    ],
+    "detectionHints": [
+      "investigation",
+      "corruption",
+      "board meeting",
+      "Lucy's work",
+      "documents"
+    ]
+  },
+  {
+    "id": "grace_financial_records",
+    "description": "Grace had been secretly withdrawing large sums from company accounts over the past year",
+    "points": 25,
+    "revealedBy": [
+      "char_2"
+    ],
+    "detectionHints": [
+      "money",
+      "accounts",
+      "Grace's finances",
+      "suspicious activity"
+    ]
+  },
+  {
+    "id": "medication_access",
+    "description": "Grace keeps prescription sedatives in her personal bathroom cabinet",
+    "points": 20,
+    "revealedBy": [
+      "char_2",
+      "char_5"
+    ],
+    "detectionHints": [
+      "medication",
+      "prescriptions",
+      "personal items",
+      "bathroom"
+    ]
+  },
+  {
+    "id": "kitchen_interference",
+    "description": "Grace insisted on personally handling Lucy's special dietary meal, which was unusual",
+    "points": 15,
+    "revealedBy": [
+      "char_3",
+      "char_5"
+    ],
+    "detectionHints": [
+      "dinner",
+      "food",
+      "special meal",
+      "kitchen",
+      "that night"
+    ]
+  },
+  {
+    "id": "petrov_announcement_setup",
+    "description": "Grace specifically asked Petrov to make his announcement at exactly 8:35 PM",
+    "points": 20,
+    "revealedBy": [
+      "char_4"
+    ],
+    "detectionHints": [
+      "announcement",
+      "timing",
+      "Grace's request",
+      "distraction"
+    ]
+  },
+  {
+    "id": "grace_eavesdropping",
+    "description": "Grace was seen lurking outside security meetings multiple times in the past week",
+    "points": 15,
+    "revealedBy": [
+      "char_1"
+    ],
+    "detectionHints": [
+      "suspicious behavior",
+      "security meetings",
+      "Grace's whereabouts"
+    ]
+  },
+  {
+    "id": "false_alibi_hole",
+    "description": "Grace claims she was in the ballroom during 8:35-8:40, but security footage shows her in the east corridor",
+    "points": 25,
+    "revealedBy": [
+      "char_1"
+    ],
+    "detectionHints": [
+      "alibi",
+      "security footage",
+      "Grace's location",
+      "that night"
+    ]
+  },
+  {
+    "id": "power_struggle",
+    "description": "Grace had been increasingly hostile about Lucy's growing influence in company decisions",
+    "points": 15,
+    "revealedBy": [
+      "char_2",
+      "char_3"
+    ],
+    "detectionHints": [
+      "relationship",
+      "tension",
+      "company politics",
+      "Grace and Lucy"
+    ]
+  }
+]

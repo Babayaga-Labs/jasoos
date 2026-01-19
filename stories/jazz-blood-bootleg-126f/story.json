@@ -1,0 +1,38 @@
+{
+  "id": "jazz-blood-bootleg-126f",
+  "title": "Jazz, Blood & Bootleg",
+  "synopsis": "On a rain-slicked night at Chicago's most exclusive speakeasy, a prominent banker is found dead in a private booth. As Prohibition rages and corruption runs deep, someone in the city's glittering underworld knows more than they're telling.",
+  "crimeType": "murder",
+  "setting": {
+    "location": "The Gilded Peacock Speakeasy",
+    "timePeriod": "1924",
+    "atmosphere": "opulent yet seedy, where high society mingles with the criminal underworld"
+  },
+  "victimParagraph": "Harrison Whitmore was the very image of Chicago success - a respected banker with political connections and a finger in every profitable pie. But beneath his polished exterior lay a web of dangerous loans, secret partnerships, and blackmail material on half of Chicago's elite. His death threatens to unravel not just his empire, but the reputations of countless powerful figures.",
+  "sceneImageUrl": "https://v3b.fal.media/files/b/0a8af370/N1YSbS8WJnzOj2T9mCI6O.jpg",
+  "timeline": [
+    "7:15 PM - Gloria Blackwood arrives early for her performance, sees Harrison Whitmore arguing with Charles Wellington in the office about financial discrepancies",
+    "7:45 PM - Vincent Romano delivers his weekly liquor shipment, notices Eleanor Whitmore watching her husband through the office window",
+    "8:00 PM - Ted Murphy arrives to collect his weekly payoff from Harrison, sees Eleanor leaving the maintenance closet looking flustered",
+    "8:30 PM - Gloria begins her first set of the evening, Harrison watches intently from his usual table",
+    "9:15 PM - Eleanor confronts Harrison during Gloria's break, witnesses observe heated argument about divorce papers",
+    "9:45 PM - Charles Wellington meets Harrison in the office to discuss partnership dissolution",
+    "10:00 PM - Eleanor seen entering maintenance closet again, emerges with screwdriver",
+    "10:15 PM - Harrison leaves office, heads to private back room",
+    "10:20 PM - Eleanor follows Harrison to back room, no witnesses for next 10 minutes",
+    "10:30 PM - Vincent Romano hears muffled crash from back room while checking his stored liquor",
+    "10:45 PM - Ted Murphy discovers Harrison's body while doing his rounds",
+    "11:00 PM - Gloria spots Eleanor disposing of bloody screwdriver in alley dumpster during her smoke break"
+  ],
+  "solution": {
+    "culprit": "Eleanor Whitmore",
+    "method": "Eleanor took a screwdriver from the maintenance closet, followed Harrison to the private back room where he often met Gloria, and stabbed him multiple times in the chest. She disposed of the weapon in the alley dumpster, not realizing Gloria was taking her break there.",
+    "motive": "Eleanor discovered Harrison was planning to divorce her for Gloria Blackwood, which would leave Eleanor socially and financially ruined. She also found evidence that he had been manipulating their prenuptial agreement to ensure she would receive nothing.",
+    "explanation": "Eleanor Whitmore's movements throughout the evening show clear premeditation, from her initial discovery of the divorce plans to her strategic acquisition of the murder weapon. Her opportunity window aligns perfectly with the estimated time of death, and Gloria's witness account of the weapon disposal provides crucial physical evidence. The motive became clear when Charles Wellington revealed Harrison's plans to dissolve business partnerships in preparation for the divorce."
+  },
+  "scoring": {
+    "minimumPointsToAccuse": 100,
+    "perfectScoreThreshold": 175
+  },
+  "createdAt": "2026-01-19T01:01:28.590Z"
+}

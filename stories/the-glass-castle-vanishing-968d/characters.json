@@ -1,0 +1,264 @@
+[
+  {
+    "id": "char_1",
+    "tempId": "char_1",
+    "name": "Dr. Sarah Winters",
+    "role": "Head of Security Systems",
+    "age": 42,
+    "isGuilty": false,
+    "isVictim": false,
+    "personality": {
+      "traits": [
+        "methodical",
+        "hyper-competent",
+        "emotionally distant",
+        "perfectionist"
+      ],
+      "speechStyle": "precise and technical, speaks in systems terminology",
+      "quirks": [
+        "constantly checks her smartwatch",
+        "arranges objects in perfect geometric patterns"
+      ]
+    },
+    "appearance": {
+      "description": "Tall and angular with steel-gray hair in a severe bob cut. Always wearing minimalist black suits with cutting-edge smart glasses. Her posture is military-straight, with every movement precise and calculated.",
+      "imagePrompt": "Professional headshot of a stern 42-year-old woman with sharp features and steel-gray bob cut, wearing a black minimalist blazer and advanced augmented reality glasses, cold expression, high-tech modern setting, dramatic lighting"
+    },
+    "knowledge": {
+      "knowsAboutCrime": "Implemented security protocols and knows about window vulnerability",
+      "knowsAboutOthers": [
+        "Witnessed Grace Chen's tense behavior during system demo",
+        "Can verify security access logs"
+      ],
+      "alibi": "Was managing security protocols at gala from 8:00 PM onwards"
+    },
+    "statement": "Dr. Winters was monitoring the new security system throughout the gala and confirms all protocols were functioning normally until 8:35 PM.",
+    "secrets": [
+      {
+        "content": "She discovered a potential vulnerability in the security system weeks ago but didn't report it to protect her reputation",
+        "willingnessToReveal": "low",
+        "revealCondition": "When presented with evidence that fixing the vulnerability could have prevented the kidnapping"
+      }
+    ],
+    "behaviorUnderPressure": {
+      "defensive": "Retreats into technical jargon and statistical analysis",
+      "whenCaughtLying": "Deflects by pointing out system anomalies",
+      "whenAccused": "Becomes coldly logical, demanding proof for every assertion"
+    },
+    "relationships": {
+      "char_5": "Professional rivalry, distrusts Grace's influence over security budget",
+      "char_2": "Caught him trying to hack security systems once"
+    },
+    "imageUrl": "https://v3b.fal.media/files/b/0a8af293/zca0siOJz6cdHTWiWwZ4T.jpg"
+  },
+  {
+    "id": "char_2",
+    "tempId": "char_2",
+    "name": "James Chen",
+    "role": "The Estranged Uncle",
+    "age": 45,
+    "isGuilty": false,
+    "isVictim": false,
+    "personality": {
+      "traits": [
+        "bitter",
+        "charismatic",
+        "manipulative",
+        "desperate"
+      ],
+      "speechStyle": "smooth and calculated with underlying anger",
+      "quirks": [
+        "fidgets with expensive cufflinks",
+        "drinks exclusively aged whiskey"
+      ]
+    },
+    "appearance": {
+      "description": "Formerly wealthy playboy gone to seed, wearing last season's designer suits that hang slightly loose. Salt-and-pepper hair styled to hide thinning, with a carefully maintained stubble. Dark circles under eyes betray financial stress.",
+      "imagePrompt": "Portrait of a disheveled 45-year-old Asian man in an expensive but slightly worn suit, salt-and-pepper hair, tired eyes, stubble, holding a whiskey glass, moody lighting, luxury setting"
+    },
+    "knowledge": {
+      "knowsAboutCrime": "Attempted to access secure wing at 9:00 PM but was blocked",
+      "knowsAboutOthers": [
+        "Had financial dispute with Lucy's father",
+        "Saw Grace heading to kitchen before gala"
+      ],
+      "alibi": "Was publicly visible at gala from 8:00-9:00 PM before attempting wing access"
+    },
+    "statement": "James Chen was seen arguing about finances before the gala and later attempted to access the secure wing around 9:00 PM.",
+    "secrets": [
+      {
+        "content": "He's deeply in debt to dangerous people and came to the gala to beg for money",
+        "willingnessToReveal": "medium",
+        "revealCondition": "When offered financial help or immunity"
+      }
+    ],
+    "behaviorUnderPressure": {
+      "defensive": "Becomes condescending and brings up family history",
+      "whenCaughtLying": "Tries to charm his way out with self-deprecating humor",
+      "whenAccused": "Gets angry and brings up Marcus's past mistakes"
+    },
+    "relationships": {
+      "char_5": "Blames her for his exclusion from family wealth",
+      "char_1": "Resentful of her blocking his access to mansion"
+    },
+    "imageUrl": "https://v3b.fal.media/files/b/0a8af293/Zf1w_y1kR1InHGZ-Cxstp.jpg"
+  },
+  {
+    "id": "char_3",
+    "tempId": "char_3",
+    "name": "Olivia Martinez",
+    "role": "Daughter's Private Tutor",
+    "age": 29,
+    "isGuilty": false,
+    "isVictim": false,
+    "personality": {
+      "traits": [
+        "nurturing",
+        "observant",
+        "anxious",
+        "dedicated"
+      ],
+      "speechStyle": "warm but hesitant, uses academic terminology",
+      "quirks": [
+        "takes detailed notes on everything",
+        "frequently adjusts her glasses"
+      ]
+    },
+    "appearance": {
+      "description": "Petite with curly brown hair usually in a messy bun. Wears smart casual clothing with comfortable shoes. Always carries a tablet and smart notebook. Has a worried furrow between her brows.",
+      "imagePrompt": "Portrait of a young Latina woman, 29, curly brown hair in messy bun, smart casual attire, worried expression, wire-rim glasses, holding digital tablet, warm lighting, modern indoor setting"
+    },
+    "knowledge": {
+      "knowsAboutCrime": "Had heated discussion with Lucy at 7:00 PM and discovered her missing at 9:30 PM",
+      "knowsAboutOthers": [
+        "Knows about Lucy's private concerns",
+        "Witnessed Viktor's announcement disruption"
+      ],
+      "alibi": "Was documented on security footage in library then at gala"
+    },
+    "statement": "Olivia Martinez had a private meeting with Lucy before the gala and was the first to discover her missing from her room.",
+    "secrets": [
+      {
+        "content": "She discovered Lucy was planning to expose corruption in her father's company",
+        "willingnessToReveal": "high",
+        "revealCondition": "When convinced it could help find Lucy"
+      }
+    ],
+    "behaviorUnderPressure": {
+      "defensive": "Becomes flustered and over-explains everything",
+      "whenCaughtLying": "Immediately confesses and apologizes profusely",
+      "whenAccused": "Tears up and provides detailed alibis"
+    },
+    "relationships": {
+      "char_5": "Distrusts Grace's interest in Lucy's work",
+      "char_4": "Caught him trying to bribe her for information"
+    },
+    "imageUrl": "https://v3b.fal.media/files/b/0a8af293/KxfgM1XiIJ2etFAqkTPe7.jpg"
+  },
+  {
+    "id": "char_4",
+    "tempId": "char_4",
+    "name": "Viktor Petrov",
+    "role": "Rival Tech CEO",
+    "age": 52,
+    "isGuilty": false,
+    "isVictim": false,
+    "personality": {
+      "traits": [
+        "ruthless",
+        "brilliant",
+        "arrogant",
+        "competitive"
+      ],
+      "speechStyle": "commanding and dismissive with Russian accent",
+      "quirks": [
+        "never sits down during meetings",
+        "constantly checks cryptocurrency prices"
+      ]
+    },
+    "appearance": {
+      "description": "Tall and imposing with close-cropped silver hair and expensive bespoke suits. Athletic build from regular boxing. Always wearing a $500,000 smart watch and neural interface earpiece.",
+      "imagePrompt": "Powerful 52-year-old man with silver hair, muscular build, wearing tailored charcoal suit, expensive smart watch, stern expression, standing assertively, modern tech office background, dramatic corporate lighting"
+    },
+    "knowledge": {
+      "knowsAboutCrime": "Created distraction at 8:35 PM with product announcement",
+      "knowsAboutOthers": [
+        "Had requested private meeting with Lucy",
+        "Observed Grace's movements during gala"
+      ],
+      "alibi": "Was continuously in public view at gala making announcement"
+    },
+    "statement": "Viktor Petrov arrived early requesting to meet Lucy, then made a dramatic product announcement during the gala at 8:35 PM.",
+    "secrets": [
+      {
+        "content": "His company's AI project is failing and he's desperate to steal Chen's technology",
+        "willingnessToReveal": "never",
+        "revealCondition": "Only if faced with criminal charges"
+      }
+    ],
+    "behaviorUnderPressure": {
+      "defensive": "Becomes intimidating and makes veiled threats",
+      "whenCaughtLying": "Calls his lawyers and refuses to speak",
+      "whenAccused": "Threatens lawsuits and corporate espionage investigations"
+    },
+    "relationships": {
+      "char_5": "Suspicious of her sudden marriage to Marcus",
+      "char_1": "Tried to hire her away multiple times"
+    },
+    "imageUrl": "https://v3b.fal.media/files/b/0a8af293/b1_y3GSStQktdDMTV0TBN.jpg"
+  },
+  {
+    "id": "char_5",
+    "tempId": "char_5",
+    "name": "Grace Chen",
+    "role": "The Stepmother",
+    "age": 35,
+    "isGuilty": true,
+    "isVictim": false,
+    "personality": {
+      "traits": [
+        "calculating",
+        "envious",
+        "charming",
+        "insecure"
+      ],
+      "speechStyle": "overly sympathetic with underlying coldness",
+      "quirks": [
+        "obsessively applies hand sanitizer",
+        "touches her wedding ring when lying"
+      ]
+    },
+    "appearance": {
+      "description": "Elegant and poised with long black hair and designer clothing. Perfect makeup masks signs of stress. Maintains a camera-ready appearance at all times. Moves with practiced grace from her former modeling career.",
+      "imagePrompt": "Sophisticated 35-year-old Asian woman, long straight black hair, expensive designer dress, flawless makeup, forced concerned expression, tension in eyes, luxury home setting, soft dramatic lighting"
+    },
+    "knowledge": {
+      "knowsAboutCrime": "Delivered soup to Lucy at 8:20 PM, returned alone at 8:40 PM",
+      "knowsAboutOthers": [
+        "Knew Lucy's dietary restrictions",
+        "Overheard security system details"
+      ],
+      "alibi": "Claims to have left Lucy resting in her room after delivering soup"
+    },
+    "statement": "Grace Chen prepared special dietary soup for Lucy, delivered it to her room at 8:20 PM, and returned to the gala at 8:40 PM reporting Lucy was resting.",
+    "secrets": [
+      {
+        "content": "Orchestrated the kidnapping out of jealousy over Lucy's relationship with Marcus and her growing influence in the company",
+        "willingnessToReveal": "never",
+        "revealCondition": "Only when confronted with irrefutable evidence"
+      }
+    ],
+    "behaviorUnderPressure": {
+      "defensive": "Plays the grieving stepmother role more dramatically",
+      "whenCaughtLying": "Creates elaborate alternative explanations",
+      "whenAccused": "Becomes tearful and calls for her husband"
+    },
+    "relationships": {
+      "char_1": "Undermines her authority while maintaining facade of respect",
+      "char_2": "Secretly glad about his financial troubles",
+      "char_3": "Views her as a threat to control over Lucy",
+      "char_4": "Offered him inside information for future favors"
+    },
+    "imageUrl": "https://v3b.fal.media/files/b/0a8af293/08ixcdnj8FVuqwFDhxNoq.jpg"
+  }
+]

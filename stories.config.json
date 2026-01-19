@@ -72,6 +72,34 @@
       "description": "Dark Knight's Final Curtain (User Generated)",
       "isUGC": true,
       "createdAt": "2026-01-18T15:12:45.782Z"
+    },
+    {
+      "id": "the-midnight-canvas-caper-d83o",
+      "enabled": true,
+      "description": "The Midnight Canvas Caper (User Generated)",
+      "isUGC": true,
+      "createdAt": "2026-01-19T00:43:11.672Z"
+    },
+    {
+      "id": "jazz-blood-bootleg-126f",
+      "enabled": true,
+      "description": "Jazz, Blood & Bootleg (User Generated)",
+      "isUGC": true,
+      "createdAt": "2026-01-19T01:01:28.590Z"
+    },
+    {
+      "id": "jazz-blood-bootleg-4gcy",
+      "enabled": true,
+      "description": "Jazz, Blood & Bootleg (User Generated)",
+      "isUGC": true,
+      "createdAt": "2026-01-19T01:13:34.375Z"
+    },
+    {
+      "id": "death-in-the-spotlight-z8vo",
+      "enabled": true,
+      "description": "Death in the Spotlight (User Generated)",
+      "isUGC": true,
+      "createdAt": "2026-01-19T02:17:19.229Z"
     }
   ],
   "defaults": {

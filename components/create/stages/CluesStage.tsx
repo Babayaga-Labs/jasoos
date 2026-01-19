@@ -1,188 +1,163 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useWizard } from '../wizard/WizardContext';
-import { ClueCard, ClueSummary } from '../cards/ClueCard';
-import { SkeletonCard } from '../cards/FadeInCard';
-import { TimelineSection, CharacterKnowledgeSection, SolutionSection } from '../cards/StoryBible';
-import { CRIME_TYPES } from '@/packages/ai/types/ugc-types';
-import type { UGCScaffoldFormInput, ScaffoldGenerateSSEEvent } from '@/packages/ai/types/ugc-types';
-import type { ValidationWarning } from '@/packages/ai';
+import type { UGCGeneratedClue, UGCGeneratedCharacter } from '@/packages/ai/types/ugc-types';
 
-// ============================================================================
-// Validation Results Component
-// ============================================================================
-
-function ValidationResults({ warnings }: { warnings: ValidationWarning[] }) {
-  const criticalCount = warnings.filter(w => w.severity === 'critical').length;
-  const warningCount = warnings.filter(w => w.severity === 'warning').length;
-  const infoCount = warnings.filter(w => w.severity === 'info').length;
-
-  const getSeverityIcon = (severity: string) => {
-    switch (severity) {
-      case 'critical': return '❌';
-      case 'warning': return '⚠️';
-      case 'info': return 'ℹ️';
-      default: return '⚠️';
-    }
-  };
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'critical': return 'text-red-300';
-      case 'warning': return 'text-amber-200';
-      case 'info': return 'text-blue-200';
-      default: return 'text-amber-200';
-    }
-  };
-
-  return (
-    <div className={`p-4 rounded-xl ${criticalCount > 0 ? 'bg-red-500/10 border border-red-500/30' : 'bg-amber-500/10 border border-amber-500/30'}`}>
-      <div className="flex items-center gap-3 mb-3">
-        <span className="text-lg">🔍</span>
-        <span className={`font-semibold ${criticalCount > 0 ? 'text-red-300' : 'text-amber-300'}`}>
-          Validation Results
-        </span>
-        <div className="flex gap-2">
-          {criticalCount > 0 && <span className="px-1.5 py-0.5 rounded bg-red-500/30 text-red-300 text-xs">{criticalCount} critical</span>}
-          {warningCount > 0 && <span className="px-1.5 py-0.5 rounded bg-amber-500/30 text-amber-300 text-xs">{warningCount} warnings</span>}
-          {infoCount > 0 && <span className="px-1.5 py-0.5 rounded bg-blue-500/30 text-blue-300 text-xs">{infoCount} info</span>}
-        </div>
-      </div>
-      <div className="space-y-2">
-        {warnings.map((warning, index) => (
-          <div key={index} className={`flex items-start gap-2 text-sm ${getSeverityColor(warning.severity)}`}>
-            <span className="flex-shrink-0">{getSeverityIcon(warning.severity)}</span>
-            <div className="flex-1">
-              <span>{warning.message}</span>
-              {warning.suggestion && (
-                <p className="text-xs text-slate-400 mt-0.5">💡 {warning.suggestion}</p>
-              )}
-            </div>
-            <span className="px-1.5 py-0.5 rounded bg-slate-700/50 text-xs text-slate-400 capitalize">
-              {warning.category}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+interface ValidationWarning {
+  category: string;
+  severity: 'info' | 'warning' | 'critical';
+  message: string;
+  suggestion?: string;
 }
 
-// ============================================================================
-// Scaffold Flow - Crime Details & Final Generation
-// ============================================================================
+type ModalStep = 'preview' | 'validating' | 'warnings' | 'publishing';
 
-function ScaffoldCluesStage() {
+export function CluesStage() {
+  const { state, dispatch, canPublish } = useWizard();
   const {
-    state,
-    dispatch,
-    canGenerateFinal,
-    selectedCulprit,
-    completedScaffoldCharacters,
-    completedCharacters,
-    canProceedFromClues,
-  } = useWizard();
-
-  const {
-    scaffold,
-    scaffoldCharacters,
-    initialPremise,
-    crimeDetails,
-    finalGenerating,
-    cluesComplete,
-    generatedPlotPoints,
+    storyId,
+    clues,
+    timeline,
+    solution,
+    generatedCharacters,
+    foundation,
+    timelineRegenerating,
+    sceneGenerating,
+    isPublishing,
     minimumPointsToAccuse,
     perfectScoreThreshold,
   } = state;
 
-  const [generationProgress, setGenerationProgress] = useState<{
-    step: string;
-    message: string;
-    progress: number;
-  } | null>(null);
+  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
+  const [showPublishModal, setShowPublishModal] = useState(false);
+  const [modalStep, setModalStep] = useState<ModalStep>('preview');
+  const [validationWarnings, setValidationWarnings] = useState<ValidationWarning[]>([]);
+  const [publishProgress, setPublishProgress] = useState<{ step: string; progress: number } | null>(null);
 
-  const [validationWarnings, setValidationWarnings] = useState<ValidationWarning[] | null>(null);
-  const [isValidating, setIsValidating] = useState(false);
-  const [activeTab, setActiveTab] = useState<'timeline' | 'characters' | 'clues' | 'validate'>('timeline');
+  if (clues.length === 0) {
+    return (
+      <div className="text-center py-20">
+        <p className="text-slate-400">No clues generated yet. Complete the characters stage first.</p>
+        <button
+          onClick={() => dispatch({ type: 'GO_TO_STAGE', stage: 'characters' })}
+          className="mt-4 px-6 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors"
+        >
+          Go to Characters
+        </button>
+      </div>
+    );
+  }
 
-  const handleValidate = async () => {
-    if (!state.generatedStory || !state.generatedPlotPoints) return;
+  const handleRegenerateTimeline = async () => {
+    if (!solution || !foundation) return;
 
-    setIsValidating(true);
+    dispatch({ type: 'START_TIMELINE_REGEN' });
+
+    try {
+      const response = await fetch('/api/ugc/regenerate-timeline', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clues,
+          characters: generatedCharacters,
+          solution,
+          setting: foundation.setting,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to regenerate timeline');
+      }
+
+      const result = await response.json();
+      dispatch({ type: 'COMPLETE_TIMELINE_REGEN', timeline: result.timeline });
+    } catch (error) {
+      dispatch({
+        type: 'SET_ERROR',
+        error: error instanceof Error ? error.message : 'Failed to regenerate timeline',
+      });
+    }
+  };
+
+  const handleOpenPublishModal = () => {
+    setShowPublishModal(true);
+    setModalStep('preview');
+    setValidationWarnings([]);
+    setPublishProgress(null);
+  };
+
+  const handleRunValidation = async () => {
+    setModalStep('validating');
+
     try {
       const response = await fetch('/api/ugc/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          story: state.generatedStory,
-          characters: completedCharacters,
-          plotPoints: {
-            plotPoints: state.generatedPlotPoints,
-            minimumPointsToAccuse: minimumPointsToAccuse,
-            perfectScoreThreshold: perfectScoreThreshold,
+          characters: generatedCharacters,
+          clues,
+          timeline,
+          solution,
+          scoring: {
+            minimumPointsToAccuse,
+            perfectScoreThreshold,
           },
         }),
       });
 
-      const result = await response.json();
-      if (response.ok) {
-        setValidationWarnings(result.warnings);
-      } else {
-        console.error('Validation failed:', result.error);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Validation failed');
       }
+
+      const result = await response.json();
+      setValidationWarnings(result.warnings || []);
+      setModalStep('warnings');
     } catch (error) {
-      console.error('Validation error:', error);
-    } finally {
-      setIsValidating(false);
+      dispatch({
+        type: 'SET_ERROR',
+        error: error instanceof Error ? error.message : 'Validation failed',
+      });
+      setShowPublishModal(false);
     }
   };
 
-  const handleCrimeDetailsChange = (field: 'motive' | 'method', value: string) => {
-    dispatch({ type: 'UPDATE_CRIME_DETAILS', field, value });
-  };
+  const handleConfirmPublish = async () => {
+    if (!foundation || !solution || !storyId) return;
 
-  const handleGenerate = async () => {
-    if (!scaffold || !selectedCulprit) return;
-
-    dispatch({ type: 'START_FINAL_GENERATION' });
+    setModalStep('publishing');
+    dispatch({ type: 'START_PUBLISH' });
+    setPublishProgress({ step: 'Starting...', progress: 0 });
 
     try {
-      // Build the scaffold form input
-      const scaffoldFormInput: UGCScaffoldFormInput = {
-        initialPremise,
-        scaffold,
-        characters: scaffoldCharacters.filter(c => c.isComplete).map(c => ({
-          fromSuggestionId: c.suggestionId,
-          tempId: c.suggestionId,
-          name: c.name,
-          role: c.role,
-          appearance: c.appearance,
-          personalityTraits: c.personalityTraits,
-          secret: c.secret,
-          isCulprit: c.isCulprit,
-          uploadedImageUrl: c.uploadedImageUrl,
-        })),
-        crimeDetails: {
-          motive: crimeDetails.motive,
-          method: crimeDetails.method,
-        },
-      };
-
-      const response = await fetch('/api/ugc/generate', {
+      const response = await fetch('/api/ugc/publish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scaffoldFormInput }),
+        body: JSON.stringify({
+          storyId,
+          foundation,
+          characters: generatedCharacters,
+          clues,
+          timeline,
+          solution,
+          scoring: {
+            minimumPointsToAccuse,
+            perfectScoreThreshold,
+          },
+        }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to start generation');
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to publish');
       }
 
       // Handle SSE stream
       const reader = response.body?.getReader();
-      if (!reader) throw new Error('No response stream');
+      if (!reader) throw new Error('No response body');
 
       const decoder = new TextDecoder();
       let buffer = '';
@@ -197,31 +172,18 @@ function ScaffoldCluesStage() {
 
         for (const line of lines) {
           if (line.startsWith('data: ')) {
-            try {
-              const event: ScaffoldGenerateSSEEvent = JSON.parse(line.slice(6));
-
-              if (event.type === 'progress') {
-                setGenerationProgress({
-                  step: event.step,
-                  message: event.message,
-                  progress: event.progress,
-                });
-              } else if (event.type === 'complete') {
-                dispatch({
-                  type: 'COMPLETE_FINAL_GENERATION',
-                  story: event.data.story,
-                  characters: event.data.characters,
-                  plotPoints: event.data.plotPoints.plotPoints,
-                  minPoints: event.data.plotPoints.minimumPointsToAccuse,
-                  perfectScore: event.data.plotPoints.perfectScoreThreshold,
-                  storyId: event.storyId,
-                });
-                setGenerationProgress(null);
-              } else if (event.type === 'error') {
-                throw new Error(event.message);
+            const data = JSON.parse(line.slice(6));
+            if (data.type === 'progress') {
+              setPublishProgress({ step: data.message, progress: data.progress });
+            } else if (data.type === 'complete') {
+              dispatch({ type: 'COMPLETE_PUBLISH', storyId: data.storyId });
+              if (data.sceneImageUrl) {
+                dispatch({ type: 'COMPLETE_SCENE_GEN', imageUrl: data.sceneImageUrl });
               }
-            } catch (parseError) {
-              // Skip invalid JSON
+              // Redirect to play the story
+              window.location.href = `/game/${data.storyId}`;
+            } else if (data.type === 'error') {
+              throw new Error(data.error);
             }
           }
         }
@@ -229,768 +191,626 @@ function ScaffoldCluesStage() {
     } catch (error) {
       dispatch({
         type: 'SET_ERROR',
-        error: error instanceof Error ? error.message : 'Generation failed',
+        error: error instanceof Error ? error.message : 'Failed to publish',
       });
-      setGenerationProgress(null);
+      setShowPublishModal(false);
     }
   };
 
-  const handleProceed = () => {
-    dispatch({ type: 'GO_TO_STAGE', stage: 'world' });
-  };
+  const criticalCount = validationWarnings.filter(w => w.severity === 'critical').length;
+  const warningCount = validationWarnings.filter(w => w.severity === 'warning').length;
+  const infoCount = validationWarnings.filter(w => w.severity === 'info').length;
 
-  const handleBack = () => {
-    dispatch({ type: 'GO_TO_STAGE', stage: 'characters' });
-  };
+  const culprit = generatedCharacters.find(c => c.isGuilty);
+  const victim = generatedCharacters.find(c => c.isVictim);
+  const totalPoints = clues.reduce((sum, c) => sum + c.points, 0);
 
-  // Show generating state with progress
-  if (finalGenerating) {
-    return (
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-slate-800/50 border border-violet-500/30 mb-4">
-            <div className="w-5 h-5 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
-            <span className="text-violet-300 font-medium">
-              {generationProgress?.message || 'Initializing generation...'}
-            </span>
-          </div>
-          {generationProgress && (
-            <div className="mt-4 max-w-md mx-auto">
-              <div className="flex justify-between text-sm text-slate-400 mb-2">
-                <span>{generationProgress.step}</span>
-                <span>{generationProgress.progress}%</span>
-              </div>
-              <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-violet-500 to-pink-500 transition-all duration-300"
-                  style={{ width: `${generationProgress.progress}%` }}
-                />
-              </div>
-            </div>
-          )}
-          <p className="text-slate-500 mt-4">
-            Building timeline from character secrets, generating clues, and creating roleplay prompts...
-          </p>
-        </div>
-
-        <div className="grid gap-4">
-          {[...Array(6)].map((_, i) => (
-            <SkeletonCard key={i} className="h-28" />
-          ))}
-        </div>
+  return (
+    <div className="max-w-7xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-white mb-3">
+          Clues & Timeline
+        </h2>
+        <p className="text-slate-400">
+          Review your clues and timeline. Edit as needed, then publish your mystery.
+        </p>
       </div>
-    );
-  }
 
-  // Show generated results with tabbed layout
-  if (cluesComplete && generatedPlotPoints) {
-    const tabs = [
-      { id: 'timeline' as const, label: 'Timeline', icon: '📅', count: state.generatedStory?.actualEvents.length },
-      { id: 'characters' as const, label: 'Characters', icon: '👥', count: completedCharacters.length },
-      { id: 'clues' as const, label: 'Clues', icon: '🔎', count: generatedPlotPoints.length },
-      { id: 'validate' as const, label: 'Validate', icon: '✓', count: validationWarnings?.length },
-    ];
-
-    return (
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold text-white mb-2">
-            Review Your Mystery
-          </h2>
-          <p className="text-slate-400 text-sm">
-            Check each section before publishing
-          </p>
-        </div>
-
-        {/* Tab Bar */}
-        <div className="flex gap-2 mb-6 p-1 rounded-xl bg-slate-800/50 border border-slate-700/50">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`
-                flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-all
-                ${activeTab === tab.id
-                  ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
-                }
-              `}
-            >
-              <span>{tab.icon}</span>
-              <span className="hidden sm:inline">{tab.label}</span>
-              {tab.count !== undefined && tab.count > 0 && (
-                <span className={`px-1.5 py-0.5 rounded-full text-xs ${
-                  tab.id === 'validate' && validationWarnings && validationWarnings.some(w => w.severity === 'critical')
-                    ? 'bg-red-500/30 text-red-300'
-                    : 'bg-slate-700/50 text-slate-400'
-                }`}>
-                  {tab.count}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-
-        {/* Tab Content */}
-        <div className="min-h-[400px]">
-          {activeTab === 'timeline' && (
-            <div className="p-4 rounded-xl bg-slate-800/20 border border-slate-700/30">
-              <TimelineSection />
+      {/* Main Grid Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left: Clues */}
+        <div className="flex flex-col" style={{ minHeight: '600px' }}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-semibold text-white">Clues</h3>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleRegenerateTimeline}
+                disabled={timelineRegenerating}
+                className="px-4 py-2 bg-violet-500/20 text-violet-400 rounded-lg hover:bg-violet-500/30 transition-colors text-sm disabled:opacity-50"
+              >
+                {timelineRegenerating ? 'Regenerating...' : 'Regenerate Timeline'}
+              </button>
+              <button
+                onClick={() => dispatch({ type: 'ADD_CLUE' })}
+                className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors text-sm"
+              >
+                + Add Clue
+              </button>
             </div>
-          )}
+          </div>
 
-          {activeTab === 'characters' && (
-            <div className="p-4 rounded-xl bg-slate-800/20 border border-slate-700/30">
-              <CharacterKnowledgeSection />
-            </div>
-          )}
-
-          {activeTab === 'clues' && (
-            <div className="space-y-6">
-              <ClueSummary
-                plotPoints={generatedPlotPoints}
-                minimumPointsToAccuse={minimumPointsToAccuse}
-                perfectScoreThreshold={perfectScoreThreshold}
-                delay={0}
+          <div className="space-y-3 flex-1 overflow-y-auto pr-2">
+            {clues.map((clue) => (
+              <ClueCard
+                key={clue.id}
+                clue={clue}
+                characters={generatedCharacters}
+                onUpdate={(updates) => dispatch({ type: 'UPDATE_CLUE', id: clue.id, updates })}
+                onDelete={() => dispatch({ type: 'DELETE_CLUE', id: clue.id })}
               />
-              <div className="space-y-4">
-                {generatedPlotPoints.map((pp, index) => (
-                  <ClueCard
-                    key={pp.id}
-                    plotPoint={pp}
-                    characters={completedCharacters}
-                    delay={0}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+            ))}
+          </div>
+        </div>
 
-          {activeTab === 'validate' && (
-            <div className="space-y-6">
-              {/* Validate Button */}
-              <div className="flex justify-center">
+        {/* Right: Character Tabs + Timeline */}
+        <div className="flex flex-col space-y-4" style={{ minHeight: '600px' }}>
+          {/* Character Reference Tabs */}
+          <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-4">
+            <h3 className="text-lg font-semibold text-white mb-3">Character Reference</h3>
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {generatedCharacters.map((char) => (
                 <button
-                  onClick={handleValidate}
-                  disabled={isValidating}
+                  key={char.id}
+                  onClick={() => setSelectedCharacter(selectedCharacter === char.id ? null : char.id)}
                   className={`
-                    flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all
-                    ${isValidating
-                      ? 'bg-slate-700/50 text-slate-400 cursor-wait'
-                      : 'bg-violet-500/20 border border-violet-500/30 text-violet-300 hover:bg-violet-500/30 hover:border-violet-500/50'
+                    flex items-center gap-2 px-3 py-2 rounded-lg transition-all shrink-0
+                    ${selectedCharacter === char.id
+                      ? 'bg-violet-500/20 border border-violet-500'
+                      : 'bg-slate-700/50 border border-slate-600 hover:border-slate-500'
                     }
+                    ${char.isGuilty ? 'ring-1 ring-red-500' : ''}
                   `}
                 >
-                  {isValidating ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
-                      Validating...
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      {validationWarnings ? 'Re-validate' : 'Run Validation'}
-                    </>
-                  )}
+                  <div className="w-8 h-8 rounded-full bg-slate-600 overflow-hidden relative">
+                    {char.imageUrl ? (
+                      <Image src={char.imageUrl} alt={char.name} fill className="object-cover" />
+                    ) : (
+                      <span className="absolute inset-0 flex items-center justify-center text-xs">👤</span>
+                    )}
+                  </div>
+                  <span className="text-sm text-white">{char.name}</span>
+                  {char.isGuilty && <span className="text-xs text-red-400">*</span>}
                 </button>
+              ))}
+            </div>
+
+            {/* Selected Character Details - Simplified */}
+            {selectedCharacter && (
+              <div className="mt-4 pt-4 border-t border-slate-700">
+                {(() => {
+                  const char = generatedCharacters.find((c) => c.id === selectedCharacter);
+                  if (!char) return null;
+                  return (
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-slate-600 overflow-hidden relative shrink-0">
+                        {char.imageUrl ? (
+                          <Image src={char.imageUrl} alt={char.name} fill className="object-cover" />
+                        ) : (
+                          <span className="absolute inset-0 flex items-center justify-center text-sm">👤</span>
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-white">{char.name}</p>
+                        <p className="text-xs text-slate-400">{char.role}</p>
+                      </div>
+                      {char.isGuilty && (
+                        <span className="ml-auto px-2 py-0.5 bg-red-500/20 text-red-400 text-xs rounded-full">
+                          Culprit
+                        </span>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
+            )}
+          </div>
 
-              {/* Validation Results */}
-              {validationWarnings && validationWarnings.length > 0 && (
-                <ValidationResults warnings={validationWarnings} />
-              )}
+          {/* Timeline */}
+          <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-4 flex-1 flex flex-col">
+            <h3 className="text-lg font-semibold text-white mb-4">Timeline</h3>
 
-              {validationWarnings && validationWarnings.length === 0 && (
-                <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center">
-                  <span className="text-emerald-300">All checks passed! Your mystery is ready.</span>
+            <div className="space-y-3 flex-1 overflow-y-auto pr-2">
+              {timeline.map((event, index) => (
+                <div key={index} className="flex items-start gap-3 group">
+                  <div className="flex flex-col items-center">
+                    <div className="w-3 h-3 rounded-full bg-violet-500" />
+                    {index < timeline.length - 1 && (
+                      <div className="w-0.5 h-full bg-slate-700" />
+                    )}
+                  </div>
+                  <div className="flex-1 pb-4">
+                    <textarea
+                      value={event}
+                      onChange={(e) =>
+                        dispatch({ type: 'UPDATE_TIMELINE_EVENT', index, value: e.target.value })
+                      }
+                      rows={2}
+                      className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                    />
+                    <div className="flex gap-2 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => dispatch({ type: 'ADD_TIMELINE_EVENT', afterIndex: index })}
+                        className="text-xs text-slate-500 hover:text-violet-400"
+                      >
+                        + Add After
+                      </button>
+                      <button
+                        onClick={() => dispatch({ type: 'DELETE_TIMELINE_EVENT', index })}
+                        className="text-xs text-slate-500 hover:text-red-400"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <div className="flex justify-between items-center pt-8 border-t border-slate-800">
+        <button
+          onClick={() => dispatch({ type: 'GO_TO_STAGE', stage: 'characters' })}
+          className="px-6 py-3 text-slate-400 hover:text-white transition-colors"
+        >
+          ← Back to Characters
+        </button>
+
+        <button
+          onClick={handleOpenPublishModal}
+          disabled={!canPublish || isPublishing || sceneGenerating}
+          className={`
+            py-4 px-8 rounded-xl font-semibold text-lg transition-all duration-300
+            ${canPublish && !isPublishing && !sceneGenerating
+              ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white shadow-lg shadow-teal-500/30 hover:shadow-xl hover:shadow-teal-500/40 hover:scale-[1.02]'
+              : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+            }
+          `}
+        >
+          Review & Publish
+        </button>
+      </div>
+
+      {/* Review & Publish Modal */}
+      {showPublishModal && (
+        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 rounded-2xl max-w-4xl w-full shadow-2xl border border-slate-800 overflow-hidden max-h-[90vh] flex flex-col">
+            {/* Modal Header - Only show for non-preview steps */}
+            {modalStep !== 'preview' && (
+              <div className="p-6 border-b border-slate-700 shrink-0">
+                <h3 className="text-xl font-bold text-white">
+                  {modalStep === 'publishing' ? 'Publishing...' :
+                   modalStep === 'validating' ? 'Validating...' :
+                   'Validation Results'}
+                </h3>
+              </div>
+            )}
+
+            {/* Modal Content */}
+            <div className="overflow-y-auto flex-1">
+              {/* Netflix-style Preview Step */}
+              {modalStep === 'preview' && foundation && (
+                <div className="relative">
+                  {/* Hero Banner with Character Collage Background */}
+                  <div className="relative h-64 overflow-hidden">
+                    {/* Background: Use first character image or gradient */}
+                    {generatedCharacters.find(c => c.imageUrl)?.imageUrl ? (
+                      <div className="absolute inset-0">
+                        <Image
+                          src={generatedCharacters.find(c => c.imageUrl)!.imageUrl!}
+                          alt="Scene"
+                          fill
+                          className="object-cover blur-sm scale-110 opacity-40"
+                        />
+                      </div>
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-violet-900/50 via-slate-900 to-red-900/30" />
+                    )}
+
+                    {/* Gradient Overlays */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-transparent to-slate-900/80" />
+
+                    {/* Title & Info Overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 p-6">
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded text-xs font-medium">
+                          {foundation.crimeType}
+                        </span>
+                        <span className="px-2 py-0.5 bg-slate-700/80 text-slate-300 rounded text-xs">
+                          {foundation.setting.timePeriod}
+                        </span>
+                      </div>
+                      <h2 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">
+                        {foundation.title}
+                      </h2>
+                      <p className="text-slate-300 text-sm line-clamp-2 max-w-2xl">
+                        {foundation.synopsis}
+                      </p>
+                    </div>
+
+                    {/* Character Portraits Row - Netflix style */}
+                    <div className="absolute -bottom-8 right-6 flex -space-x-3">
+                      {generatedCharacters.filter(c => !c.isVictim).slice(0, 5).map((char, idx) => (
+                        <div
+                          key={char.id}
+                          className={`
+                            w-16 h-16 rounded-full border-2 overflow-hidden relative shadow-xl
+                            ${char.isGuilty ? 'border-red-500' : 'border-slate-700'}
+                          `}
+                          style={{ zIndex: 10 - idx }}
+                        >
+                          {char.imageUrl ? (
+                            <Image src={char.imageUrl} alt={char.name} fill className="object-cover" />
+                          ) : (
+                            <div className="w-full h-full bg-slate-700 flex items-center justify-center text-2xl">
+                              👤
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Content Section */}
+                  <div className="p-6 pt-12 space-y-6">
+                    {/* Setting & Location */}
+                    <div className="flex items-center gap-4 text-sm text-slate-400">
+                      <span className="flex items-center gap-1">
+                        <span className="text-lg">📍</span> {foundation.setting.location}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <span className="text-lg">🌙</span> {foundation.setting.atmosphere}
+                      </span>
+                    </div>
+
+                    {/* Victim Card */}
+                    {victim && (
+                      <div className="bg-gradient-to-r from-red-950/50 to-slate-900/50 rounded-xl p-4 border border-red-900/30">
+                        <div className="flex items-start gap-4">
+                          <div className="w-12 h-12 rounded-full bg-slate-700 overflow-hidden relative shrink-0 border-2 border-red-500/50">
+                            {victim.imageUrl ? (
+                              <Image src={victim.imageUrl} alt={victim.name} fill className="object-cover grayscale" />
+                            ) : (
+                              <span className="absolute inset-0 flex items-center justify-center text-xl">💀</span>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-xs text-red-400 uppercase tracking-wider font-medium">The Victim</p>
+                            <p className="text-white font-semibold">{victim.name}</p>
+                            <p className="text-sm text-slate-400 mt-1">{foundation.victimParagraph}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Suspects Grid */}
+                    <div>
+                      <p className="text-xs text-slate-500 uppercase tracking-wider mb-3 font-medium">Suspects</p>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {generatedCharacters.filter(c => !c.isVictim).map((char) => (
+                          <div
+                            key={char.id}
+                            className={`
+                              group relative rounded-xl overflow-hidden border transition-all hover:scale-[1.02]
+                              ${char.isGuilty
+                                ? 'border-red-500/30 hover:border-red-500/50'
+                                : 'border-slate-700/50 hover:border-slate-600'
+                              }
+                            `}
+                          >
+                            <div className="aspect-[3/4] relative">
+                              {char.imageUrl ? (
+                                <Image src={char.imageUrl} alt={char.name} fill className="object-cover" />
+                              ) : (
+                                <div className="w-full h-full bg-slate-800 flex items-center justify-center text-4xl">👤</div>
+                              )}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                              <div className="absolute bottom-0 left-0 right-0 p-3">
+                                <p className="text-white font-medium text-sm">{char.name}</p>
+                                <p className="text-slate-400 text-xs">{char.role}</p>
+                              </div>
+                              {char.isGuilty && (
+                                <div className="absolute top-2 right-2 px-2 py-0.5 bg-red-500/80 rounded text-[10px] text-white font-medium">
+                                  CULPRIT
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Solution Reveal */}
+                    {solution && culprit && (
+                      <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                        <p className="text-xs text-slate-500 uppercase tracking-wider mb-3 font-medium">The Truth</p>
+                        <div className="grid grid-cols-3 gap-4 text-sm">
+                          <div>
+                            <p className="text-slate-500 text-xs">Method</p>
+                            <p className="text-slate-200">{solution.method}</p>
+                          </div>
+                          <div>
+                            <p className="text-slate-500 text-xs">Motive</p>
+                            <p className="text-slate-200">{solution.motive}</p>
+                          </div>
+                          <div>
+                            <p className="text-slate-500 text-xs">Evidence Trail</p>
+                            <p className="text-slate-200">{clues.length} clues • {totalPoints} pts</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Stats Bar */}
+                    <div className="flex items-center justify-between py-3 border-t border-slate-800">
+                      <div className="flex items-center gap-6 text-sm">
+                        <span className="text-slate-400">
+                          <span className="text-white font-semibold">{generatedCharacters.filter(c => !c.isVictim).length}</span> suspects
+                        </span>
+                        <span className="text-slate-400">
+                          <span className="text-white font-semibold">{clues.length}</span> clues
+                        </span>
+                        <span className="text-slate-400">
+                          <span className="text-white font-semibold">{timeline.length}</span> timeline events
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
-              {/* Solution Preview */}
-              <div className="p-4 rounded-xl bg-slate-800/20 border border-slate-700/30">
-                <SolutionSection />
-              </div>
+              {/* Validating Step */}
+              {modalStep === 'validating' && (
+                <div className="flex flex-col items-center justify-center py-12 px-6">
+                  <svg className="animate-spin h-12 w-12 text-violet-500 mb-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  <p className="text-slate-300">Checking your mystery for issues...</p>
+                </div>
+              )}
 
-              {/* Navigation */}
-              <div className="flex items-center gap-4 pt-4">
-                <button
-                  onClick={handleBack}
-                  className="px-6 py-3 rounded-xl font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all"
-                >
-                  ← Back
-                </button>
+              {/* Warnings Step */}
+              {modalStep === 'warnings' && (
+                <div className="space-y-4 p-6">
+                  {validationWarnings.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span className="text-4xl">✓</span>
+                      </div>
+                      <p className="text-lg text-white mb-2">All checks passed!</p>
+                      <p className="text-sm text-slate-400">Your mystery is ready to publish.</p>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-slate-300">
+                        We found some potential issues. You can still publish, but you may want to review these:
+                      </p>
 
-                <button
-                  onClick={handleProceed}
-                  disabled={!canProceedFromClues}
-                  className="flex-1 py-4 px-6 rounded-xl font-semibold text-lg bg-gradient-to-r from-amber-500 via-violet-500 to-pink-500 text-white hover:scale-[1.02] hover:shadow-lg hover:shadow-violet-500/25 active:scale-[0.98] transition-all transform"
-                >
-                  Continue to World
-                </button>
-              </div>
+                      {/* Warning Summary */}
+                      <div className="flex gap-4 text-sm">
+                        {criticalCount > 0 && (
+                          <span className="px-3 py-1 bg-red-900/30 text-red-400 rounded-full">
+                            {criticalCount} critical
+                          </span>
+                        )}
+                        {warningCount > 0 && (
+                          <span className="px-3 py-1 bg-amber-900/30 text-amber-400 rounded-full">
+                            {warningCount} warnings
+                          </span>
+                        )}
+                        {infoCount > 0 && (
+                          <span className="px-3 py-1 bg-slate-700 text-slate-400 rounded-full">
+                            {infoCount} info
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Warning List */}
+                      <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                        {validationWarnings.map((warning, i) => (
+                          <div
+                            key={i}
+                            className={`p-3 rounded-lg border ${
+                              warning.severity === 'critical'
+                                ? 'bg-red-900/20 border-red-500/30'
+                                : warning.severity === 'warning'
+                                  ? 'bg-amber-900/20 border-amber-500/30'
+                                  : 'bg-slate-700/50 border-slate-600'
+                            }`}
+                          >
+                            <p className={`text-sm ${
+                              warning.severity === 'critical'
+                                ? 'text-red-300'
+                                : warning.severity === 'warning'
+                                  ? 'text-amber-300'
+                                  : 'text-slate-300'
+                            }`}>
+                              {warning.message}
+                            </p>
+                            {warning.suggestion && (
+                              <p className="text-xs text-slate-500 mt-1">{warning.suggestion}</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Publishing Step */}
+              {modalStep === 'publishing' && publishProgress && (
+                <div className="space-y-4 py-8 px-6">
+                  <p className="text-slate-300 text-center">{publishProgress.step}</p>
+                  <div className="h-3 bg-slate-700 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 transition-all duration-500"
+                      style={{ width: `${publishProgress.progress}%` }}
+                    />
+                  </div>
+                  <p className="text-sm text-slate-500 text-center">{publishProgress.progress}%</p>
+                </div>
+              )}
+
             </div>
-          )}
-        </div>
-      </div>
-    );
-  }
 
-  // Show crime details form
-  return (
-    <div className="max-w-2xl mx-auto">
-      <div className="text-center mb-10">
-        <h2 className="text-3xl font-bold text-white mb-3">
-          Crime Details
-        </h2>
-        <p className="text-slate-400">
-          Define the motive and method. The timeline will be generated based on character secrets.
-        </p>
-      </div>
+            {/* Modal Footer */}
+            <div className="p-6 border-t border-slate-700 flex gap-3 justify-end shrink-0">
+              {modalStep === 'preview' && (
+                <>
+                  <button
+                    onClick={() => setShowPublishModal(false)}
+                    className="px-6 py-2 text-slate-400 hover:text-white transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleRunValidation}
+                    className="px-6 py-2 bg-gradient-to-r from-violet-500 to-purple-500 text-white rounded-lg hover:from-violet-600 hover:to-purple-600 transition-all"
+                  >
+                    Run Validation
+                  </button>
+                </>
+              )}
 
-      <div className="space-y-6">
-        {/* Crime Type (from scaffold, read-only) */}
-        {scaffold && (
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Type of Crime
-            </label>
-            <div className="px-4 py-3 rounded-xl bg-slate-800/30 border border-slate-700/30 text-slate-300">
-              {scaffold.crimeType.charAt(0).toUpperCase() + scaffold.crimeType.slice(1)}
+              {modalStep === 'validating' && (
+                <button
+                  disabled
+                  className="px-6 py-2 bg-slate-700 text-slate-500 rounded-lg cursor-not-allowed"
+                >
+                  Validating...
+                </button>
+              )}
+
+              {modalStep === 'warnings' && (
+                <>
+                  <button
+                    onClick={() => setShowPublishModal(false)}
+                    className="px-6 py-2 text-slate-400 hover:text-white transition-colors"
+                  >
+                    Go Back & Fix
+                  </button>
+                  <button
+                    onClick={handleConfirmPublish}
+                    className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:from-emerald-600 hover:to-teal-600 transition-all"
+                  >
+                    {validationWarnings.length > 0 ? 'Publish Anyway' : 'Publish Now'}
+                  </button>
+                </>
+              )}
+
+              {modalStep === 'publishing' && (
+                <button
+                  disabled
+                  className="px-6 py-2 bg-slate-700 text-slate-500 rounded-lg cursor-not-allowed"
+                >
+                  Publishing...
+                </button>
+              )}
             </div>
           </div>
-        )}
-
-        {/* Selected Culprit (from CharactersStage, read-only) */}
-        <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
-            The Culprit
-            <span className="text-slate-500 font-normal ml-2">(selected in Characters stage)</span>
-          </label>
-          {selectedCulprit ? (
-            <div className="flex items-center gap-4 p-4 rounded-xl bg-red-500/20 border border-red-500/50">
-              <div className="w-12 h-12 rounded-full bg-slate-700/50 flex items-center justify-center overflow-hidden">
-                {selectedCulprit.uploadedImageUrl ? (
-                  <img
-                    src={selectedCulprit.uploadedImageUrl}
-                    alt={selectedCulprit.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-2xl">👤</span>
-                )}
-              </div>
-              <div className="flex-1">
-                <p className="font-medium text-red-300">{selectedCulprit.name}</p>
-                <p className="text-sm text-slate-400">{selectedCulprit.role}</p>
-              </div>
-              <span className="px-3 py-1 rounded-full bg-red-500/30 text-red-300 text-xs font-bold">
-                GUILTY
-              </span>
-            </div>
-          ) : (
-            <div className="p-4 rounded-xl bg-amber-500/20 border border-amber-500/50 text-amber-300">
-              No culprit selected. Go back to Characters and mark one as the culprit.
-            </div>
-          )}
         </div>
-
-        {/* Motive */}
-        <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
-            Motive
-            <span className="text-slate-500 font-normal ml-2">(Why did they do it?)</span>
-          </label>
-          <textarea
-            value={crimeDetails.motive}
-            onChange={(e) => handleCrimeDetailsChange('motive', e.target.value)}
-            placeholder="Greed drove them to eliminate the only person who knew about the hidden inheritance..."
-            rows={3}
-            className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 focus:outline-none transition-all resize-none"
-          />
-          {selectedCulprit?.potentialMotive && (
-            <p className="text-xs text-slate-500 mt-2">
-              Suggested: {selectedCulprit.potentialMotive}
-            </p>
-          )}
-        </div>
-
-        {/* Method */}
-        <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
-            Method
-            <span className="text-slate-500 font-normal ml-2">(How did they commit the crime?)</span>
-          </label>
-          <textarea
-            value={crimeDetails.method}
-            onChange={(e) => handleCrimeDetailsChange('method', e.target.value)}
-            placeholder="Slipped poison into the victim's evening drink during the confusion of the party..."
-            rows={3}
-            className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 focus:outline-none transition-all resize-none"
-          />
-        </div>
-
-        {/* Navigation */}
-        <div className="flex items-center gap-4 pt-4">
-          <button
-            onClick={handleBack}
-            className="px-6 py-3 rounded-xl font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all"
-          >
-            ← Back
-          </button>
-
-          <button
-            onClick={handleGenerate}
-            disabled={!canGenerateFinal}
-            className={`
-              flex-1 py-4 px-6 rounded-xl font-semibold text-lg transition-all transform
-              ${canGenerateFinal
-                ? 'bg-gradient-to-r from-amber-500 via-violet-500 to-pink-500 text-white hover:scale-[1.02] hover:shadow-lg hover:shadow-violet-500/25 active:scale-[0.98]'
-                : 'bg-slate-700/50 text-slate-500 cursor-not-allowed'
-              }
-            `}
-          >
-            Generate Story & Clues
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
 
-// ============================================================================
-// Legacy Flow - Full Crime Definition
-// ============================================================================
+interface ClueCardProps {
+  clue: UGCGeneratedClue;
+  characters: UGCGeneratedCharacter[];
+  onUpdate: (updates: Partial<UGCGeneratedClue>) => void;
+  onDelete: () => void;
+}
 
-function LegacyCluesStage() {
-  const {
-    state,
-    dispatch,
-    canProceedFromClues,
-    completedCharacters,
-    nonVictimCharacters,
-  } = useWizard();
+function ClueCard({ clue, characters, onUpdate, onDelete }: ClueCardProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  const {
-    crimeInput,
-    generatedStory,
-    generatedPlotPoints,
-    minimumPointsToAccuse,
-    perfectScoreThreshold,
-    cluesGenerating,
-    cluesComplete,
-  } = state;
+  return (
+    <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-4 space-y-3">
+      {/* Description */}
+      <textarea
+        value={clue.description}
+        onChange={(e) => onUpdate({ description: e.target.value })}
+        rows={2}
+        placeholder="Clue description..."
+        className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+      />
 
-  const [validationWarnings, setValidationWarnings] = useState<ValidationWarning[] | null>(null);
-  const [isValidating, setIsValidating] = useState(false);
-  const [activeTab, setActiveTab] = useState<'timeline' | 'characters' | 'clues' | 'validate'>('timeline');
-
-  const handleValidate = async () => {
-    if (!generatedStory || !generatedPlotPoints) return;
-
-    setIsValidating(true);
-    try {
-      const response = await fetch('/api/ugc/validate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          story: generatedStory,
-          characters: completedCharacters,
-          plotPoints: {
-            plotPoints: generatedPlotPoints,
-            minimumPointsToAccuse,
-            perfectScoreThreshold,
-          },
-        }),
-      });
-
-      const result = await response.json();
-      if (response.ok) {
-        setValidationWarnings(result.warnings);
-      } else {
-        console.error('Validation failed:', result.error);
-      }
-    } catch (error) {
-      console.error('Validation error:', error);
-    } finally {
-      setIsValidating(false);
-    }
-  };
-
-  const handleInputChange = (field: keyof typeof crimeInput, value: string) => {
-    dispatch({ type: 'UPDATE_CRIME_INPUT', field, value });
-  };
-
-  const handleGenerate = async () => {
-    dispatch({ type: 'START_CLUES_GENERATION' });
-
-    try {
-      const response = await fetch('/api/ugc/generate-clues', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          crimeInput,
-          story: generatedStory,
-          characters: completedCharacters,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate clues');
-      }
-
-      dispatch({
-        type: 'COMPLETE_CLUES_GENERATION',
-        plotPoints: data.plotPoints,
-        minPoints: data.minimumPointsToAccuse,
-        perfectScore: data.perfectScoreThreshold,
-        updatedStory: data.updatedStory,
-        updatedCharacters: data.updatedCharacters,
-      });
-    } catch (error) {
-      dispatch({
-        type: 'SET_ERROR',
-        error: error instanceof Error ? error.message : 'Clues generation failed',
-      });
-    }
-  };
-
-  const handleProceed = () => {
-    dispatch({ type: 'GO_TO_STAGE', stage: 'world' });
-  };
-
-  const handleBack = () => {
-    dispatch({ type: 'GO_TO_STAGE', stage: 'characters' });
-  };
-
-  const isFormValid =
-    crimeInput.crimeType &&
-    crimeInput.culpritId &&
-    crimeInput.motive.trim() &&
-    crimeInput.method.trim();
-
-  // Culprit options - exclude victims
-  const culpritOptions = nonVictimCharacters;
-
-  // Show form if not yet generated
-  if (!cluesComplete && !cluesGenerating) {
-    return (
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold text-white mb-3">
-            Define the Crime
-          </h2>
-          <p className="text-slate-400">
-            Who did it? Why? And how? The clues will be generated based on these details.
-          </p>
+      {/* Points */}
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-slate-400">Points:</label>
+          <input
+            type="number"
+            value={clue.points}
+            onChange={(e) => onUpdate({ points: parseInt(e.target.value) || 0 })}
+            className="w-16 px-2 py-1 bg-slate-900/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+          />
         </div>
 
-        <div className="space-y-6">
-          {/* Crime Type */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Type of Crime
-            </label>
-            <select
-              value={crimeInput.crimeType}
-              onChange={(e) => handleInputChange('crimeType', e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700/50 text-white focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 focus:outline-none transition-all"
-            >
-              {CRIME_TYPES.map((type) => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
-                </option>
-              ))}
-            </select>
-          </div>
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="text-sm text-slate-400 hover:text-white"
+        >
+          {isExpanded ? 'Hide Details' : 'Show Details'}
+        </button>
 
-          {/* Culprit Selection */}
+        <button
+          onClick={onDelete}
+          className="ml-auto text-sm text-slate-500 hover:text-red-400"
+        >
+          Delete
+        </button>
+      </div>
+
+      {/* Expanded Details */}
+      {isExpanded && (
+        <div className="pt-3 border-t border-slate-700">
+          {/* Revealed By */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              The Culprit
-              <span className="text-slate-500 font-normal ml-2">(Who committed the crime?)</span>
-            </label>
-            <div className="grid grid-cols-1 gap-3">
-              {culpritOptions.map((char) => (
+            <label className="block text-xs text-slate-400 mb-2">Revealed By:</label>
+            <div className="flex flex-wrap gap-2">
+              {characters.map((char) => (
                 <button
                   key={char.id}
-                  type="button"
-                  onClick={() => handleInputChange('culpritId', char.tempId)}
+                  onClick={() => {
+                    const isSelected = clue.revealedBy.includes(char.id);
+                    onUpdate({
+                      revealedBy: isSelected
+                        ? clue.revealedBy.filter((id) => id !== char.id)
+                        : [...clue.revealedBy, char.id],
+                    });
+                  }}
                   className={`
-                    flex items-center gap-4 p-4 rounded-xl border transition-all text-left
-                    ${crimeInput.culpritId === char.tempId
-                      ? 'bg-red-500/20 border-red-500/50'
-                      : 'bg-slate-800/30 border-slate-700/30 hover:border-slate-600'
+                    px-3 py-1 rounded-lg text-sm transition-all
+                    ${clue.revealedBy.includes(char.id)
+                      ? 'bg-violet-500/20 text-violet-400 border border-violet-500'
+                      : 'bg-slate-700 text-slate-400 border border-slate-600 hover:border-slate-500'
                     }
                   `}
                 >
-                  {/* Avatar */}
-                  <div className="w-12 h-12 rounded-full bg-slate-700/50 flex items-center justify-center overflow-hidden">
-                    {char.imageUrl ? (
-                      <img src={char.imageUrl} alt={char.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-2xl">👤</span>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <p className={`font-medium ${crimeInput.culpritId === char.tempId ? 'text-red-300' : 'text-white'}`}>
-                      {char.name}
-                    </p>
-                    <p className="text-sm text-slate-400">{char.role}</p>
-                  </div>
-                  {crimeInput.culpritId === char.tempId && (
-                    <span className="px-3 py-1 rounded-full bg-red-500/30 text-red-300 text-xs font-bold">
-                      GUILTY
-                    </span>
-                  )}
+                  {char.name}
                 </button>
               ))}
             </div>
           </div>
-
-          {/* Motive */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Motive
-              <span className="text-slate-500 font-normal ml-2">(Why did they do it?)</span>
-            </label>
-            <textarea
-              value={crimeInput.motive}
-              onChange={(e) => handleInputChange('motive', e.target.value)}
-              placeholder="Greed drove them to eliminate the only person who knew about the hidden inheritance..."
-              rows={3}
-              className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 focus:outline-none transition-all resize-none"
-            />
-          </div>
-
-          {/* Method */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Method
-              <span className="text-slate-500 font-normal ml-2">(How did they commit the crime?)</span>
-            </label>
-            <textarea
-              value={crimeInput.method}
-              onChange={(e) => handleInputChange('method', e.target.value)}
-              placeholder="Slipped poison into the victim's evening drink during the confusion of the party..."
-              rows={3}
-              className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 focus:outline-none transition-all resize-none"
-            />
-          </div>
-
-          {/* Generate Button */}
-          <button
-            onClick={handleGenerate}
-            disabled={!isFormValid}
-            className={`
-              w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all transform
-              ${isFormValid
-                ? 'bg-gradient-to-r from-amber-500 via-violet-500 to-pink-500 text-white hover:scale-[1.02] hover:shadow-lg hover:shadow-violet-500/25 active:scale-[0.98]'
-                : 'bg-slate-700/50 text-slate-500 cursor-not-allowed'
-              }
-            `}
-          >
-            Generate Clues & Evidence
-          </button>
         </div>
-      </div>
-    );
-  }
-
-  // Show generating state
-  if (cluesGenerating) {
-    return (
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-slate-800/50 border border-violet-500/30 mb-4">
-            <div className="w-5 h-5 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
-            <span className="text-violet-300 font-medium">Generating clues and evidence...</span>
-          </div>
-          <p className="text-slate-500">Creating a web of evidence for players to uncover</p>
-        </div>
-
-        <div className="grid gap-4">
-          {[...Array(6)].map((_, i) => (
-            <SkeletonCard key={i} className="h-28" />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  // Show generated results with tabbed layout
-  if (!generatedPlotPoints) {
-    return null;
-  }
-
-  const tabs = [
-    { id: 'timeline' as const, label: 'Timeline', icon: '📅', count: generatedStory?.actualEvents.length },
-    { id: 'characters' as const, label: 'Characters', icon: '👥', count: completedCharacters.length },
-    { id: 'clues' as const, label: 'Clues', icon: '🔎', count: generatedPlotPoints.length },
-    { id: 'validate' as const, label: 'Validate', icon: '✓', count: validationWarnings?.length },
-  ];
-
-  return (
-    <div className="max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="text-center mb-6">
-        <h2 className="text-3xl font-bold text-white mb-2">
-          Review Your Mystery
-        </h2>
-        <p className="text-slate-400 text-sm">
-          Check each section before publishing
-        </p>
-      </div>
-
-      {/* Tab Bar */}
-      <div className="flex gap-2 mb-6 p-1 rounded-xl bg-slate-800/50 border border-slate-700/50">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`
-              flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-all
-              ${activeTab === tab.id
-                ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30'
-                : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
-              }
-            `}
-          >
-            <span>{tab.icon}</span>
-            <span className="hidden sm:inline">{tab.label}</span>
-            {tab.count !== undefined && tab.count > 0 && (
-              <span className={`px-1.5 py-0.5 rounded-full text-xs ${
-                tab.id === 'validate' && validationWarnings && validationWarnings.some(w => w.severity === 'critical')
-                  ? 'bg-red-500/30 text-red-300'
-                  : 'bg-slate-700/50 text-slate-400'
-              }`}>
-                {tab.count}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab Content */}
-      <div className="min-h-[400px]">
-        {activeTab === 'timeline' && (
-          <div className="p-4 rounded-xl bg-slate-800/20 border border-slate-700/30">
-            <TimelineSection />
-          </div>
-        )}
-
-        {activeTab === 'characters' && (
-          <div className="p-4 rounded-xl bg-slate-800/20 border border-slate-700/30">
-            <CharacterKnowledgeSection />
-          </div>
-        )}
-
-        {activeTab === 'clues' && (
-          <div className="space-y-6">
-            <ClueSummary
-              plotPoints={generatedPlotPoints}
-              minimumPointsToAccuse={minimumPointsToAccuse}
-              perfectScoreThreshold={perfectScoreThreshold}
-              delay={0}
-            />
-            <div className="space-y-4">
-              {generatedPlotPoints.map((pp) => (
-                <ClueCard
-                  key={pp.id}
-                  plotPoint={pp}
-                  characters={completedCharacters}
-                  delay={0}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'validate' && (
-          <div className="space-y-6">
-            {/* Validate Button */}
-            <div className="flex justify-center">
-              <button
-                onClick={handleValidate}
-                disabled={isValidating}
-                className={`
-                  flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all
-                  ${isValidating
-                    ? 'bg-slate-700/50 text-slate-400 cursor-wait'
-                    : 'bg-violet-500/20 border border-violet-500/30 text-violet-300 hover:bg-violet-500/30 hover:border-violet-500/50'
-                  }
-                `}
-              >
-                {isValidating ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
-                    Validating...
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    {validationWarnings ? 'Re-validate' : 'Run Validation'}
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Validation Results */}
-            {validationWarnings && validationWarnings.length > 0 && (
-              <ValidationResults warnings={validationWarnings} />
-            )}
-
-            {validationWarnings && validationWarnings.length === 0 && (
-              <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center">
-                <span className="text-emerald-300">All checks passed! Your mystery is ready.</span>
-              </div>
-            )}
-
-            {/* Solution Preview */}
-            <div className="p-4 rounded-xl bg-slate-800/20 border border-slate-700/30">
-              <SolutionSection />
-            </div>
-
-            {/* Navigation */}
-            <div className="flex items-center gap-4 pt-4">
-              <button
-                onClick={handleBack}
-                className="px-6 py-3 rounded-xl font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all"
-              >
-                ← Back
-              </button>
-
-              <button
-                onClick={handleProceed}
-                disabled={!canProceedFromClues}
-                className="flex-1 py-4 px-6 rounded-xl font-semibold text-lg bg-gradient-to-r from-amber-500 via-violet-500 to-pink-500 text-white hover:scale-[1.02] hover:shadow-lg hover:shadow-violet-500/25 active:scale-[0.98] transition-all transform"
-              >
-                Continue to World
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
-}
-
-// ============================================================================
-// Main Export - Routes to appropriate flow
-// ============================================================================
-
-export function CluesStage() {
-  const { state } = useWizard();
-
-  if (state.useScaffoldFlow) {
-    return <ScaffoldCluesStage />;
-  }
-
-  return <LegacyCluesStage />;
 }

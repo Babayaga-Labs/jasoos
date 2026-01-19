@@ -17,7 +17,14 @@ export async function POST(request: NextRequest) {
     }
 
     const story = JSON.parse(fs.readFileSync(storyPath, 'utf-8'));
-    const { characters: allCharacters } = JSON.parse(fs.readFileSync(charactersPath, 'utf-8'));
+    const charactersData = JSON.parse(fs.readFileSync(charactersPath, 'utf-8'));
+
+    // Handle both formats: { characters: [...] } or just [...]
+    const allCharacters = Array.isArray(charactersData) ? charactersData : charactersData.characters;
+
+    if (!allCharacters) {
+      return NextResponse.json({ error: 'Invalid characters data' }, { status: 500 });
+    }
 
     // Filter out victims - they can't be interrogated (they're dead/missing)
     const interactableCharacters = allCharacters.filter((c: any) => !c.isVictim);

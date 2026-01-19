@@ -2,25 +2,25 @@
 
 import { WizardLayout } from '@/components/create/wizard/WizardLayout';
 import { useWizard } from '@/components/create/wizard/WizardContext';
-import { StoryStage } from '@/components/create/stages/StoryStage';
+import { PromptStage } from '@/components/create/stages/PromptStage';
+import { FoundationStage } from '@/components/create/stages/FoundationStage';
 import { CharactersStage } from '@/components/create/stages/CharactersStage';
 import { CluesStage } from '@/components/create/stages/CluesStage';
-import { WorldStage } from '@/components/create/stages/WorldStage';
 
 function WizardContent() {
   const { state } = useWizard();
 
   switch (state.currentStage) {
-    case 'story':
-      return <StoryStage />;
+    case 'prompt':
+      return <PromptStage />;
+    case 'foundation':
+      return <FoundationStage />;
     case 'characters':
       return <CharactersStage />;
     case 'clues':
       return <CluesStage />;
-    case 'world':
-      return <WorldStage />;
     default:
-      return <StoryStage />;
+      return <PromptStage />;
   }
 }
 

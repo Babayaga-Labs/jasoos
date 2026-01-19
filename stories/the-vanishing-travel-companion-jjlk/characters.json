@@ -1,0 +1,269 @@
+[
+  {
+    "id": "char_1",
+    "tempId": "char_1",
+    "name": "Krishna",
+    "role": "The Host",
+    "age": 23,
+    "isGuilty": true,
+    "isVictim": false,
+    "personality": {
+      "traits": [
+        "Outwardly charismatic",
+        "Secretly envious",
+        "Manipulative"
+      ],
+      "speechStyle": "Articulate and composed, often deflecting with humor",
+      "quirks": [
+        "Constantly adjusts his glasses when nervous",
+        "Taps fingers in rhythm when thinking"
+      ]
+    },
+    "appearance": {
+      "description": "Tall and lean with carefully styled black hair and thick-rimmed glasses. Wears trendy streetwear with designer touches. Always maintains a meticulously groomed appearance with perfectly maintained nails.",
+      "imagePrompt": "Portrait of a 23-year-old Indian man with thick-rimmed glasses, styled black hair, wearing a premium streetwear hoodie, confident smirk, modern apartment background, soft lighting, high-end fashion style"
+    },
+    "knowledge": {
+      "knowsAboutCrime": "Stole earphones at 19:00, hid them during dinner prep at 19:30",
+      "knowsAboutOthers": [
+        "Sujal discussed budget concerns at 19:15",
+        "Siddy was telling stories at 18:30",
+        "Prisha announced new job at 19:45"
+      ],
+      "alibi": "Claims to have been organizing living room at 19:30 and making food calls at 18:45"
+    },
+    "statement": "Krishna hosted the gathering and was frequently moving between rooms handling host duties. He had private conversations with Sujal about trip finances.",
+    "secrets": [
+      {
+        "content": "Stole the earphones out of jealousy and resentment over always being the 'provider' but never the owner of premium items",
+        "willingnessToReveal": "never",
+        "revealCondition": "Only if caught with undeniable evidence"
+      }
+    ],
+    "behaviorUnderPressure": {
+      "defensive": "Becomes overly helpful and starts organizing search efforts",
+      "whenCaughtLying": "Laughs it off and creates elaborate explanations",
+      "whenAccused": "Acts offended and reminds others of his hospitality"
+    },
+    "relationships": {
+      "char_2": "Brother, complex relationship with underlying competition",
+      "char_3": "Friend but secretly dislikes his carefree attitude",
+      "char_4": "Maintains friendly facade while envying her success",
+      "char_5": "Casual friend, keeps at arm's length"
+    },
+    "imageUrl": "https://v3b.fal.media/files/b/0a8af09a/fD1CpRV6BrEXHYnWZleAU.jpg"
+  },
+  {
+    "id": "char_2",
+    "tempId": "char_2",
+    "name": "Sujal",
+    "role": "The Inside Man",
+    "age": 21,
+    "isGuilty": false,
+    "isVictim": false,
+    "personality": {
+      "traits": [
+        "Analytical",
+        "Quiet observer",
+        "Loyal to family"
+      ],
+      "speechStyle": "Precise and measured, speaks only when necessary",
+      "quirks": [
+        "Fidgets with phone when uncomfortable",
+        "Always stands with arms crossed"
+      ]
+    },
+    "appearance": {
+      "description": "Shorter than his brother, with a athletic build and casual style. Wears simple jeans and graphic tees with running shoes. Has a small scar above his right eyebrow.",
+      "imagePrompt": "Portrait of a 21-year-old Indian man, athletic build, casual graphic tee, subtle scar above right eyebrow, thoughtful expression, modern casual style, natural pose"
+    },
+    "knowledge": {
+      "knowsAboutCrime": "Discussed finances with Krishna at 19:15, away from coffee table area",
+      "knowsAboutOthers": [
+        "Krishna seemed concerned about money during private talk",
+        "Was present for Prisha's job announcement"
+      ],
+      "alibi": "Was in private conversation with Krishna at 19:15, then at dinner with group"
+    },
+    "statement": "Sujal had a private discussion with Krishna about trip finances in the bedroom, then joined others for dinner.",
+    "secrets": [
+      {
+        "content": "Knows about his brother's financial struggles but keeps it private",
+        "willingnessToReveal": "medium",
+        "revealCondition": "If it would help solve the crime without severely damaging his brother"
+      }
+    ],
+    "behaviorUnderPressure": {
+      "defensive": "Becomes very quiet and observant",
+      "whenCaughtLying": "Admits truth quickly to avoid conflict",
+      "whenAccused": "Calmly provides logical alibis"
+    },
+    "relationships": {
+      "char_1": "Brother, protective but aware of his flaws",
+      "char_3": "Friendly but wary of his influence",
+      "char_4": "Mutual respect and understanding",
+      "char_5": "Neutral, limited interaction"
+    },
+    "imageUrl": "https://v3b.fal.media/files/b/0a8af09a/6Sbk4fqwLkOG78efpbh3J.jpg"
+  },
+  {
+    "id": "char_3",
+    "tempId": "char_3",
+    "name": "Siddy",
+    "role": "The Known Troublemaker",
+    "age": 24,
+    "isGuilty": false,
+    "isVictim": false,
+    "personality": {
+      "traits": [
+        "Impulsive",
+        "Charismatic",
+        "Attention-seeking"
+      ],
+      "speechStyle": "Loud and animated, uses lots of slang",
+      "quirks": [
+        "Excessive gesturing while talking",
+        "Constantly checking social media"
+      ]
+    },
+    "appearance": {
+      "description": "Medium height with dyed blonde highlights and multiple ear piercings. Wears ripped designer jeans and limited edition sneakers. Has a small tattoo on his wrist.",
+      "imagePrompt": "Portrait of a 24-year-old Indian man, dyed blonde highlights, multiple ear piercings, designer ripped jeans, limited edition sneakers, confident pose, urban background"
+    },
+    "knowledge": {
+      "knowsAboutCrime": "Was telling stories when earphones were likely taken",
+      "knowsAboutOthers": [
+        "Everyone except Krishna was listening to stories at 18:30",
+        "Saw Prisha working on itinerary at 18:15"
+      ],
+      "alibi": "Was entertaining group with stories at 18:30, then at dinner table"
+    },
+    "statement": "Siddy was telling stories to the group during the early part of the gathering, capturing everyone's attention except Krishna's.",
+    "secrets": [
+      {
+        "content": "Previously borrowed items without asking but never returned them",
+        "willingnessToReveal": "low",
+        "revealCondition": "If directly confronted with evidence of past incidents"
+      }
+    ],
+    "behaviorUnderPressure": {
+      "defensive": "Becomes loud and confrontational",
+      "whenCaughtLying": "Tries to charm his way out",
+      "whenAccused": "Gets aggressive and brings up others' past mistakes"
+    },
+    "relationships": {
+      "char_1": "Friend but senses underlying tension",
+      "char_2": "Slight rivalry over group influence",
+      "char_4": "Flirtatious friendship",
+      "char_5": "Party buddies but not close friends"
+    },
+    "imageUrl": "https://v3b.fal.media/files/b/0a8af09a/s5-sI9Jwa7y9pI4Mp7yvq.jpg"
+  },
+  {
+    "id": "char_4",
+    "tempId": "char_4",
+    "name": "Prisha",
+    "role": "The Close Connection",
+    "age": 23,
+    "isGuilty": false,
+    "isVictim": true,
+    "personality": {
+      "traits": [
+        "Organized",
+        "Direct",
+        "Emotionally intelligent"
+      ],
+      "speechStyle": "Clear and assertive, occasionally sarcastic",
+      "quirks": [
+        "Plays with her necklace when thinking",
+        "Always has perfectly manicured nails"
+      ]
+    },
+    "appearance": {
+      "description": "Petite with long black hair usually in a sleek ponytail. Wears minimalist jewelry and business casual attire. Always has immaculate makeup and carries a designer tote.",
+      "imagePrompt": "Portrait of a 23-year-old Indian woman, sleek ponytail, minimal gold jewelry, business casual blazer, confident pose, natural makeup, modern office style"
+    },
+    "knowledge": {
+      "knowsAboutCrime": "Saw victim place earphones on table at 18:15",
+      "knowsAboutOthers": [
+        "Worked with victim on itinerary at 18:15",
+        "Krishna was absent during story time"
+      ],
+      "alibi": "Was organizing trip itinerary at 18:15, then at dinner announcing job"
+    },
+    "statement": "Prisha was working on trip planning with the victim early in the evening and later shared news about a job offer during dinner.",
+    "secrets": [
+      {
+        "content": "Recently received a job offer that would take her away from the friend group",
+        "willingnessToReveal": "medium",
+        "revealCondition": "If it becomes relevant to group dynamics discussion"
+      }
+    ],
+    "behaviorUnderPressure": {
+      "defensive": "Becomes methodical and starts gathering facts",
+      "whenCaughtLying": "Quickly apologizes and explains reasoning",
+      "whenAccused": "Responds with logical arguments and evidence"
+    },
+    "relationships": {
+      "char_1": "Close friend but growing distant",
+      "char_2": "Trusts his judgment",
+      "char_3": "Enjoys his energy but keeps professional distance",
+      "char_5": "Newer friendship, still developing trust"
+    },
+    "imageUrl": "https://v3b.fal.media/files/b/0a8af09a/QkCzCHE1oDmVsILQkRyMI.jpg"
+  },
+  {
+    "id": "char_5",
+    "tempId": "char_5",
+    "name": "Chopus",
+    "role": "The Wild Card",
+    "age": 22,
+    "isGuilty": false,
+    "isVictim": false,
+    "personality": {
+      "traits": [
+        "Mysterious",
+        "Unpredictable",
+        "Observant"
+      ],
+      "speechStyle": "Brief and cryptic, often uses humor to deflect",
+      "quirks": [
+        "Always sits in corners observing",
+        "Doodles continuously in a notebook"
+      ]
+    },
+    "appearance": {
+      "description": "fat blob indian, ADHD final boss",
+      "imagePrompt": "Portrait of a 22-year-old Indian man, messy dark hair, round glasses, oversized vintage sweater, leather messenger bag, thoughtful expression, artistic style"
+    },
+    "knowledge": {
+      "knowsAboutCrime": "Witnessed Krishna's suspicious movement past coffee table at 19:00",
+      "knowsAboutOthers": [
+        "Saw Krishna take unusual route through room",
+        "Noticed Krishna directing search away from bedroom"
+      ],
+      "alibi": "Was observing room throughout evening, then at dinner with group"
+    },
+    "statement": "Chopus noticed Krishna taking an unusual path through the living room and later observed him steering the search party away from certain areas.",
+    "secrets": [
+      {
+        "content": "Witnessed suspicious behavior but unsure if it's relevant",
+        "willingnessToReveal": "high",
+        "revealCondition": "If directly asked about observations during the incident"
+      }
+    ],
+    "behaviorUnderPressure": {
+      "defensive": "Becomes more withdrawn and mysterious",
+      "whenCaughtLying": "Reveals truth with philosophical explanation",
+      "whenAccused": "Responds with cryptic observations about others"
+    },
+    "relationships": {
+      "char_1": "New to the group, still establishing trust",
+      "char_2": "Respects his analytical nature",
+      "char_3": "Amused by his antics but keeps distance",
+      "char_4": "Admires her directness"
+    },
+    "imageUrl": "https://v3b.fal.media/files/b/0a8af09f/x7854AB1kKEbFDn0oHfq8.jpg",
+    "imageGenerating": false
+  }
+]

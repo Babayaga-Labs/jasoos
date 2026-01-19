@@ -1,0 +1,36 @@
+{
+  "id": "the-vanishing-travel-companion-jjlk",
+  "title": "The Vanishing Travel Companion",
+  "synopsis": "Minutes before a group trip, a prized pair of earphones mysteriously disappears from a crowded room. With time ticking and tensions rising, five close friends suddenly find themselves caught in a web of suspicion. What starts as a simple missing item quickly unravels the complex dynamics within the group.",
+  "crimeType": "theft",
+  "setting": {
+    "location": "Krishna's Studio Apartment",
+    "timePeriod": "modern",
+    "atmosphere": "claustrophobic and tense, with mounting pressure from the impending departure"
+  },
+  "victimParagraph": "The owner of the missing earphones isn't just losing a piece of technology - they're losing their trusted travel companion and source of personal space in group settings. These weren't just any earphones; they represented comfort and control in social situations, making their theft particularly personal and disruptive to the upcoming trip.",
+  "sceneImageUrl": "https://v3b.fal.media/files/b/0a8af0bf/2HfYdqCbBlQVgf1NFm5Rn.jpg",
+  "timeline": [
+    "18:00 - Everyone arrives at Krishna's apartment for the pre-trip gathering. Krishna welcomes guests while showing off his new home theater setup",
+    "18:15 - Victim places earphones on coffee table while helping Prisha organize trip itinerary in living room",
+    "18:30 - Siddy starts telling stories about past adventures, drawing everyone's attention except Krishna",
+    "18:45 - Krishna offers to order food and goes to kitchen to make calls, leaving others in living room",
+    "19:00 - Chopus notices Krishna return from kitchen through unusual route past coffee table",
+    "19:15 - Sujal and Krishna discuss budget concerns for trip in private bedroom conversation",
+    "19:30 - Food arrives; everyone moves to dining area except Krishna who 'organizes' living room",
+    "19:45 - Prisha announces her new job offer during dinner, causing animated group discussion",
+    "20:15 - Group begins searching apartment; Krishna 'helps' while directing search away from his bedroom",
+    "20:30 - Chopus mentions seeing Krishna's unusual movement earlier; Krishna deflects by suggesting Siddy's past behavior"
+  ],
+  "solution": {
+    "culprit": "Krishna",
+    "method": "During the food ordering distraction, Krishna pocketed the earphones while walking past the coffee table. He later used the dinner preparation time to hide them in his bedroom inside a hollowed-out book.",
+    "motive": "Struggling financially and envious of others' possessions, Krishna stole the earphones out of resentment. His role as host and provider masked his growing bitterness about not owning premium items himself.",
+    "explanation": "Krishna created multiple distractions throughout the evening to execute and cover up his theft. His unusual movement past the coffee table, noticed by Chopus, was the actual theft. The private conversation with Sujal about finances reveals his motive, while his attempt to deflect suspicion onto Siddy shows consciousness of guilt."
+  },
+  "scoring": {
+    "minimumPointsToAccuse": 100,
+    "perfectScoreThreshold": 190
+  },
+  "createdAt": "2026-01-18T23:06:32.902Z"
+}

@@ -1,66 +1,60 @@
 import { NextRequest } from 'next/server';
-import {
-  validateStoryConsistency,
-  UGCGeneratedData,
-  UGCGeneratedStory,
+import { validateFoundationStory, MIN_CHARACTERS } from '@/packages/ai';
+import type {
   UGCGeneratedCharacter,
-  UGCGeneratedPlotPoint,
-} from '@/packages/ai';
+  UGCGeneratedClue,
+  UGCSolution,
+} from '@/packages/ai/types/ugc-types';
 
+interface ValidateRequest {
+  characters: UGCGeneratedCharacter[];
+  clues: UGCGeneratedClue[];
+  timeline: string[];
+  solution: UGCSolution;
+  scoring: {
+    minimumPointsToAccuse: number;
+    perfectScoreThreshold: number;
+  };
+}
+
+/**
+ * Validate story without publishing
+ * POST /api/ugc/validate
+ */
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { story, characters, plotPoints } = body as {
-      story: UGCGeneratedStory;
-      characters: UGCGeneratedCharacter[];
-      plotPoints: {
-        plotPoints: UGCGeneratedPlotPoint[];
-        minimumPointsToAccuse: number;
-        perfectScoreThreshold: number;
-      };
-    };
+    const body = await request.json() as ValidateRequest;
 
-    // Validate required fields
-    if (!story) {
-      return new Response(
-        JSON.stringify({ error: 'story is required' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+    // Basic validation
+    if (!body.characters || body.characters.length < MIN_CHARACTERS) {
+      return Response.json({ error: `At least ${MIN_CHARACTERS} characters are required` }, { status: 400 });
     }
-
-    if (!characters || !Array.isArray(characters)) {
-      return new Response(
-        JSON.stringify({ error: 'characters array is required' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+    if (!body.clues || body.clues.length === 0) {
+      return Response.json({ error: 'At least one clue is required' }, { status: 400 });
     }
-
-    if (!plotPoints || !plotPoints.plotPoints) {
-      return new Response(
-        JSON.stringify({ error: 'plotPoints is required' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+    if (!body.solution) {
+      return Response.json({ error: 'Solution is required' }, { status: 400 });
     }
-
-    // Build the data structure expected by validation
-    const data: UGCGeneratedData = {
-      story,
-      characters,
-      plotPoints,
-    };
 
     // Run validation
-    const result = validateStoryConsistency(data);
+    const validationResult = validateFoundationStory({
+      clues: body.clues,
+      characters: body.characters,
+      timeline: body.timeline || [],
+      solution: body.solution,
+      minimumPointsToAccuse: body.scoring?.minimumPointsToAccuse || 50,
+      perfectScoreThreshold: body.scoring?.perfectScoreThreshold || 150,
+    });
 
-    return new Response(JSON.stringify(result), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
+    return Response.json({
+      warnings: validationResult.warnings,
+      isPublishable: validationResult.isPublishable,
     });
   } catch (error) {
-    console.error('Error in UGC validate:', error);
-    return new Response(
-      JSON.stringify({ error: 'Validation failed', details: error instanceof Error ? error.message : 'Unknown error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    console.error('Validation error:', error);
+    return Response.json(
+      { error: error instanceof Error ? error.message : 'Validation failed' },
+      { status: 500 }
     );
   }
 }

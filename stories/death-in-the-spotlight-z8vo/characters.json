@@ -1,0 +1,222 @@
+{
+  "characters": [
+    {
+      "id": "char_1",
+      "tempId": "char_1",
+      "name": "Olivia Zhang",
+      "role": "Aspiring Model Roommate",
+      "age": 23,
+      "isGuilty": true,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "perfectionist",
+          "outwardly sweet",
+          "deeply insecure",
+          "calculating"
+        ],
+        "speechStyle": "Soft-spoken with carefully chosen words, often self-deprecating",
+        "quirks": [
+          "constantly checks her reflection in any surface",
+          "fidgets with her hair when lying"
+        ]
+      },
+      "appearance": {
+        "description": "Striking Asian features with high cheekbones and almond eyes, but slightly less conventionally perfect than Jade. Always impeccably dressed in minimalist luxury brands. Carries herself with a studied grace that occasionally appears forced.",
+        "imagePrompt": "Portrait of a 23-year-old Asian woman model, sharp cheekbones, long straight black hair, wearing expensive minimalist white designer clothing, slight tension in her perfect smile, soft studio lighting, modern setting"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Observed Jade's water bottle during lunch break and afternoon shoot; made comments about Asian representation; present during collapse",
+        "knowsAboutOthers": [
+          "Saw Sofia arrive at 9:15 AM and document behind scenes",
+          "Witnessed Marcus photographing throughout day",
+          "Aware of Natasha doing Jade's makeup early morning"
+        ],
+        "alibi": "Claims to have been in makeup chair during critical period before Jade's collapse"
+      },
+      "statement": "Olivia Zhang attended the morning meeting where Asian representation was discussed and was present on set during the afternoon shoot when Jade collapsed.",
+      "secrets": [
+        {
+          "content": "Poisoned Jade out of professional jealousy and deep resentment over being constantly compared to her as 'the other Asian model'",
+          "willingnessToReveal": "never",
+          "revealCondition": "Only if presented with irrefutable evidence"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes very quiet and proper, emphasizing her professional achievements",
+        "whenCaughtLying": "Deflects by bringing up her own insecurities and playing victim",
+        "whenAccused": "Maintains composure but hands shake noticeably"
+      },
+      "relationships": {
+        "char_2": "Flirtatious but professional",
+        "char_3": "Outwardly friendly but secretly resents her influence",
+        "char_4": "Cordial but distant"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8af4fb/w5J_CH6S5RCmHS28_Wd01.jpg"
+    },
+    {
+      "id": "char_2",
+      "tempId": "char_2",
+      "name": "Marcus Reid",
+      "role": "Photographer Roommate",
+      "age": 31,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "charismatic",
+          "workaholic",
+          "observant",
+          "slightly arrogant",
+          "nervous"
+        ],
+        "speechStyle": "Direct and professional with artistic flourishes",
+        "quirks": [
+          "talks with his hands while describing shots",
+          "always carries a vintage film camera"
+        ]
+      },
+      "appearance": {
+        "description": "FAT GUY",
+        "imagePrompt": "Portrait of a 31-year-old male photographer, tousled brown hair, artistic stubble, wearing a black turtleneck and vintage leather camera strap, confident pose, modern studio setting"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Overheard Jade's phone call about 'evidence' and 'going public'; documented entire shoot including collapse",
+        "knowsAboutOthers": [
+          "Collaborated with Sofia on separate shoot at 1:00 PM",
+          "Saw Olivia watching Jade intently during afternoon shoot",
+          "Observed Natasha's early morning makeup session with Jade"
+        ],
+        "alibi": "Was photographing with Sofia during 1:00 PM shoot, documented on camera"
+      },
+      "statement": "Marcus Reid was present from early morning setup, photographed throughout the day, and captured the entire sequence of events leading to Jade's collapse.",
+      "secrets": [
+        {
+          "content": "Was secretly documenting evidence of industry exploitation for a exposé",
+          "willingnessToReveal": "medium",
+          "revealCondition": "If convinced it could help solve the case"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes technically verbose about photography details",
+        "whenCaughtLying": "Admits truth quickly but justifies actions",
+        "whenAccused": "Responds with factual alibis and documentation"
+      },
+      "relationships": {
+        "char_1": "Professional admiration with slight romantic tension",
+        "char_3": "Collaborative work relationship",
+        "char_4": "Friendly but professional"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8af522/-Z98HPfUyVHL_M5YlXpQq.jpg",
+      "imageGenerating": false
+    },
+    {
+      "id": "char_3",
+      "tempId": "char_3",
+      "name": "Sofia Reyes",
+      "role": "Fashion Blogger Roommate",
+      "age": 27,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "ambitious",
+          "socially savvy",
+          "protective",
+          "quick-witted"
+        ],
+        "speechStyle": "Fast-paced with industry jargon and social media references",
+        "quirks": [
+          "constantly checking multiple phones",
+          "speaks in headline-ready soundbites"
+        ]
+      },
+      "appearance": {
+        "description": "Latina fashionista with bold style choices and ever-changing hair colors. Currently sporting a purple bob cut. Always camera-ready with perfect makeup and trending designer pieces.",
+        "imagePrompt": "Portrait of a 27-year-old Latina woman, short purple bob haircut, bold makeup, wearing eclectic designer clothing, multiple phones visible, confident smile, modern fashion studio background"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Noticed Jade's unusual tension; found exposé draft on phone; documented behind-scenes content",
+        "knowsAboutOthers": [
+          "Worked with Marcus during 1:00 PM shoot",
+          "Observed Olivia's comments during morning meeting",
+          "Saw Natasha overhearing hallway argument"
+        ],
+        "alibi": "Documented working with Marcus on separate shoot at 1:00 PM, verified by photos"
+      },
+      "statement": "Sofia Reyes was documenting behind-the-scenes content throughout the day and discovered the draft exposé on Jade's phone after the incident.",
+      "secrets": [
+        {
+          "content": "Knew about Jade's plans to expose industry corruption",
+          "willingnessToReveal": "high",
+          "revealCondition": "If she feels it would honor Jade's memory"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Starts live-streaming or recording interactions",
+        "whenCaughtLying": "Spins it as 'protecting client confidentiality'",
+        "whenAccused": "Responds with documented timelines and social media evidence"
+      },
+      "relationships": {
+        "char_1": "Professional friendship with underlying competition",
+        "char_2": "Close collaborative relationship",
+        "char_4": "Friendly but sometimes demanding"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8af4fb/Gv_QbGymeZSZF7vhFbZMF.jpg"
+    },
+    {
+      "id": "char_4",
+      "tempId": "char_4",
+      "name": "Natasha Petrov",
+      "role": "Makeup Artist",
+      "age": 35,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "detail-oriented",
+          "maternal",
+          "discreet",
+          "world-weary"
+        ],
+        "speechStyle": "Quiet and professional with a slight Russian accent",
+        "quirks": [
+          "organizes makeup brushes when stressed",
+          "hums classical music while working"
+        ]
+      },
+      "appearance": {
+        "description": "Elegant Russian woman with platinum blonde hair always in a tight bun. Wears all black with immaculate makeup and a signature red lip. Moves with precise, economical gestures.",
+        "imagePrompt": "Portrait of a 35-year-old Russian woman, platinum blonde hair in tight bun, perfect red lipstick, wearing all black professional clothing, serious expression, beauty studio setting"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Discussed announcement with Jade during morning makeup; overheard heated argument about 'keeping quiet'",
+        "knowsAboutOthers": [
+          "Present for Jade's early morning conversations",
+          "Saw Olivia enter break room after Jade's lunch",
+          "Observed Sofia documenting throughout day"
+        ],
+        "alibi": "Was in makeup room preparing supplies during lunch break, verified by multiple witnesses"
+      },
+      "statement": "Natasha Petrov did Jade's makeup in the morning and overheard several conversations throughout the day, including a heated argument in the hallway.",
+      "secrets": [
+        {
+          "content": "Overheard Jade arguing with someone about 'keeping quiet' the day before",
+          "willingnessToReveal": "medium",
+          "revealCondition": "If directly asked about Jade's last day"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes extremely focused on work tasks",
+        "whenCaughtLying": "Apologizes formally and corrects statement",
+        "whenAccused": "Maintains professional demeanor while providing detailed timeline"
+      },
+      "relationships": {
+        "char_1": "Professional but slightly maternal",
+        "char_2": "Mutual professional respect",
+        "char_3": "Slightly annoyed by her energy but professional"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8af4fb/4qkB6ZtCvVHoT0BY95YpH.jpg"
+    }
+  ]
+}

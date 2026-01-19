@@ -13,7 +13,8 @@ export async function POST(request: NextRequest) {
     const charactersPath = path.join(storyDir, 'characters.json');
 
     const story = JSON.parse(fs.readFileSync(storyPath, 'utf-8'));
-    const { characters } = JSON.parse(fs.readFileSync(charactersPath, 'utf-8'));
+    const charactersData = JSON.parse(fs.readFileSync(charactersPath, 'utf-8'));
+    const characters = Array.isArray(charactersData) ? charactersData : charactersData.characters;
 
     // Find the guilty character
     const guiltyCharacter = characters.find((c: any) => c.isGuilty);

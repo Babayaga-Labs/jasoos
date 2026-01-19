@@ -1,0 +1,143 @@
+[
+  {
+    "id": "financial_stress",
+    "description": "Krishna recently complained about struggling to pay rent and feeling left behind as friends buy premium items",
+    "points": 25,
+    "revealedBy": [
+      "char_2"
+    ],
+    "detectionHints": [
+      "money",
+      "finances",
+      "rent",
+      "expenses",
+      "Krishna's situation",
+      "problems"
+    ]
+  },
+  {
+    "id": "unusual_movement",
+    "description": "Krishna took an unnecessary detour past the coffee table when returning from making food order calls",
+    "points": 30,
+    "revealedBy": [
+      "char_5"
+    ],
+    "detectionHints": [
+      "movement",
+      "coffee table",
+      "walking",
+      "what did you see",
+      "suspicious",
+      "Krishna"
+    ]
+  },
+  {
+    "id": "private_conversation",
+    "description": "During private chat, Krishna expressed bitter jealousy about others' expensive travel gear",
+    "points": 25,
+    "revealedBy": [
+      "char_2"
+    ],
+    "detectionHints": [
+      "conversation",
+      "private talk",
+      "bedroom",
+      "what did Krishna say",
+      "Sujal"
+    ]
+  },
+  {
+    "id": "false_cleaning",
+    "description": "Krishna's 'organizing' of living room seemed focused on moving things rather than actual cleaning",
+    "points": 20,
+    "revealedBy": [
+      "char_5",
+      "char_3"
+    ],
+    "detectionHints": [
+      "cleaning",
+      "organizing",
+      "living room",
+      "behavior",
+      "suspicious"
+    ]
+  },
+  {
+    "id": "deflection_attempt",
+    "description": "Krishna quickly tried to blame Siddy when Chopus mentioned seeing unusual movement",
+    "points": 20,
+    "revealedBy": [
+      "char_3",
+      "char_5"
+    ],
+    "detectionHints": [
+      "blame",
+      "accusation",
+      "Siddy",
+      "reaction",
+      "what happened"
+    ]
+  },
+  {
+    "id": "search_direction",
+    "description": "Krishna kept suggesting searching areas far from his bedroom, acting nervous when anyone went near it",
+    "points": 20,
+    "revealedBy": [
+      "char_3",
+      "char_5"
+    ],
+    "detectionHints": [
+      "search",
+      "bedroom",
+      "nervous",
+      "behavior",
+      "suspicious"
+    ]
+  },
+  {
+    "id": "previous_comments",
+    "description": "Krishna had earlier expressed strong interest in the victim's earphones, asking detailed questions about them",
+    "points": 15,
+    "revealedBy": [
+      "char_3"
+    ],
+    "detectionHints": [
+      "earphones",
+      "interest",
+      "questions",
+      "earlier",
+      "before"
+    ]
+  },
+  {
+    "id": "distraction_pattern",
+    "description": "Krishna created multiple situations requiring attention elsewhere - food ordering, cleaning, suggesting searches",
+    "points": 20,
+    "revealedBy": [
+      "char_2",
+      "char_5"
+    ],
+    "detectionHints": [
+      "distractions",
+      "pattern",
+      "behavior",
+      "attention",
+      "suspicious"
+    ]
+  },
+  {
+    "id": "bedroom_access",
+    "description": "Krishna was the only person who went to his bedroom multiple times during the gathering",
+    "points": 15,
+    "revealedBy": [
+      "char_2"
+    ],
+    "detectionHints": [
+      "bedroom",
+      "movements",
+      "alone",
+      "private",
+      "access"
+    ]
+  }
+]

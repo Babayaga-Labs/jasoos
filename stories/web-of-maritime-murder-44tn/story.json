@@ -1,0 +1,38 @@
+{
+  "id": "web-of-maritime-murder-44tn",
+  "title": "Web of Maritime Murder",
+  "synopsis": "When May Parker, beloved aunt of Peter Parker, is found dead in her luxury cabin aboard the Crystal Seas cruise liner, all signs point to her nephew - the masked vigilante Spider-Man. But with multiple passengers harboring dark secrets and grudges, the truth may be more tangled than it appears.",
+  "crimeType": "murder",
+  "setting": {
+    "location": "The Crystal Seas Luxury Cruise Liner",
+    "timePeriod": "modern",
+    "atmosphere": "opulent yet claustrophobic, with mounting tension as passengers realize they're trapped at sea with a killer"
+  },
+  "victimParagraph": "May Parker was more than just the sweet elderly aunt everyone knew - she was a shrewd businesswoman who had recently acquired several valuable properties in Queens through her late husband's estate. Despite her gentle demeanor, she had begun making waves in local real estate circles and was planning to announce a major development project. Her murder occurred the night before a scheduled meeting with potential investors aboard the ship.",
+  "sceneImageUrl": "https://v3b.fal.media/files/b/0a8af11e/6BedRBFZXrvGUCFQ4Zs_l.jpg",
+  "timeline": [
+    "2:00 PM - May Parker checks into her luxury suite, assisted by Peter Parker who seems unusually agitated while handling her luggage",
+    "3:30 PM - Victoria Winters observes May in the ship's business center, printing documents related to her development project",
+    "4:45 PM - Sarah Thompson and May have tea in the main dining room, discussing suspicious property dealings. Marcus Bennett is seen taking notes from a nearby table",
+    "6:15 PM - Dr. Warren Miles examines Peter Parker after a reported anxiety episode, noticing his erratic behavior but clearing him for duty",
+    "7:30 PM - May visits the ship's safe to secure important documents, witnessed by Marcus Bennett who lingers nearby",
+    "8:45 PM - Victoria Winters attempts to schedule a private meeting with May, but is turned down",
+    "9:30 PM - Peter Parker begins his security rounds, documented on log but with a 45-minute gap near May's suite",
+    "10:15 PM - Sarah Thompson hears a muffled thud from May's direction while walking past, but assumes it's normal ship noise",
+    "10:20 PM - Peter Parker, in a psychotic episode, enters May's suite using his security override and kills her",
+    "10:45 PM - Dr. Miles notices Peter Parker washing his hands thoroughly in the medical bay bathroom",
+    "11:30 PM - Marcus Bennett sees Peter Parker disposing of something in the ship's waste chute",
+    "7:00 AM - Housekeeping discovers May's body in her suite"
+  ],
+  "solution": {
+    "culprit": "Peter Parker",
+    "method": "During a bipolar episode, Peter Parker used his security clearance to enter May's suite. Using his enhanced strength as Spider-Man, he crushed her skull in a moment of psychosis, then methodically cleaned up and disposed of evidence using his intimate knowledge of ship security protocols.",
+    "motive": "Peter's untreated bipolar disorder led to a severe psychotic break. The stress of maintaining his secret identity while managing ship security, combined with May's growing influence in real estate circles (which threatened to expose some of his vigilante activities), triggered a violent episode.",
+    "explanation": "Peter Parker's position as Security Chief provided him perfect access and knowledge to commit the crime and cover his tracks. His documented anxiety episode earlier that day, followed by the suspicious gap in his security rounds, coincides with the murder timeframe. Multiple witnesses observed his erratic behavior throughout the day, and his unusual activities after the murder - including thorough hand-washing and suspicious disposal of evidence - point to his guilt. The method of death (crushed skull) matches his enhanced abilities, which he tried to disguise as a random act of violence."
+  },
+  "scoring": {
+    "minimumPointsToAccuse": 100,
+    "perfectScoreThreshold": 195
+  },
+  "createdAt": "2026-01-18T23:22:29.507Z"
+}

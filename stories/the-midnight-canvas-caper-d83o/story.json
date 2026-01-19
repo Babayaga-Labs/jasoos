@@ -1,0 +1,38 @@
+{
+  "id": "the-midnight-canvas-caper-d83o",
+  "title": "The Midnight Canvas Caper",
+  "synopsis": "What should have been a perfectly orchestrated heist at the prestigious Hamilton Museum of Fine Art turns catastrophic when the crew discovers they weren't the only ones with plans that night. Now a priceless masterpiece is missing, a security guard lies dead, and nothing is quite what it seems.",
+  "crimeType": "murder",
+  "setting": {
+    "location": "Hamilton Museum of Fine Art",
+    "timePeriod": "modern",
+    "atmosphere": "elegant and austere by day, shadowy and treacherous by night"
+  },
+  "victimParagraph": "James Sullivan, 52, was more than just a security guard - he was a former art historian who chose this quieter life after a personal tragedy. Well-liked by the museum staff, Sullivan was known for his encyclopedic knowledge of the collections and his habit of catching small details others missed. His death transforms what seemed like a simple theft into something far more sinister.",
+  "sceneImageUrl": "https://v3b.fal.media/files/b/0a8af303/Gufb7vzd0BJZxFOjRl8uc.jpg",
+  "timeline": [
+    "6:30 PM - Victoria Blackwood begins restoration work on the Rembrandt in the conservation lab, seen by several staff members leaving for the day",
+    "7:15 PM - Derek Foster arrives for a private viewing appointment with Sullivan, discussing potential acquisitions",
+    "8:00 PM - Sarah O'Malley starts her cleaning shift, notices Sullivan and Victoria sharing coffee in the break room",
+    "8:45 PM - Marcus Chen performs his security check, notes Foster's agitated state while leaving the museum",
+    "9:15 PM - Victoria returns to conservation lab, claiming to need to finish delicate work before morning",
+    "9:30 PM - Sullivan makes his usual rounds, radios Chen about checking the Renaissance wing",
+    "10:00 PM - Sarah sees Victoria hurriedly leaving the break room, carrying her usual thermos",
+    "10:15 PM - Sullivan takes his regular coffee break, using his personal mug",
+    "10:45 PM - Victoria is recorded on security cameras leaving the building",
+    "11:00 PM - Sarah finds Sullivan unresponsive in the break room while emptying trash bins",
+    "11:05 PM - Marcus Chen calls emergency services",
+    "11:30 PM - Raymond Torres arrives, having been monitoring the museum due to recent theft attempts"
+  ],
+  "solution": {
+    "culprit": "Victoria Blackwood",
+    "method": "Victoria poisoned Sullivan's personal coffee mug with a fast-acting toxin while alone in the break room. Knowing his routine, she timed it perfectly so he would drink it during his regular 10:15 break. She used her regular presence in the museum and apparent work on the Rembrandt as cover.",
+    "motive": "Victoria had fallen in love with Sullivan during their late-night conversations about art history. When he discovered her plan to steal and replace the Rembrandt with a forgery, she realized he would report her. Unable to bear his rejection and the destruction of her scheme, she decided to silence him.",
+    "explanation": "Victoria Blackwood used her position as restoration expert and her knowledge of Sullivan's routines to orchestrate his murder. Security footage shows her suspicious behavior in the break room, and Sarah's witness account places her there just before Sullivan's death. The timing of events reveals that Victoria was the only person with both opportunity and access to Sullivan's mug, while her secret romantic feelings and theft plan provided compelling motivation for the murder."
+  },
+  "scoring": {
+    "minimumPointsToAccuse": 120,
+    "perfectScoreThreshold": 195
+  },
+  "createdAt": "2026-01-19T00:43:11.672Z"
+}

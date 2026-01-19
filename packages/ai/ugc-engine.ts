@@ -25,13 +25,23 @@ import type {
   UGCGeneratedPlotPoint,
   UGCDraftState,
   EditableSection,
-  // New scaffold-based types
+  // Scaffold-based types
   UGCStoryScaffold,
   UGCCharacterSuggestion,
   UGCCharacterFromScaffold,
   UGCScaffoldFormInput,
   UGCGeneratedTimeline,
   UGCGeneratedCharacterKnowledge,
+  // New foundation-based types (UGC Pipeline Redesign v2)
+  UGCFoundationCharacter,
+  UGCFoundation,
+  CulpritInfo,
+  FleshOutRequest,
+  FleshOutResponse,
+  UGCGeneratedClue,
+  UGCSolution,
+  FleshOutProgressEvent,
+  RegenerateTimelineRequest,
 } from './types/ugc-types';
 
 // ============================================================================
@@ -578,7 +588,7 @@ Respond with ONLY the JSON object, no other text.`;
 
   /**
    * Generate story scaffold from a basic premise (LLM Call 1)
-   * Returns title, hook, crime type, and character suggestions
+   * Returns title, synopsis, crime type, victim paragraph, and character suggestions
    */
   async generateStoryScaffold(premise: string): Promise<UGCStoryScaffold> {
     const prompt = `You are a mystery story architect. Given a basic premise, generate a story scaffold that provides structure while leaving room for user customization.
@@ -589,7 +599,7 @@ ${premise}
 Generate a JSON object with this structure:
 {
   "title": "Compelling 3-6 word title for the mystery",
-  "hook": "2-3 sentence polished premise that draws players in. This will be shown at the start of the game.",
+  "synopsis": "2-3 sentence polished premise that draws players in. This will be shown at the start of the game.",
   "crimeType": "murder" | "theft" | "kidnapping" | "fraud" | "sabotage",
   "setting": {
     "location": "Specific location inferred from premise (e.g., 'Westbrook Manor', 'The Silver Moon Casino')",
@@ -605,7 +615,7 @@ Generate a JSON object with this structure:
       "potentialMotive": "Vague hint at what could drive them to crime (user will elaborate)"
     }
   ],
-  "victimContext": "Brief description of the victim if applicable (1-2 sentences about who they were)"
+  "victimParagraph": "A compelling 2-3 sentence paragraph about the victim. Who were they? What was their role/status? Why might someone want them gone? This sets the emotional stakes."
 }
 
 RULES:
@@ -616,6 +626,7 @@ RULES:
 5. Include variety: someone with clear motive, someone with access, a red herring, an insider
 6. potentialMotive should be VAGUE - just a hint (e.g., "financial troubles", "old grudge") not a full backstory
 7. If the crime type isn't clear from the premise, infer the most fitting one
+8. The victimParagraph should be evocative and make the player care about solving the mystery
 
 Respond with ONLY the JSON object, no other text.`;
 
@@ -628,7 +639,18 @@ Respond with ONLY the JSON object, no other text.`;
       temperature: 0.7,
     });
 
-    return this.parseJSONResponse(text);
+    // Parse response and ensure backward compatibility
+    const scaffold = this.parseJSONResponse(text);
+
+    // Handle backward compatibility: if response has old field names, map them
+    if (scaffold.hook && !scaffold.synopsis) {
+      scaffold.synopsis = scaffold.hook;
+    }
+    if (scaffold.victimContext && !scaffold.victimParagraph) {
+      scaffold.victimParagraph = scaffold.victimContext;
+    }
+
+    return scaffold;
   }
 
   /**
@@ -662,7 +684,7 @@ Respond with ONLY the JSON object, no other text.`;
       difficulty: this.calculateDifficulty(formInput.characters.length),
       estimatedMinutes: 25 + (formInput.characters.length * 5),
       setting: formInput.scaffold.setting,
-      premise: formInput.scaffold.hook,
+      premise: formInput.scaffold.synopsis || formInput.scaffold.hook || '', // Support both new and old field names
       actualEvents: timeline.actualEvents,
       solution: timeline.solution,
     };
@@ -721,7 +743,7 @@ STORY SCAFFOLD:
 - Setting: ${formInput.scaffold.setting.location}, ${formInput.scaffold.setting.timePeriod}
 - Atmosphere: ${formInput.scaffold.setting.atmosphere}
 - Crime Type: ${formInput.scaffold.crimeType}
-${formInput.scaffold.victimContext ? `- Victim: ${formInput.scaffold.victimContext}` : ''}
+${formInput.scaffold.victimParagraph || formInput.scaffold.victimContext ? `- Victim: ${formInput.scaffold.victimParagraph || formInput.scaffold.victimContext}` : ''}
 
 CRIME DETAILS (CONFIDENTIAL - timeline must support this):
 - Culprit: ${culprit.name} (${culprit.role})
@@ -1871,6 +1893,488 @@ Respond with ONLY the JSON object, no other text.`;
     });
 
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+  }
+
+  // ==========================================================================
+  // NEW FLOW v2: Foundation-Based Generation (UGC Pipeline Redesign)
+  // ==========================================================================
+
+  /**
+   * Helper to create progress events
+   */
+  private createProgressEvent(
+    step: FleshOutProgressEvent['step'],
+    message: string,
+    progress: number
+  ): FleshOutProgressEvent {
+    return { type: 'progress', step, message, progress };
+  }
+
+  /**
+   * Main entry point for the new foundation-based flow.
+   * Takes minimal foundation data + character sketches + culprit info and generates:
+   * - Full character details with images
+   * - Timeline
+   * - Clues (without categories)
+   * - Solution
+   */
+  async fleshOutAndGenerate(
+    request: FleshOutRequest,
+    onProgress: (event: FleshOutProgressEvent) => void
+  ): Promise<FleshOutResponse> {
+    this.resetPromptTraces();
+
+    const { foundation, characters, culprit } = request;
+    const storyId = this.generateStoryIdFromTitle(foundation.title);
+
+    // Validate culprit exists
+    if (!characters.some(c => c.id === culprit.characterId)) {
+      throw new Error('Culprit character not found in character list');
+    }
+
+    // Step 1: Generate full character details (0% → 20%)
+    onProgress(this.createProgressEvent('characters', 'Generating character appearances and personalities...', 0));
+    const fleshedOutCharacters = await this.generateFullCharacterDetails(foundation, characters, culprit);
+    onProgress(this.createProgressEvent('characters', 'Character details generated', 20));
+
+    // Step 2: Generate timeline and solution (20% → 40%)
+    onProgress(this.createProgressEvent('timeline', 'Building the story timeline...', 20));
+    const { timeline, solution } = await this.generateTimelineAndSolution(foundation, fleshedOutCharacters, culprit);
+    onProgress(this.createProgressEvent('timeline', 'Timeline created', 40));
+
+    // Step 3: Generate clues (40% → 60%)
+    onProgress(this.createProgressEvent('clues', 'Creating discoverable clues...', 40));
+    const { clues, scoring } = await this.generateCluesWithoutCategories(foundation, fleshedOutCharacters, timeline, solution);
+    onProgress(this.createProgressEvent('clues', 'Clues generated', 60));
+
+    // Step 4: Generate character knowledge (60% → 75%)
+    onProgress(this.createProgressEvent('knowledge', 'Deriving what each character knows...', 60));
+    const charactersWithKnowledge = await this.addCharacterKnowledge(fleshedOutCharacters, timeline, solution);
+    onProgress(this.createProgressEvent('knowledge', 'Character knowledge derived', 75));
+
+    // Step 5: Generate character images (75% → 100%)
+    onProgress(this.createProgressEvent('images', 'Generating character portraits...', 75));
+    const charactersWithImages = await this.generateCharacterImagesForFleshOut(charactersWithKnowledge, foundation.setting);
+    onProgress(this.createProgressEvent('images', 'Generation complete!', 100));
+
+    return {
+      storyId,
+      characters: charactersWithImages,
+      clues,
+      timeline,
+      solution,
+      scoring,
+    };
+  }
+
+  /**
+   * Generate full character details from minimal foundation input
+   */
+  private async generateFullCharacterDetails(
+    foundation: UGCFoundation,
+    characters: UGCFoundationCharacter[],
+    culprit: CulpritInfo
+  ): Promise<UGCGeneratedCharacter[]> {
+    const characterList = characters.map(c => ({
+      id: c.id,
+      name: c.name,
+      role: c.role,
+      connectionHint: c.connectionHint,
+      isCulprit: c.id === culprit.characterId,
+    }));
+
+    const prompt = `You are a character designer for a mystery game. Generate detailed character profiles based on minimal sketches.
+
+STORY FOUNDATION:
+- Title: ${foundation.title}
+- Synopsis: ${foundation.synopsis}
+- Setting: ${foundation.setting.location}, ${foundation.setting.timePeriod}
+- Atmosphere: ${foundation.setting.atmosphere}
+- Crime Type: ${foundation.crimeType}
+- Victim: ${foundation.victimParagraph}
+
+CRIME DETAILS:
+- Culprit: The character marked as isCulprit
+- Motive: ${culprit.motive}
+- Method: ${culprit.method}
+
+CHARACTER SKETCHES:
+${JSON.stringify(characterList, null, 2)}
+
+For EACH character, generate a complete profile. Output a JSON array:
+[
+  {
+    "id": "original_character_id",
+    "tempId": "original_character_id",
+    "name": "Character name",
+    "role": "Their role",
+    "age": appropriate_age_number,
+    "isGuilty": true_if_culprit_false_otherwise,
+    "isVictim": false,
+    "personality": {
+      "traits": ["3-5 personality traits fitting their role and the setting"],
+      "speechStyle": "How they speak - formal, nervous, confident, etc.",
+      "quirks": ["2 behavioral quirks or mannerisms"]
+    },
+    "appearance": {
+      "description": "2-3 sentences describing their appearance fitting the setting and era",
+      "imagePrompt": "Detailed AI image generation prompt for a portrait"
+    },
+    "secrets": [
+      {
+        "content": "A secret this character has (related to crime for culprit, personal for others)",
+        "willingnessToReveal": "low" | "medium" | "high" | "never",
+        "revealCondition": "What would make them reveal this"
+      }
+    ],
+    "behaviorUnderPressure": {
+      "defensive": "How they act when feeling defensive",
+      "whenCaughtLying": "How they react when caught in a lie",
+      "whenAccused": "How they respond to direct accusation"
+    },
+    "relationships": {
+      "other_character_id": "Their relationship to that character"
+    }
+  }
+]
+
+CRITICAL RULES:
+1. The culprit's secret MUST relate to the crime and motive
+2. Each character should have a unique personality and appearance fitting the era
+3. Appearance descriptions should be vivid and specific for portrait generation
+4. Secrets should create interesting interrogation dynamics
+5. The image prompt should describe: age, gender, clothing style, expression, era-appropriate details
+
+Respond with ONLY the JSON array.`;
+
+    this.tracePrompt('flesh-out-characters', prompt);
+
+    const { text } = await generateText({
+      config: this.config.llm,
+      prompt,
+      maxTokens: 4000,
+      temperature: 0.7,
+    });
+
+    const generated = this.parseJSONResponse(text);
+
+    // Ensure we have all required fields and merge with original data
+    return generated.map((char: Partial<UGCGeneratedCharacter>) => ({
+      id: char.id || '',
+      tempId: char.tempId || char.id || '',
+      name: char.name || '',
+      role: char.role || '',
+      age: char.age || 30,
+      isGuilty: char.isGuilty || false,
+      isVictim: char.isVictim || false,
+      personality: char.personality || { traits: [], speechStyle: '', quirks: [] },
+      appearance: char.appearance || { description: '', imagePrompt: '' },
+      knowledge: { knowsAboutCrime: '', knowsAboutOthers: [], alibi: '' }, // Will be filled later
+      statement: '', // Will be filled later
+      secrets: char.secrets || [],
+      behaviorUnderPressure: char.behaviorUnderPressure || { defensive: '', whenCaughtLying: '', whenAccused: '' },
+      relationships: char.relationships || {},
+    }));
+  }
+
+  /**
+   * Generate timeline and solution from character details and crime info
+   */
+  private async generateTimelineAndSolution(
+    foundation: UGCFoundation,
+    characters: UGCGeneratedCharacter[],
+    culprit: CulpritInfo
+  ): Promise<{ timeline: string[]; solution: UGCSolution }> {
+    const culpritChar = characters.find(c => c.id === culprit.characterId);
+
+    const prompt = `You are a mystery plot architect. Create a detailed timeline of events for this mystery.
+
+STORY FOUNDATION:
+- Title: ${foundation.title}
+- Setting: ${foundation.setting.location}, ${foundation.setting.timePeriod}
+- Crime Type: ${foundation.crimeType}
+- Victim: ${foundation.victimParagraph}
+
+CRIME DETAILS:
+- Culprit: ${culpritChar?.name} (${culpritChar?.role})
+- Motive: ${culprit.motive}
+- Method: ${culprit.method}
+
+CHARACTERS:
+${characters.map(c => `- ${c.name} (${c.role}): ${c.personality.traits.join(', ')}
+  Secret: ${c.secrets[0]?.content || 'None specified'}`).join('\n')}
+
+Generate a JSON object:
+{
+  "timeline": [
+    "TIME - Event description showing what happened",
+    "Include 8-12 timestamped events",
+    "Show movements of all characters",
+    "Include the crime itself",
+    "End with discovery"
+  ],
+  "solution": {
+    "culprit": "${culpritChar?.name}",
+    "method": "Detailed description of how they committed the crime",
+    "motive": "Full explanation of why they did it",
+    "explanation": "3-4 sentence explanation for the player reveal, connecting all evidence"
+  }
+}
+
+TIMELINE RULES:
+1. Every character's secret should influence at least one event
+2. Show the culprit's OPPORTUNITY WINDOW (time alone near crime scene)
+3. Create WITNESS MOMENTS where other characters see something relevant
+4. Innocent characters should have VERIFIABLE activities
+5. The timeline should make the mystery SOLVABLE through interrogation
+
+Respond with ONLY the JSON object.`;
+
+    this.tracePrompt('generate-timeline-solution', prompt);
+
+    const { text } = await generateText({
+      config: this.config.llm,
+      prompt,
+      maxTokens: 2500,
+      temperature: 0.7,
+    });
+
+    const result = this.parseJSONResponse(text);
+    return {
+      timeline: result.timeline || [],
+      solution: result.solution || { culprit: '', method: '', motive: '', explanation: '' },
+    };
+  }
+
+  /**
+   * Generate clues without categories for the new flow
+   */
+  private async generateCluesWithoutCategories(
+    foundation: UGCFoundation,
+    characters: UGCGeneratedCharacter[],
+    timeline: string[],
+    solution: UGCSolution
+  ): Promise<{ clues: UGCGeneratedClue[]; scoring: { minimumPointsToAccuse: number; perfectScoreThreshold: number } }> {
+    // Filter out victims
+    const interactableCharacters = characters.filter(c => !c.isVictim);
+
+    const prompt = `You are creating clues for a detective mystery game. The ONLY way to discover information is through CHARACTER INTERROGATION.
+
+STORY:
+- Title: ${foundation.title}
+- Setting: ${foundation.setting.location}
+- Solution: ${solution.culprit} committed ${foundation.crimeType} because ${solution.motive}
+- Method: ${solution.method}
+
+TIMELINE:
+${timeline.join('\n')}
+
+CHARACTERS WHO CAN BE INTERROGATED:
+${interactableCharacters.map(c => `- ${c.id}: ${c.name} (${c.role})`).join('\n')}
+
+Create 8-12 clues that form a solvable mystery. Generate a JSON object:
+{
+  "clues": [
+    {
+      "id": "clue_snake_case_id",
+      "description": "What the player learns when this clue is revealed",
+      "points": 10-30,
+      "revealedBy": ["character_id_who_knows_this"],
+      "detectionHints": ["keywords", "phrases", "topics that trigger this clue"]
+    }
+  ],
+  "minimumPointsToAccuse": 50,
+  "perfectScoreThreshold": calculated_total_of_all_points
+}
+
+CLUE GENERATION RULES:
+1. EVERY clue MUST be assigned to at least one LIVING character who can reveal it
+2. Characters can only reveal clues they would realistically know from the timeline
+3. Include clues that:
+   - Point to the culprit's motive (at least 2)
+   - Expose the culprit's false alibi (at least 1-2)
+   - Show the culprit's opportunity (at least 1)
+   - Provide corroborating evidence (at least 2)
+4. Critical clues pointing to the culprit should be worth more points (25-30)
+5. Total possible points should be around 150-200
+
+DETECTION HINTS should include:
+- Direct question keywords ("where were you", "what did you see")
+- Topic triggers ("alibi", "that night", "relationship")
+- Character name mentions
+
+Respond with ONLY the JSON object.`;
+
+    this.tracePrompt('generate-clues-no-categories', prompt);
+
+    const { text } = await generateText({
+      config: this.config.llm,
+      prompt,
+      maxTokens: 3000,
+      temperature: 0.7,
+    });
+
+    const result = this.parseJSONResponse(text);
+    return {
+      clues: result.clues || [],
+      scoring: {
+        minimumPointsToAccuse: result.minimumPointsToAccuse || 50,
+        perfectScoreThreshold: result.perfectScoreThreshold || 150,
+      },
+    };
+  }
+
+  /**
+   * Add knowledge to characters based on timeline
+   */
+  private async addCharacterKnowledge(
+    characters: UGCGeneratedCharacter[],
+    timeline: string[],
+    solution: UGCSolution
+  ): Promise<UGCGeneratedCharacter[]> {
+    const prompt = `Derive what each character knows based on the timeline of events.
+
+TIMELINE:
+${timeline.join('\n')}
+
+SOLUTION:
+- Culprit: ${solution.culprit}
+- Method: ${solution.method}
+- Motive: ${solution.motive}
+
+CHARACTERS:
+${characters.map(c => `- ${c.id}: ${c.name} (${c.role}) - Guilty: ${c.isGuilty}`).join('\n')}
+
+Generate a JSON object mapping each character ID to their knowledge:
+{
+  "character_id": {
+    "knowsAboutCrime": "What they directly witnessed or know about the crime",
+    "knowsAboutOthers": ["Info they have about other characters from timeline"],
+    "alibi": "Where they claim to have been (FALSE for culprit, TRUE for innocents)",
+    "statement": "Third-person case summary for player display (1-2 sentences, like detective notes)"
+  }
+}
+
+RULES:
+1. Culprit's alibi MUST have holes or be verifiably false
+2. Innocent characters should have TRUE, verifiable alibis
+3. Each character should know something useful based on timeline events they witnessed
+4. knowsAboutOthers should be information they could reveal during interrogation
+5. Statements should be neutral, factual, and NOT reveal whether alibis are true
+
+Respond with ONLY the JSON object.`;
+
+    this.tracePrompt('add-character-knowledge', prompt);
+
+    const { text } = await generateText({
+      config: this.config.llm,
+      prompt,
+      maxTokens: 2500,
+      temperature: 0.7,
+    });
+
+    const knowledgeMap = this.parseJSONResponse(text);
+
+    return characters.map(char => {
+      const knowledge = knowledgeMap[char.id];
+      if (!knowledge) return char;
+
+      return {
+        ...char,
+        knowledge: {
+          knowsAboutCrime: knowledge.knowsAboutCrime || '',
+          knowsAboutOthers: knowledge.knowsAboutOthers || [],
+          alibi: knowledge.alibi || '',
+        },
+        statement: knowledge.statement || '',
+      };
+    });
+  }
+
+  /**
+   * Generate character images for the flesh-out flow (parallel for speed)
+   */
+  private async generateCharacterImagesForFleshOut(
+    characters: UGCGeneratedCharacter[],
+    setting: { location: string; timePeriod: string; atmosphere?: string }
+  ): Promise<UGCGeneratedCharacter[]> {
+    if (!this.config.image.apiKey) {
+      console.warn('IMAGE_API_KEY not configured, skipping character images');
+      return characters;
+    }
+
+    const imageClient = new ImageClient(this.config.image);
+
+    // Generate images in parallel for all characters that need them
+    const imagePromises = characters.map(async (character): Promise<UGCGeneratedCharacter> => {
+      // Skip if character already has an image
+      if (character.imageUrl) {
+        return character;
+      }
+
+      try {
+        const result = await imageClient.generatePortrait(character.appearance.imagePrompt);
+        return { ...character, imageUrl: result.url };
+      } catch (error) {
+        console.warn(`Failed to generate portrait for ${character.name}:`, error);
+        return character;
+      }
+    });
+
+    return Promise.all(imagePromises);
+  }
+
+  /**
+   * Regenerate timeline from edited clues (reverse flow for new UX)
+   * Takes edited clues and generates a coherent timeline that supports them
+   */
+  async regenerateTimelineFromClues(request: RegenerateTimelineRequest): Promise<string[]> {
+    const { clues, characters, solution, setting } = request;
+
+    // Filter out victims
+    const interactableCharacters = characters.filter(c => !c.isVictim);
+
+    const prompt = `You are regenerating a mystery timeline to be coherent with the edited clues.
+
+SETTING:
+- Location: ${setting.location}
+- Time Period: ${setting.timePeriod}
+
+SOLUTION:
+- Culprit: ${solution.culprit}
+- Method: ${solution.method}
+- Motive: ${solution.motive}
+
+CHARACTERS:
+${interactableCharacters.map(c => `- ${c.name} (${c.role})`).join('\n')}
+
+CLUES THAT MUST BE SUPPORTED BY TIMELINE:
+${clues.map(c => `- "${c.description}" (revealed by: ${c.revealedBy.map(id => {
+  const char = characters.find(ch => ch.id === id);
+  return char?.name || id;
+}).join(', ')})`).join('\n')}
+
+Generate a NEW timeline that:
+1. Creates events that explain how each character knows the clues they can reveal
+2. Shows the culprit's opportunity to commit the crime
+3. Provides alibis for innocent characters
+4. Makes the clues logically discoverable through interrogation
+
+Output a JSON array of 8-12 timestamped events:
+["TIME - Event description", ...]
+
+Respond with ONLY the JSON array.`;
+
+    this.tracePrompt('regenerate-timeline-from-clues', prompt);
+
+    const { text } = await generateText({
+      config: this.config.llm,
+      prompt,
+      maxTokens: 2000,
+      temperature: 0.7,
+    });
+
+    return this.parseJSONResponse(text);
   }
 
   /**

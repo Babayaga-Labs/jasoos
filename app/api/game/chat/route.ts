@@ -13,7 +13,8 @@ export async function POST(request: NextRequest) {
 
     // Load character data
     const charactersPath = path.join(storyDir, 'characters.json');
-    const { characters } = JSON.parse(fs.readFileSync(charactersPath, 'utf-8'));
+    const charactersData = JSON.parse(fs.readFileSync(charactersPath, 'utf-8'));
+    const characters = Array.isArray(charactersData) ? charactersData : charactersData.characters;
 
     const character = characters.find((c: any) => c.id === characterId);
     if (!character) {

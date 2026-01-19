@@ -33,6 +33,14 @@ const config: Config = {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.5' },
         },
+        'spin-slow': {
+          from: { transform: 'rotate(0deg)' },
+          to: { transform: 'rotate(360deg)' },
+        },
+        'fade-in-out': {
+          '0%, 100%': { opacity: '0.5' },
+          '50%': { opacity: '1' },
+        },
       },
       animation: {
         'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
@@ -40,6 +48,8 @@ const config: Config = {
         'scale-in': 'scaleIn 0.3s ease-out forwards',
         'shimmer': 'shimmer 2s infinite linear',
         'pulse-slow': 'pulse 2s ease-in-out infinite',
+        'spin-slow': 'spin-slow 4s linear infinite',
+        'fade-in-out': 'fade-in-out 3s ease-in-out infinite',
       },
     },
   },

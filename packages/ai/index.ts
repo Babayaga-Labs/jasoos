@@ -48,7 +48,7 @@ export type {
   RegenerateSectionResponse,
   SaveRequest,
   SaveResponse,
-  // NEW: Scaffold-based types (character-driven flow)
+  // Scaffold-based types (character-driven flow)
   UGCStoryScaffold,
   UGCCharacterSuggestion,
   UGCCharacterFromScaffold,
@@ -61,6 +61,21 @@ export type {
   ScaffoldGenerateProgressEvent,
   ScaffoldGenerateCompleteEvent,
   ScaffoldGenerateSSEEvent,
+  // NEW: Foundation-based types (UGC Pipeline Redesign v2)
+  UGCFoundationCharacter,
+  UGCFoundation,
+  CulpritInfo,
+  FleshOutRequest,
+  FleshOutResponse,
+  UGCGeneratedClue,
+  UGCSolution,
+  FleshOutProgressEvent,
+  FleshOutCompleteEvent,
+  FleshOutSSEEvent,
+  RegenerateTimelineRequest,
+  RegenerateTimelineResponse,
+  RegenerateImageRequest,
+  RegenerateImageResponse,
 } from './types/ugc-types';
 export {
   TIME_PERIODS,
@@ -83,5 +98,15 @@ export {
   validateKnowledgeCoherence,
   validateSolvability,
   validateCulpritAlibi,
+  // New validation for foundation-based flow
+  validateFoundationStory,
+  validateNewClueRevealers,
+  validateNewSolvability,
+  validateNewCulprit,
+  validateNewTimeline,
 } from './ugc-validation';
-export type { ValidationWarning, ValidationResult } from './ugc-validation';
+export type {
+  ValidationWarning,
+  ValidationResult,
+  FoundationValidationInput,
+} from './ugc-validation';
