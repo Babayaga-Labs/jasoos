@@ -1,14 +1,15 @@
 'use client';
 
 import React, { createContext, useContext, useReducer } from 'react';
-import type {
-  UGCStoryScaffold,
-  UGCFoundationCharacter,
-  UGCFoundation,
-  UGCGeneratedCharacter,
-  UGCGeneratedClue,
-  UGCSolution,
-  FleshOutResponse,
+import {
+  PERSONALITY_TRAITS,
+  type UGCStoryScaffold,
+  type UGCFoundationCharacter,
+  type UGCFoundation,
+  type UGCGeneratedCharacter,
+  type UGCGeneratedClue,
+  type UGCSolution,
+  type FleshOutResponse,
 } from '@/packages/ai/types/ugc-types';
 
 // ============================================================================
@@ -53,6 +54,10 @@ export interface WizardState {
   sceneImageUrl: string | null;
   sceneGenerating: boolean;
   isPublishing: boolean;
+  isPublished: boolean;
+
+  // Tracking for dirty state
+  secretsEditedSinceGeneration: boolean;
 
   // Error handling
   error: string | null;
@@ -77,7 +82,7 @@ type WizardAction =
   | { type: 'UPDATE_FOUNDATION_SETTING'; field: keyof UGCFoundation['setting']; value: string }
 
   // Foundation stage - character edits
-  | { type: 'UPDATE_FOUNDATION_CHARACTER'; id: string; field: 'name' | 'role'; value: string }
+  | { type: 'UPDATE_FOUNDATION_CHARACTER'; id: string; field: 'name' | 'role' | 'connectionHint'; value: string }
   | { type: 'ADD_FOUNDATION_CHARACTER' }
   | { type: 'DELETE_FOUNDATION_CHARACTER'; id: string }
 
@@ -107,7 +112,7 @@ type WizardAction =
   | { type: 'ADD_TIMELINE_EVENT'; afterIndex: number }
   | { type: 'DELETE_TIMELINE_EVENT'; index: number }
   | { type: 'START_TIMELINE_REGEN' }
-  | { type: 'COMPLETE_TIMELINE_REGEN'; timeline: string[] }
+  | { type: 'COMPLETE_TIMELINE_REGEN'; timeline: string[]; characters?: UGCGeneratedCharacter[] }
 
   // Publish
   | { type: 'START_SCENE_GEN' }
@@ -159,6 +164,10 @@ function createInitialState(): WizardState {
     sceneImageUrl: null,
     sceneGenerating: false,
     isPublishing: false,
+    isPublished: false,
+
+    // Tracking
+    secretsEditedSinceGeneration: false,
 
     // Error
     error: null,
@@ -248,7 +257,7 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
       };
       return {
         ...state,
-        foundationCharacters: [...state.foundationCharacters, newChar],
+        foundationCharacters: [newChar, ...state.foundationCharacters],
       };
     }
 
@@ -306,17 +315,24 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
         solution: action.result.solution,
         minimumPointsToAccuse: action.result.scoring.minimumPointsToAccuse,
         perfectScoreThreshold: action.result.scoring.perfectScoreThreshold,
+        secretsEditedSinceGeneration: false, // Fresh generation, no edits yet
         currentStage: 'characters',
       };
 
     // ===================== Character Stage Edits =====================
-    case 'UPDATE_GENERATED_CHARACTER':
+    case 'UPDATE_GENERATED_CHARACTER': {
+      const secretsWereEdited = 'secrets' in action.updates;
       return {
         ...state,
         generatedCharacters: state.generatedCharacters.map(c =>
           c.id === action.id ? { ...c, ...action.updates } : c
         ),
+        // Track if secrets were edited since last generation
+        secretsEditedSinceGeneration: secretsWereEdited
+          ? true
+          : state.secretsEditedSinceGeneration,
       };
+    }
 
     case 'START_IMAGE_REGEN':
       return {
@@ -364,7 +380,7 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
       };
       return {
         ...state,
-        clues: [...state.clues, newClue],
+        clues: [newClue, ...state.clues],
       };
     }
 
@@ -403,6 +419,9 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
         ...state,
         timelineRegenerating: false,
         timeline: action.timeline,
+        // Update characters with aligned knowledge if provided
+        generatedCharacters: action.characters || state.generatedCharacters,
+        secretsEditedSinceGeneration: false, // Reset since timeline now reflects secrets
       };
 
     // ===================== Publish =====================
@@ -423,6 +442,7 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
       return {
         ...state,
         isPublishing: false,
+        isPublished: true,
         storyId: action.storyId,
       };
 
@@ -488,9 +508,18 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
   // Can proceed from Characters?
   // - Has generated characters
   // - Not currently generating
+  // - Each character has at least 1 personality trait selected
+  const allCharactersHaveTraits = state.generatedCharacters.every(char => {
+    const validTraits = char.personality.traits.filter(t =>
+      (PERSONALITY_TRAITS as readonly string[]).includes(t.toLowerCase())
+    );
+    return validTraits.length >= 1;
+  });
+
   const canProceedFromCharacters =
     state.generatedCharacters.length >= 3 &&
-    !state.charactersGenerating;
+    !state.charactersGenerating &&
+    allCharactersHaveTraits;
 
   // Can publish?
   // - Has clues

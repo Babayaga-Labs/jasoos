@@ -1,0 +1,276 @@
+{
+  "characters": [
+    {
+      "id": "char_1",
+      "tempId": "char_1",
+      "name": "Edward, Prince of Wales",
+      "role": "The Heir",
+      "age": 59,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "impatient",
+          "hedonistic",
+          "charismatic",
+          "diplomatic"
+        ],
+        "speechStyle": "Refined but casual, often using humor to deflect tension",
+        "quirks": [
+          "Constantly adjusts his collar and cuffs",
+          "Taps his ring against surfaces when thinking"
+        ]
+      },
+      "appearance": {
+        "description": "Corpulent yet dignified, with a magnificent silver beard and piercing blue eyes. Dressed impeccably in the finest tailored suits, though his waistcoat strains slightly at the buttons. His bearing remains regal despite his weight.",
+        "imagePrompt": "Portrait of a portly Victorian era royal man, 59, with well-groomed silver beard, wearing an ornate military uniform with medals, confident expression, pale blue eyes, standing before a rich red curtain background, photorealistic style"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Was away during murder, found knife planted in his chambers upon return",
+        "knowsAboutOthers": [
+          "Was at a secret political meeting during the murder time",
+          "Unaware of Harrison's movements"
+        ],
+        "alibi": "TRUE - Verifiably at secret political meeting from 7:30-9:00 AM, witnessed by Lady Marlborough leaving"
+      },
+      "statement": "Claims to have been at a private meeting outside the castle from 7:30-9:00 AM, returning directly to his study at 9:00 AM.",
+      "secrets": [
+        {
+          "content": "Has been secretly meeting with politicians to discuss modernizing the monarchy once he becomes king",
+          "willingnessToReveal": "medium",
+          "revealCondition": "If convinced it would help clear his name of suspicion"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes pompous and pulls rank",
+        "whenCaughtLying": "Deflects with humor and charm",
+        "whenAccused": "Responds with royal indignation and threatens consequences"
+      },
+      "relationships": {
+        "char_2": "Views him as reliable but beneath notice",
+        "char_3": "Protective of his younger sister",
+        "char_4": "Respects but slightly distrusts",
+        "char_5": "Cordial but distant"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8b062f/xn5Y4VrAecQ33wvUWBuHI.jpg"
+    },
+    {
+      "id": "char_2",
+      "tempId": "char_2",
+      "name": "James Harrison",
+      "role": "The Butler",
+      "age": 45,
+      "isGuilty": true,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "meticulous",
+          "seemingly proper",
+          "internally unstable",
+          "obsessive"
+        ],
+        "speechStyle": "Precise and formal, occasionally slipping into rambling when stressed",
+        "quirks": [
+          "Compulsively straightens pictures and objects",
+          "Wrings hands when anxious"
+        ]
+      },
+      "appearance": {
+        "description": "Tall and lean with perfect posture, his black butler's uniform immaculate without a single wrinkle. Prematurely graying hair always perfectly combed, with deep-set dark eyes that occasionally betray inner turmoil.",
+        "imagePrompt": "Portrait of a Victorian butler, 45, tall and thin, wearing crisp black tailcoat and white gloves, perfectly groomed graying hair, haunted dark eyes, pale complexion, standing formally in a wood-paneled hallway, photorealistic style"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Committed murder at 8:15 AM, planted weapon in Edward's chambers",
+        "knowsAboutOthers": [
+          "Knows Edward was away",
+          "Aware of Dr. Gull seeing him in corridors"
+        ],
+        "alibi": "FALSE - Claims to have been delivering linens to other parts of castle"
+      },
+      "statement": "Reports being occupied with normal morning duties, including delivering fresh linens throughout the castle during the time in question.",
+      "secrets": [
+        {
+          "content": "Suffers from severe bipolar disorder and killed the Queen during a manic episode, hiding the weapon in panic",
+          "willingnessToReveal": "never",
+          "revealCondition": "Only if completely broken down mentally"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes excessively formal and rigid",
+        "whenCaughtLying": "Develops nervous tics and stutters",
+        "whenAccused": "Retreats into absolute denial and cites his years of service"
+      },
+      "relationships": {
+        "char_1": "Deeply respectful yet resentful of privilege",
+        "char_3": "Protective and somewhat paternal",
+        "char_4": "Cautiously avoidant",
+        "char_5": "Professional rivalry"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8b062f/9qKj-sijoUqxmWM-2H7KO.jpg"
+    },
+    {
+      "id": "char_3",
+      "tempId": "char_3",
+      "name": "Princess Beatrice",
+      "role": "The Youngest Daughter",
+      "age": 43,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "dutiful",
+          "melancholic",
+          "protective",
+          "scholarly"
+        ],
+        "speechStyle": "Soft-spoken but articulate, often historical references",
+        "quirks": [
+          "Fiddles with her mother's locket",
+          "Quotes Shakespeare when nervous"
+        ]
+      },
+      "appearance": {
+        "description": "A handsome woman in mourning dress, with Victoria's strong profile but softer features. Her dark hair is swept up severely, and she carries herself with rigid composure masking deep grief.",
+        "imagePrompt": "Portrait of a Victorian princess, 43, wearing elegant black mourning dress with high collar, dark hair in Gibson Girl style, strong nose, sad eyes, pale complexion, seated in a library setting, photorealistic style"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Passed bathroom at 8:45 AM, noticed unusual silence",
+        "knowsAboutOthers": [
+          "Had private consultation with Dr. Gull about marriage plans",
+          "Unaware of Harrison's state"
+        ],
+        "alibi": "TRUE - With Dr. Gull at 7:15 AM, location verified until 8:45 AM"
+      },
+      "statement": "Was consulting with Dr. Gull early morning, then attended to personal matters in her chambers until passing by the Queen's bathroom at 8:45 AM.",
+      "secrets": [
+        {
+          "content": "Had been planning to marry against her mother's wishes",
+          "willingnessToReveal": "low",
+          "revealCondition": "If it becomes relevant to proving someone's whereabouts"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Withdraws into formal etiquette",
+        "whenCaughtLying": "Becomes tearful and apologetic",
+        "whenAccused": "Responds with quiet, dignified denial"
+      },
+      "relationships": {
+        "char_1": "Complicated sibling relationship",
+        "char_2": "Trusts and relies upon",
+        "char_4": "Grateful for his discretion",
+        "char_5": "Friendly but guarded"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8b062f/v1e7LVy-WJWY6TXSOGlhP.jpg"
+    },
+    {
+      "id": "char_4",
+      "tempId": "char_4",
+      "name": "Dr. William Gull",
+      "role": "The Royal Physician",
+      "age": 62,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "analytical",
+          "reserved",
+          "dedicated",
+          "slightly arrogant",
+          "arrogant"
+        ],
+        "speechStyle": "Clinical and precise, fond of medical terminology",
+        "quirks": [
+          "Constantly checks his pocket watch",
+          "Adjusts his spectacles when thinking"
+        ]
+      },
+      "appearance": {
+        "description": "Distinguished elderly gentleman with a trim white beard and wire-rimmed spectacles. His black frock coat is well-worn but dignified, with a gold watch chain across his vest.",
+        "imagePrompt": "Portrait of a Victorian doctor, 62, with neat white beard and wire spectacles, wearing formal black frock coat and vest with watch chain, stern expression, holding medical bag, standing in a formal study, photorealistic style"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Saw Harrison running with knife, determined time of death, pronounced Queen dead",
+        "knowsAboutOthers": [
+          "Knows about Princess Beatrice's marriage plans",
+          "Witnessed Harrison's unusual behavior"
+        ],
+        "alibi": "TRUE - With Princess Beatrice at 7:15 AM, location accounted for"
+      },
+      "statement": "Was delayed by Princess Beatrice's consultation, later saw Harrison rushing through corridors, and ultimately pronounced the Queen's death.",
+      "secrets": [
+        {
+          "content": "Has been treating several royals for various embarrassing conditions",
+          "willingnessToReveal": "low",
+          "revealCondition": "Only if it could help solve the crime and under strict confidence"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes coldly professional",
+        "whenCaughtLying": "Cites medical confidentiality",
+        "whenAccused": "Responds with scientific logic and facts"
+      },
+      "relationships": {
+        "char_1": "Professional but concerned about health",
+        "char_2": "Minimal interaction, slightly suspicious",
+        "char_3": "Sympathetic and protective",
+        "char_5": "Cordial professional relationship"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8b062f/cTQ9NDgAhL0xbr0x4e4q_.jpg"
+    },
+    {
+      "id": "char_5",
+      "tempId": "char_5",
+      "name": "Lady Sarah Marlborough",
+      "role": "The Lady-in-Waiting",
+      "age": 51,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "observant",
+          "politically astute",
+          "ambitious",
+          "diplomatic",
+          "arrogant"
+        ],
+        "speechStyle": "Elegant and measured, with subtle undertones",
+        "quirks": [
+          "Always carries a folded fan",
+          "Taps her teeth with her fingernail when thinking"
+        ]
+      },
+      "appearance": {
+        "description": "Aristocratic beauty slightly faded but still striking, with perfect posture and graceful movements. Her clothes are expensive but understated, and her gray-streaked dark hair is elaborately styled.",
+        "imagePrompt": "Portrait of a Victorian noblewoman, 51, wearing rich burgundy dress with lace collar, gray-streaked dark hair in elaborate updo, holding decorative fan, aristocratic features, slight smile, in an ornate drawing room, photorealistic style"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Attended Queen's bath at 8:00 AM, discovered body at 9:15 AM",
+        "knowsAboutOthers": [
+          "Saw Edward leaving at 7:30 AM",
+          "Witnessed Harrison's morning agitation"
+        ],
+        "alibi": "TRUE - Location verified throughout morning, discovered body"
+      },
+      "statement": "Attended the Queen's morning bath at 8:00 AM, left to write correspondence, and returned to discover the body at 9:15 AM.",
+      "secrets": [
+        {
+          "content": "Has been selling minor court secrets to newspapers",
+          "willingnessToReveal": "medium",
+          "revealCondition": "If offered protection from consequences"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes haughtily formal",
+        "whenCaughtLying": "Redirects conversation skillfully",
+        "whenAccused": "Responds with aristocratic indignation"
+      },
+      "relationships": {
+        "char_1": "Carefully deferential but calculating",
+        "char_2": "Politely dismissive",
+        "char_3": "Genuinely fond but manipulative",
+        "char_4": "Mutually respectful distance"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8b062f/slU4e6LlyE1XhTinPH-Rt.jpg"
+    }
+  ]
+}

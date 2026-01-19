@@ -16,7 +16,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Story not found' }, { status: 404 });
     }
 
-    const story = JSON.parse(fs.readFileSync(storyPath, 'utf-8'));
+    const storyRaw = JSON.parse(fs.readFileSync(storyPath, 'utf-8'));
+    // Handle both 'premise' and 'synopsis' fields for compatibility
+    const story = {
+      ...storyRaw,
+      premise: storyRaw.premise || storyRaw.synopsis || '',
+    };
     const charactersData = JSON.parse(fs.readFileSync(charactersPath, 'utf-8'));
 
     // Handle both formats: { characters: [...] } or just [...]

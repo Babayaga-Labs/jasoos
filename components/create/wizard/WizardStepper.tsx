@@ -51,9 +51,9 @@ export function WizardStepper() {
       case 'foundation':
         return canProceedFromFoundation && state.hasGeneratedOnce;
       case 'characters':
-        return canProceedFromCharacters && state.clues.length > 0;
+        return canProceedFromCharacters;
       case 'clues':
-        return state.storyId !== null;
+        return state.isPublished === true;
     }
   };
 
@@ -65,32 +65,31 @@ export function WizardStepper() {
 
   return (
     <div className="w-full">
-      {/* Progress line background */}
-      <div className="relative">
-        {/* Background track */}
-        <div className="absolute top-6 left-0 right-0 h-1 bg-slate-700/50 rounded-full mx-12" />
+      <div className="relative flex justify-between items-start">
+        {STEPS.map((step, index) => {
+          const isActive = step.id === state.currentStage;
+          const isComplete = isStageComplete(step.id);
+          const isAccessible = isStageAccessible(step.id);
+          const isPast = index < currentIndex;
+          const isLastStep = index === STEPS.length - 1;
 
-        {/* Progress fill */}
-        <div
-          className="absolute top-6 left-0 h-1 bg-gradient-to-r from-amber-500 via-violet-500 to-pink-500 rounded-full mx-12 transition-all duration-500"
-          style={{ width: `calc(${(currentIndex / (STEPS.length - 1)) * 100}% - 6rem)` }}
-        />
+          return (
+            <div key={step.id} className="flex flex-col items-center relative flex-1">
+              {/* Connector line to next step */}
+              {!isLastStep && (
+                <div className="absolute top-6 left-1/2 w-full h-0.5 -translate-y-1/2">
+                  <div className={`
+                    h-full transition-colors duration-300
+                    ${isPast || isComplete ? 'bg-gradient-to-r from-emerald-500 to-teal-500' : 'bg-slate-700/50'}
+                  `} />
+                </div>
+              )}
 
-        {/* Steps */}
-        <div className="relative flex justify-between">
-          {STEPS.map((step, index) => {
-            const isActive = step.id === state.currentStage;
-            const isComplete = isStageComplete(step.id);
-            const isAccessible = isStageAccessible(step.id);
-            const isPast = index < currentIndex;
-
-            return (
               <button
-                key={step.id}
                 onClick={() => handleStageClick(step.id)}
                 disabled={!isAccessible}
                 className={`
-                  flex flex-col items-center gap-2 transition-all duration-300 group
+                  flex flex-col items-center gap-2 transition-all duration-300 group relative z-10
                   ${isAccessible ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}
                 `}
               >
@@ -103,7 +102,7 @@ export function WizardStepper() {
                       ? 'bg-gradient-to-br from-amber-400 via-violet-500 to-pink-500 scale-110 shadow-lg shadow-violet-500/30 text-white'
                       : isComplete || isPast
                         ? 'bg-gradient-to-br from-emerald-400 to-teal-500 shadow-md shadow-emerald-500/20 text-white'
-                        : 'bg-slate-700/80 border-2 border-slate-600 text-slate-400'
+                        : 'bg-slate-800 border-2 border-slate-600 text-slate-400'
                     }
                     ${isAccessible && !isActive ? 'group-hover:scale-105 group-hover:border-violet-400' : ''}
                   `}
@@ -148,9 +147,9 @@ export function WizardStepper() {
                   {step.shortLabel}
                 </span>
               </button>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

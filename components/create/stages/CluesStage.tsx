@@ -23,14 +23,13 @@ export function CluesStage() {
     solution,
     generatedCharacters,
     foundation,
-    timelineRegenerating,
     sceneGenerating,
+    sceneImageUrl,
     isPublishing,
     minimumPointsToAccuse,
     perfectScoreThreshold,
   } = state;
 
-  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [modalStep, setModalStep] = useState<ModalStep>('preview');
   const [validationWarnings, setValidationWarnings] = useState<ValidationWarning[]>([]);
@@ -49,38 +48,6 @@ export function CluesStage() {
       </div>
     );
   }
-
-  const handleRegenerateTimeline = async () => {
-    if (!solution || !foundation) return;
-
-    dispatch({ type: 'START_TIMELINE_REGEN' });
-
-    try {
-      const response = await fetch('/api/ugc/regenerate-timeline', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          clues,
-          characters: generatedCharacters,
-          solution,
-          setting: foundation.setting,
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to regenerate timeline');
-      }
-
-      const result = await response.json();
-      dispatch({ type: 'COMPLETE_TIMELINE_REGEN', timeline: result.timeline });
-    } catch (error) {
-      dispatch({
-        type: 'SET_ERROR',
-        error: error instanceof Error ? error.message : 'Failed to regenerate timeline',
-      });
-    }
-  };
 
   const handleOpenPublishModal = () => {
     setShowPublishModal(true);
@@ -210,37 +177,40 @@ export function CluesStage() {
       {/* Header */}
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-white mb-3">
-          Clues & Timeline
+          Design Your Clues
         </h2>
         <p className="text-slate-400">
-          Review your clues and timeline. Edit as needed, then publish your mystery.
+          Add clues that players will discover through interrogation. Each clue should help solve the mystery.
         </p>
+        {sceneGenerating && (
+          <p className="text-xs text-violet-400 mt-2 flex items-center justify-center gap-2">
+            <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+            </svg>
+            Generating scene image in background...
+          </p>
+        )}
       </div>
 
-      {/* Main Grid Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left: Clues */}
-        <div className="flex flex-col" style={{ minHeight: '600px' }}>
-          <div className="flex items-center justify-between mb-4">
+      {/* Side-by-Side Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        {/* Left: Clues Section (3/5 width) */}
+        <div className="lg:col-span-3 space-y-4">
+          <div className="flex items-center justify-between mb-2">
             <h3 className="text-xl font-semibold text-white">Clues</h3>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleRegenerateTimeline}
-                disabled={timelineRegenerating}
-                className="px-4 py-2 bg-violet-500/20 text-violet-400 rounded-lg hover:bg-violet-500/30 transition-colors text-sm disabled:opacity-50"
-              >
-                {timelineRegenerating ? 'Regenerating...' : 'Regenerate Timeline'}
-              </button>
-              <button
-                onClick={() => dispatch({ type: 'ADD_CLUE' })}
-                className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors text-sm"
-              >
-                + Add Clue
-              </button>
-            </div>
+            <button
+              onClick={() => dispatch({ type: 'ADD_CLUE' })}
+              className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors text-sm"
+            >
+              + Add Clue
+            </button>
           </div>
+          <p className="text-sm text-slate-400 mb-4">
+            These clues shape how players solve your mystery. Select which characters reveal each clue during interrogation.
+          </p>
 
-          <div className="space-y-3 flex-1 overflow-y-auto pr-2">
+          <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
             {clues.map((clue) => (
               <ClueCard
                 key={clue.id}
@@ -251,112 +221,56 @@ export function CluesStage() {
               />
             ))}
           </div>
+
+          {/* Scoring Summary */}
+          <div className="bg-slate-800/30 rounded-lg p-4 border border-slate-700/50 mt-4">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-400">Total Points Available:</span>
+              <span className="text-white font-medium">{totalPoints} pts</span>
+            </div>
+            <div className="flex items-center justify-between text-sm mt-2">
+              <span className="text-slate-400">Points to Accuse:</span>
+              <span className="text-amber-400 font-medium">{minimumPointsToAccuse} pts</span>
+            </div>
+          </div>
         </div>
 
-        {/* Right: Character Tabs + Timeline */}
-        <div className="flex flex-col space-y-4" style={{ minHeight: '600px' }}>
-          {/* Character Reference Tabs */}
-          <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-4">
-            <h3 className="text-lg font-semibold text-white mb-3">Character Reference</h3>
-            <div className="flex gap-2 overflow-x-auto pb-2">
-              {generatedCharacters.map((char) => (
-                <button
-                  key={char.id}
-                  onClick={() => setSelectedCharacter(selectedCharacter === char.id ? null : char.id)}
-                  className={`
-                    flex items-center gap-2 px-3 py-2 rounded-lg transition-all shrink-0
-                    ${selectedCharacter === char.id
-                      ? 'bg-violet-500/20 border border-violet-500'
-                      : 'bg-slate-700/50 border border-slate-600 hover:border-slate-500'
-                    }
-                    ${char.isGuilty ? 'ring-1 ring-red-500' : ''}
-                  `}
-                >
-                  <div className="w-8 h-8 rounded-full bg-slate-600 overflow-hidden relative">
-                    {char.imageUrl ? (
-                      <Image src={char.imageUrl} alt={char.name} fill className="object-cover" />
-                    ) : (
-                      <span className="absolute inset-0 flex items-center justify-center text-xs">👤</span>
-                    )}
-                  </div>
-                  <span className="text-sm text-white">{char.name}</span>
-                  {char.isGuilty && <span className="text-xs text-red-400">*</span>}
-                </button>
-              ))}
-            </div>
-
-            {/* Selected Character Details - Simplified */}
-            {selectedCharacter && (
-              <div className="mt-4 pt-4 border-t border-slate-700">
-                {(() => {
-                  const char = generatedCharacters.find((c) => c.id === selectedCharacter);
-                  if (!char) return null;
-                  return (
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-slate-600 overflow-hidden relative shrink-0">
-                        {char.imageUrl ? (
-                          <Image src={char.imageUrl} alt={char.name} fill className="object-cover" />
-                        ) : (
-                          <span className="absolute inset-0 flex items-center justify-center text-sm">👤</span>
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-white">{char.name}</p>
-                        <p className="text-xs text-slate-400">{char.role}</p>
-                      </div>
-                      {char.isGuilty && (
-                        <span className="ml-auto px-2 py-0.5 bg-red-500/20 text-red-400 text-xs rounded-full">
-                          Culprit
-                        </span>
-                      )}
-                    </div>
-                  );
-                })()}
+        {/* Right: Reference Panel (2/5 width) */}
+        <div className="lg:col-span-2 space-y-4">
+          {/* Story Premise */}
+          <ReferencePanel title="Story Premise">
+            <p className="text-slate-300 text-sm leading-relaxed mb-3">
+              {foundation?.synopsis || 'No synopsis available'}
+            </p>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-slate-500">Setting:</span>
+                <span className="text-slate-300">{foundation?.setting.location}, {foundation?.setting.timePeriod}</span>
               </div>
-            )}
-          </div>
-
-          {/* Timeline */}
-          <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-4 flex-1 flex flex-col">
-            <h3 className="text-lg font-semibold text-white mb-4">Timeline</h3>
-
-            <div className="space-y-3 flex-1 overflow-y-auto pr-2">
-              {timeline.map((event, index) => (
-                <div key={index} className="flex items-start gap-3 group">
-                  <div className="flex flex-col items-center">
-                    <div className="w-3 h-3 rounded-full bg-violet-500" />
-                    {index < timeline.length - 1 && (
-                      <div className="w-0.5 h-full bg-slate-700" />
-                    )}
-                  </div>
-                  <div className="flex-1 pb-4">
-                    <textarea
-                      value={event}
-                      onChange={(e) =>
-                        dispatch({ type: 'UPDATE_TIMELINE_EVENT', index, value: e.target.value })
-                      }
-                      rows={2}
-                      className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
-                    />
-                    <div className="flex gap-2 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => dispatch({ type: 'ADD_TIMELINE_EVENT', afterIndex: index })}
-                        className="text-xs text-slate-500 hover:text-violet-400"
-                      >
-                        + Add After
-                      </button>
-                      <button
-                        onClick={() => dispatch({ type: 'DELETE_TIMELINE_EVENT', index })}
-                        className="text-xs text-slate-500 hover:text-red-400"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
+              <div className="flex items-center gap-2">
+                <span className="text-slate-500">Crime:</span>
+                <span className="text-slate-300 capitalize">{foundation?.crimeType}</span>
+              </div>
+              {solution && (
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-500">Motive:</span>
+                  <span className="text-slate-300">{solution.motive}</span>
                 </div>
+              )}
+            </div>
+          </ReferencePanel>
+
+          {/* Character Reference */}
+          <ReferencePanel title="Character Reference">
+            <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1">
+              {generatedCharacters.map((char) => (
+                <CharacterRefCard
+                  key={char.id}
+                  character={char}
+                />
               ))}
             </div>
-          </div>
+          </ReferencePanel>
         </div>
       </div>
 
@@ -366,7 +280,7 @@ export function CluesStage() {
           onClick={() => dispatch({ type: 'GO_TO_STAGE', stage: 'characters' })}
           className="px-6 py-3 text-slate-400 hover:text-white transition-colors"
         >
-          ← Back to Characters
+          Back to Characters
         </button>
 
         <button
@@ -401,97 +315,87 @@ export function CluesStage() {
 
             {/* Modal Content */}
             <div className="overflow-y-auto flex-1">
-              {/* Netflix-style Preview Step */}
+              {/* Polished Preview Step */}
               {modalStep === 'preview' && foundation && (
                 <div className="relative">
-                  {/* Hero Banner with Character Collage Background */}
-                  <div className="relative h-64 overflow-hidden">
-                    {/* Background: Use first character image or gradient */}
-                    {generatedCharacters.find(c => c.imageUrl)?.imageUrl ? (
-                      <div className="absolute inset-0">
-                        <Image
-                          src={generatedCharacters.find(c => c.imageUrl)!.imageUrl!}
-                          alt="Scene"
-                          fill
-                          className="object-cover blur-sm scale-110 opacity-40"
-                        />
-                      </div>
+                  {/* Hero Banner */}
+                  <div className="relative h-48 overflow-hidden">
+                    {/* Background: Scene image if available, otherwise elegant gradient */}
+                    {sceneImageUrl ? (
+                      <>
+                        <div className="absolute inset-0">
+                          <Image
+                            src={sceneImageUrl}
+                            alt="Scene"
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="absolute inset-0 bg-black/50" />
+                      </>
                     ) : (
-                      <div className="absolute inset-0 bg-gradient-to-br from-violet-900/50 via-slate-900 to-red-900/30" />
+                      <>
+                        <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950" />
+                        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-900/20 via-transparent to-transparent" />
+                        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-red-900/20 via-transparent to-transparent" />
+                        {/* Subtle pattern overlay */}
+                        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
+                      </>
                     )}
 
-                    {/* Gradient Overlays */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-transparent to-slate-900/80" />
+                    {/* Gradient fade at bottom */}
+                    <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-slate-900 to-transparent" />
 
                     {/* Title & Info Overlay */}
                     <div className="absolute bottom-0 left-0 right-0 p-6">
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded text-xs font-medium">
+                      <div className="flex flex-wrap items-center gap-2 mb-3">
+                        <span className="px-2.5 py-1 bg-amber-500/20 text-amber-400 rounded-md text-xs font-semibold uppercase tracking-wide border border-amber-500/30">
                           {foundation.crimeType}
                         </span>
-                        <span className="px-2 py-0.5 bg-slate-700/80 text-slate-300 rounded text-xs">
+                        <span className="px-2.5 py-1 bg-slate-700/60 text-slate-300 rounded-md text-xs border border-slate-600/50">
                           {foundation.setting.timePeriod}
                         </span>
                       </div>
-                      <h2 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">
+                      <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">
                         {foundation.title}
                       </h2>
-                      <p className="text-slate-300 text-sm line-clamp-2 max-w-2xl">
-                        {foundation.synopsis}
-                      </p>
-                    </div>
-
-                    {/* Character Portraits Row - Netflix style */}
-                    <div className="absolute -bottom-8 right-6 flex -space-x-3">
-                      {generatedCharacters.filter(c => !c.isVictim).slice(0, 5).map((char, idx) => (
-                        <div
-                          key={char.id}
-                          className={`
-                            w-16 h-16 rounded-full border-2 overflow-hidden relative shadow-xl
-                            ${char.isGuilty ? 'border-red-500' : 'border-slate-700'}
-                          `}
-                          style={{ zIndex: 10 - idx }}
-                        >
-                          {char.imageUrl ? (
-                            <Image src={char.imageUrl} alt={char.name} fill className="object-cover" />
-                          ) : (
-                            <div className="w-full h-full bg-slate-700 flex items-center justify-center text-2xl">
-                              👤
-                            </div>
-                          )}
-                        </div>
-                      ))}
                     </div>
                   </div>
 
                   {/* Content Section */}
-                  <div className="p-6 pt-12 space-y-6">
-                    {/* Setting & Location */}
-                    <div className="flex items-center gap-4 text-sm text-slate-400">
-                      <span className="flex items-center gap-1">
-                        <span className="text-lg">📍</span> {foundation.setting.location}
+                  <div className="p-6 space-y-5">
+                    {/* Synopsis */}
+                    <p className="text-slate-300 text-sm leading-relaxed">
+                      {foundation.synopsis}
+                    </p>
+
+                    {/* Setting Details */}
+                    <div className="flex items-center gap-6 text-sm text-slate-400 py-3 border-y border-slate-800">
+                      <span className="flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs">*</span>
+                        <span>{foundation.setting.location}</span>
                       </span>
-                      <span className="flex items-center gap-1">
-                        <span className="text-lg">🌙</span> {foundation.setting.atmosphere}
+                      <span className="flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs">~</span>
+                        <span className="line-clamp-1">{foundation.setting.atmosphere}</span>
                       </span>
                     </div>
 
                     {/* Victim Card */}
                     {victim && (
-                      <div className="bg-gradient-to-r from-red-950/50 to-slate-900/50 rounded-xl p-4 border border-red-900/30">
+                      <div className="bg-gradient-to-r from-red-950/40 to-slate-800/40 rounded-xl p-4 border border-red-900/20">
                         <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-full bg-slate-700 overflow-hidden relative shrink-0 border-2 border-red-500/50">
+                          <div className="w-14 h-14 rounded-lg bg-slate-800 overflow-hidden relative shrink-0 border border-red-500/30">
                             {victim.imageUrl ? (
-                              <Image src={victim.imageUrl} alt={victim.name} fill className="object-cover grayscale" />
+                              <Image src={victim.imageUrl} alt={victim.name} fill className="object-cover grayscale opacity-80" />
                             ) : (
-                              <span className="absolute inset-0 flex items-center justify-center text-xl">💀</span>
+                              <span className="absolute inset-0 flex items-center justify-center text-xl">X</span>
                             )}
                           </div>
-                          <div>
-                            <p className="text-xs text-red-400 uppercase tracking-wider font-medium">The Victim</p>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[10px] text-red-400 uppercase tracking-widest font-semibold mb-0.5">The Victim</p>
                             <p className="text-white font-semibold">{victim.name}</p>
-                            <p className="text-sm text-slate-400 mt-1">{foundation.victimParagraph}</p>
+                            <p className="text-sm text-slate-400 mt-1 line-clamp-2">{foundation.victimParagraph}</p>
                           </div>
                         </div>
                       </div>
@@ -499,16 +403,16 @@ export function CluesStage() {
 
                     {/* Suspects Grid */}
                     <div>
-                      <p className="text-xs text-slate-500 uppercase tracking-wider mb-3 font-medium">Suspects</p>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3">Suspects</p>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         {generatedCharacters.filter(c => !c.isVictim).map((char) => (
                           <div
                             key={char.id}
                             className={`
-                              group relative rounded-xl overflow-hidden border transition-all hover:scale-[1.02]
+                              group relative rounded-lg overflow-hidden border transition-all
                               ${char.isGuilty
-                                ? 'border-red-500/30 hover:border-red-500/50'
-                                : 'border-slate-700/50 hover:border-slate-600'
+                                ? 'border-red-500/40 ring-1 ring-red-500/20'
+                                : 'border-slate-700/60'
                               }
                             `}
                           >
@@ -516,16 +420,16 @@ export function CluesStage() {
                               {char.imageUrl ? (
                                 <Image src={char.imageUrl} alt={char.name} fill className="object-cover" />
                               ) : (
-                                <div className="w-full h-full bg-slate-800 flex items-center justify-center text-4xl">👤</div>
+                                <div className="w-full h-full bg-slate-800 flex items-center justify-center text-4xl">?</div>
                               )}
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
                               <div className="absolute bottom-0 left-0 right-0 p-3">
-                                <p className="text-white font-medium text-sm">{char.name}</p>
+                                <p className="text-white font-medium text-sm leading-tight">{char.name}</p>
                                 <p className="text-slate-400 text-xs">{char.role}</p>
                               </div>
                               {char.isGuilty && (
-                                <div className="absolute top-2 right-2 px-2 py-0.5 bg-red-500/80 rounded text-[10px] text-white font-medium">
-                                  CULPRIT
+                                <div className="absolute top-2 right-2 px-2 py-0.5 bg-red-500 rounded text-[10px] text-white font-semibold uppercase tracking-wide">
+                                  Culprit
                                 </div>
                               )}
                             </div>
@@ -536,37 +440,40 @@ export function CluesStage() {
 
                     {/* Solution Reveal */}
                     {solution && culprit && (
-                      <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
-                        <p className="text-xs text-slate-500 uppercase tracking-wider mb-3 font-medium">The Truth</p>
-                        <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div className="bg-slate-800/30 rounded-lg p-4 border border-slate-700/50">
+                        <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3">The Truth</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                           <div>
-                            <p className="text-slate-500 text-xs">Method</p>
-                            <p className="text-slate-200">{solution.method}</p>
+                            <p className="text-slate-500 text-xs mb-1">Method</p>
+                            <p className="text-slate-300 line-clamp-2">{solution.method}</p>
                           </div>
                           <div>
-                            <p className="text-slate-500 text-xs">Motive</p>
-                            <p className="text-slate-200">{solution.motive}</p>
+                            <p className="text-slate-500 text-xs mb-1">Motive</p>
+                            <p className="text-slate-300 line-clamp-2">{solution.motive}</p>
                           </div>
                           <div>
-                            <p className="text-slate-500 text-xs">Evidence Trail</p>
-                            <p className="text-slate-200">{clues.length} clues • {totalPoints} pts</p>
+                            <p className="text-slate-500 text-xs mb-1">Evidence Trail</p>
+                            <p className="text-slate-300">{clues.length} clues &middot; {totalPoints} pts</p>
                           </div>
                         </div>
                       </div>
                     )}
 
                     {/* Stats Bar */}
-                    <div className="flex items-center justify-between py-3 border-t border-slate-800">
-                      <div className="flex items-center gap-6 text-sm">
-                        <span className="text-slate-400">
-                          <span className="text-white font-semibold">{generatedCharacters.filter(c => !c.isVictim).length}</span> suspects
-                        </span>
-                        <span className="text-slate-400">
-                          <span className="text-white font-semibold">{clues.length}</span> clues
-                        </span>
-                        <span className="text-slate-400">
-                          <span className="text-white font-semibold">{timeline.length}</span> timeline events
-                        </span>
+                    <div className="flex items-center justify-center gap-8 py-4 mt-2 border-t border-slate-800/50">
+                      <div className="text-center">
+                        <p className="text-xl font-bold text-white">{generatedCharacters.filter(c => !c.isVictim).length}</p>
+                        <p className="text-[10px] text-slate-500 uppercase tracking-wide">Suspects</p>
+                      </div>
+                      <div className="w-px h-8 bg-slate-700/50" />
+                      <div className="text-center">
+                        <p className="text-xl font-bold text-white">{clues.length}</p>
+                        <p className="text-[10px] text-slate-500 uppercase tracking-wide">Clues</p>
+                      </div>
+                      <div className="w-px h-8 bg-slate-700/50" />
+                      <div className="text-center">
+                        <p className="text-xl font-bold text-white">{totalPoints}</p>
+                        <p className="text-[10px] text-slate-500 uppercase tracking-wide">Points</p>
                       </div>
                     </div>
                   </div>
@@ -590,7 +497,7 @@ export function CluesStage() {
                   {validationWarnings.length === 0 ? (
                     <div className="text-center py-8">
                       <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span className="text-4xl">✓</span>
+                        <span className="text-4xl text-emerald-400">&#10003;</span>
                       </div>
                       <p className="text-lg text-white mb-2">All checks passed!</p>
                       <p className="text-sm text-slate-400">Your mystery is ready to publish.</p>
@@ -730,6 +637,68 @@ export function CluesStage() {
   );
 }
 
+/**
+ * Reference Panel component for the right sidebar
+ */
+function ReferencePanel({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-4">
+      <h4 className="text-sm font-medium text-slate-400 mb-3 uppercase tracking-wide">{title}</h4>
+      <div>{children}</div>
+    </div>
+  );
+}
+
+/**
+ * Compact character reference card for the sidebar
+ */
+function CharacterRefCard({ character }: { character: UGCGeneratedCharacter }) {
+  const secret = character.secrets.length > 0 ? character.secrets[0].content : null;
+
+  return (
+    <div className="bg-slate-900/50 rounded-lg p-3 border border-slate-600">
+      <div className="flex items-center gap-3">
+        {/* Small avatar */}
+        <div className="w-10 h-10 rounded-full bg-slate-700 overflow-hidden relative shrink-0">
+          {character.imageUrl ? (
+            <Image src={character.imageUrl} alt={character.name} fill className="object-cover" />
+          ) : (
+            <span className="absolute inset-0 flex items-center justify-center text-sm text-slate-400">?</span>
+          )}
+        </div>
+
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-white text-sm truncate">{character.name}</span>
+            {character.isGuilty && (
+              <span className="px-1.5 py-0.5 bg-red-500/20 text-red-400 text-[10px] rounded font-medium">
+                Culprit
+              </span>
+            )}
+            {character.isVictim && (
+              <span className="px-1.5 py-0.5 bg-slate-500/20 text-slate-400 text-[10px] rounded font-medium">
+                Victim
+              </span>
+            )}
+          </div>
+          <p className="text-slate-500 text-xs">{character.role}</p>
+        </div>
+      </div>
+
+      {/* Secret preview (if exists and not victim) */}
+      {secret && !character.isVictim && (
+        <p className="text-slate-400 text-xs mt-2 italic line-clamp-2">
+          Secret: {secret}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Clue editing card
+ */
 interface ClueCardProps {
   clue: UGCGeneratedClue;
   characters: UGCGeneratedCharacter[];
@@ -738,7 +707,10 @@ interface ClueCardProps {
 }
 
 function ClueCard({ clue, characters, onUpdate, onDelete }: ClueCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
+
+  // Filter to only show interactable characters (not victims)
+  const interactableCharacters = characters.filter(c => !c.isVictim);
 
   return (
     <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-4 space-y-3">
@@ -785,7 +757,7 @@ function ClueCard({ clue, characters, onUpdate, onDelete }: ClueCardProps) {
           <div>
             <label className="block text-xs text-slate-400 mb-2">Revealed By:</label>
             <div className="flex flex-wrap gap-2">
-              {characters.map((char) => (
+              {interactableCharacters.map((char) => (
                 <button
                   key={char.id}
                   onClick={() => {

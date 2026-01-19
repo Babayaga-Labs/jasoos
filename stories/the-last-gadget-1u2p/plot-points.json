@@ -1,0 +1,145 @@
+{
+  "plotPoints": [
+    {
+      "id": "emotional_instability",
+      "description": "During morning maintenance, Doraemon showed unusual emotional fluctuations and mentioned feeling uneasy about recent interactions with Dekisugi",
+      "points": 25,
+      "revealedBy": [
+        "char_1"
+      ],
+      "detectionHints": [
+        "maintenance",
+        "checkup",
+        "how was Doraemon",
+        "behavior",
+        "morning visit"
+      ],
+      "category": "evidence",
+      "importance": "critical"
+    },
+    {
+      "id": "dekisugi_ai_research",
+      "description": "Dekisugi had been secretly researching advanced AI systems for months, making multiple failed attempts to replicate Doraemon's capabilities",
+      "points": 30,
+      "revealedBy": [
+        "char_1",
+        "char_3"
+      ],
+      "detectionHints": [
+        "research",
+        "AI",
+        "projects",
+        "Dekisugi's work",
+        "laboratory"
+      ],
+      "category": "evidence",
+      "importance": "critical"
+    },
+    {
+      "id": "timeline_disturbance",
+      "description": "Sewashi detected significant timeline anomalies specifically centered around Doraemon's deactivation point",
+      "points": 20,
+      "revealedBy": [
+        "char_3"
+      ],
+      "detectionHints": [
+        "future",
+        "changes",
+        "timeline",
+        "why visit",
+        "disturbance"
+      ],
+      "category": "evidence",
+      "importance": "high"
+    },
+    {
+      "id": "suspicious_equipment",
+      "description": "Dekisugi was seen carrying unusual scanning equipment that resembled electromagnetic measurement tools",
+      "points": 15,
+      "revealedBy": [
+        "char_2"
+      ],
+      "detectionHints": [
+        "equipment",
+        "devices",
+        "what was he carrying",
+        "school",
+        "laboratory"
+      ],
+      "category": "evidence",
+      "importance": "high"
+    },
+    {
+      "id": "false_homework_alibi",
+      "description": "Dekisugi claimed to need help with homework, but was top of his class and never needed assistance before",
+      "points": 25,
+      "revealedBy": [
+        "char_2",
+        "char_5"
+      ],
+      "detectionHints": [
+        "homework",
+        "study",
+        "grades",
+        "Dekisugi's visit",
+        "unusual behavior"
+      ],
+      "category": "evidence",
+      "importance": "critical"
+    },
+    {
+      "id": "prophetic_manga",
+      "description": "Jaiko's manga scene about a robot powering down came after overhearing Dekisugi mumbling about AI shutdown sequences",
+      "points": 20,
+      "revealedBy": [
+        "char_5"
+      ],
+      "detectionHints": [
+        "manga",
+        "inspiration",
+        "dream",
+        "robot story",
+        "coincidence"
+      ],
+      "category": "evidence",
+      "importance": "high"
+    },
+    {
+      "id": "backpack_observation",
+      "description": "Dr. Hakase noticed Dekisugi's backpack emitting a faint electromagnetic field when leaving the Nobi residence",
+      "points": 25,
+      "revealedBy": [
+        "char_1"
+      ],
+      "detectionHints": [
+        "backpack",
+        "leaving",
+        "afternoon",
+        "strange readings",
+        "equipment"
+      ],
+      "category": "evidence",
+      "importance": "critical"
+    },
+    {
+      "id": "ai_obsession",
+      "description": "Dekisugi had become increasingly obsessed with studying Doraemon's AI, asking suspicious technical questions during recent interactions",
+      "points": 20,
+      "revealedBy": [
+        "char_2",
+        "char_1"
+      ],
+      "detectionHints": [
+        "questions",
+        "interest",
+        "behavior change",
+        "recent weeks",
+        "Doraemon's technology"
+      ],
+      "category": "evidence",
+      "importance": "high"
+    }
+  ],
+  "minimumPointsToAccuse": 100,
+  "perfectScoreThreshold": 180
+}

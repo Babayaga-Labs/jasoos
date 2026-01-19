@@ -263,7 +263,7 @@ interface CharacterCardProps {
   isCulprit: boolean;
   motive: string;
   method: string;
-  onUpdate: (field: 'name' | 'role', value: string) => void;
+  onUpdate: (field: 'name' | 'role' | 'connectionHint', value: string) => void;
   onSetCulprit: () => void;
   onMotiveChange: (motive: string) => void;
   onMethodChange: (method: string) => void;
@@ -319,7 +319,16 @@ function CharacterCard({
             </div>
           </div>
 
-          <p className="text-sm text-slate-500 italic">{character.connectionHint}</p>
+          <div>
+            <label className="block text-xs text-slate-400 mb-1">Connection to Crime</label>
+            <input
+              type="text"
+              value={character.connectionHint}
+              onChange={(e) => onUpdate('connectionHint', e.target.value)}
+              placeholder="How are they connected to the crime?"
+              className="w-full px-3 py-2 bg-slate-800/50 border border-slate-600 rounded-lg text-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+            />
+          </div>
 
           {/* Culprit Details (expanded when culprit) */}
           {isCulprit && (

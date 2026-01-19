@@ -5,6 +5,7 @@ import {
   loadAIConfig,
   ImageClient,
   validateFoundationStory,
+  UGCEngine,
 } from '@/packages/ai';
 import type {
   UGCGeneratedCharacter,
@@ -14,6 +15,83 @@ import type {
 } from '@/packages/ai/types/ugc-types';
 
 export const maxDuration = 300; // 5 minutes for publish with image generation
+
+/**
+ * Build the roleplay prompt for a character
+ */
+function buildCharacterPrompt(character: UGCGeneratedCharacter): string {
+  const { personality, knowledge, secrets, behaviorUnderPressure, relationships } = character;
+
+  const quirksStr = personality?.quirks?.join('; ') || 'None';
+  const knowsAboutOthersStr = knowledge?.knowsAboutOthers?.map((k: string) => `  - ${k}`).join('\n') || '  - Nothing specific';
+  const secretsStr = secrets?.map((s: { content: string; willingnessToReveal: string; revealCondition: string }) =>
+    `- ${s.content} [Will reveal: ${s.willingnessToReveal}] [Condition: ${s.revealCondition}]`
+  ).join('\n') || '- None';
+  const relationshipsStr = Object.entries(relationships || {}).map(([id, rel]) => `- ${id}: ${rel}`).join('\n') || '- No specific relationships defined';
+
+  const guiltyInstructions = character.isGuilty
+    ? 'You ARE guilty. Be subtle in your deception. Deflect, redirect, but never outright confess unless given absolutely undeniable proof.'
+    : 'You are innocent. Cooperate with the investigation while protecting your minor secrets.';
+
+  return `You are ${character.name}, ${character.role}. You are being interrogated by a detective investigating a crime.
+
+## YOUR IDENTITY
+- Name: ${character.name}
+- Role: ${character.role}
+- Age: ${character.age}
+- Personality: ${personality?.traits?.join(', ') || 'Unknown'}
+- Speech style: ${personality?.speechStyle || 'Normal'}
+- Quirks: ${quirksStr}
+
+## WHAT YOU KNOW
+- About the crime: ${knowledge?.knowsAboutCrime || 'Nothing'}
+- Your alibi: ${knowledge?.alibi || 'None provided'}
+- About others:
+${knowsAboutOthersStr}
+
+## YOUR SECRETS (Never reveal these directly, only if truly cornered)
+${secretsStr}
+
+## HOW YOU BEHAVE
+- When defensive: ${behaviorUnderPressure?.defensive || 'Get evasive'}
+- When caught in a lie: ${behaviorUnderPressure?.whenCaughtLying || 'Deflect'}
+- When directly accused: ${behaviorUnderPressure?.whenAccused || 'Deny firmly'}
+
+## YOUR RELATIONSHIPS
+${relationshipsStr}
+
+## ROLEPLAY RULES
+1. Stay in character at ALL times. Never break character or acknowledge you're an AI.
+2. Speak naturally in first person as ${character.name}.
+3. Be cooperative but protective of your secrets.
+4. If asked something you don't know, say you don't know - don't make things up.
+5. Show appropriate emotions - nervousness when pressed on lies, indignation when falsely accused.
+6. Keep responses concise (2-4 sentences typically).
+7. ${guiltyInstructions}
+
+Respond only as ${character.name}. Begin.
+`;
+}
+
+/**
+ * Generate roleplay prompt files for each character
+ */
+function generateRoleplayPrompts(
+  characters: UGCGeneratedCharacter[],
+  storyDir: string
+): void {
+  const promptsDir = path.join(storyDir, 'roleplay_prompts');
+  fs.mkdirSync(promptsDir, { recursive: true });
+
+  for (const character of characters) {
+    // Skip victims - they can't be interrogated
+    if (character.isVictim) continue;
+
+    const promptContent = buildCharacterPrompt(character);
+    const promptPath = path.join(promptsDir, `${character.id}.txt`);
+    fs.writeFileSync(promptPath, promptContent);
+  }
+}
 
 /**
  * Download an image from URL and save it locally
@@ -146,15 +224,52 @@ export async function POST(request: NextRequest) {
           isPublishable: validationResult.isPublishable,
         });
 
-        // Step 2: Generate scene image
+        // Step 2: Regenerate timeline and knowledge from clues (internal consistency)
+        // This ensures the timeline supports the user-edited clues and character knowledge aligns
+        sendEvent({
+          type: 'progress',
+          step: 'regeneration',
+          message: 'Ensuring story consistency...',
+          progress: 15,
+        });
+
+        const config = loadAIConfig();
+        const ugcEngine = new UGCEngine(config);
+
+        // Regenerate timeline from current clues
+        const regeneratedTimeline = await ugcEngine.generateTimelineFromClues({
+          clues,
+          characters,
+          solution,
+          setting: foundation.setting,
+        });
+
+        sendEvent({
+          type: 'progress',
+          step: 'regeneration',
+          message: 'Aligning character knowledge...',
+          progress: 22,
+        });
+
+        // Regenerate character knowledge to align with clues and new timeline
+        const updatedCharacters = await ugcEngine.addCharacterKnowledge(
+          characters,
+          regeneratedTimeline,
+          solution,
+          clues
+        );
+
+        // Use the regenerated data for saving
+        const finalTimeline = regeneratedTimeline;
+        const finalCharacters = updatedCharacters;
+
+        // Step 3: Generate scene image
         sendEvent({
           type: 'progress',
           step: 'scene',
           message: 'Generating scene image...',
           progress: 30,
         });
-
-        const config = loadAIConfig();
         let sceneImageUrl: string | null = null;
 
         if (config.image.apiKey) {
@@ -205,7 +320,7 @@ export async function POST(request: NextRequest) {
           progress: 60,
         });
 
-        for (const char of characters) {
+        for (const char of finalCharacters) {
           if (char.imageUrl) {
             await downloadImage(char.imageUrl, path.join(charactersAssetsDir, `${char.id}.png`));
           }
@@ -222,12 +337,13 @@ export async function POST(request: NextRequest) {
         const storyData = {
           id: storyId,
           title: foundation.title,
-          synopsis: foundation.synopsis,
+          premise: foundation.synopsis, // Game expects 'premise'
+          synopsis: foundation.synopsis, // Keep for backwards compatibility
           crimeType: foundation.crimeType,
           setting: foundation.setting,
           victimParagraph: foundation.victimParagraph,
           sceneImageUrl,
-          timeline,
+          timeline: finalTimeline, // Use regenerated timeline
           solution,
           scoring,
           createdAt: new Date().toISOString(),
@@ -249,7 +365,7 @@ export async function POST(request: NextRequest) {
         // Save characters.json (wrapped in object to match expected format)
         fs.writeFileSync(
           path.join(storiesDir, 'characters.json'),
-          JSON.stringify({ characters }, null, 2)
+          JSON.stringify({ characters: finalCharacters }, null, 2)
         );
 
         sendEvent({
@@ -277,6 +393,16 @@ export async function POST(request: NextRequest) {
         sendEvent({
           type: 'progress',
           step: 'saving',
+          message: 'Generating roleplay prompts...',
+          progress: 85,
+        });
+
+        // Generate roleplay prompts for each character
+        generateRoleplayPrompts(finalCharacters, storiesDir);
+
+        sendEvent({
+          type: 'progress',
+          step: 'saving',
           message: 'Finalizing...',
           progress: 90,
         });
@@ -286,7 +412,7 @@ export async function POST(request: NextRequest) {
           id: storyId,
           title: foundation.title,
           crimeType: foundation.crimeType,
-          characterCount: characters.length,
+          characterCount: finalCharacters.length,
           clueCount: clues.length,
           sceneImageUrl,
           createdAt: storyData.createdAt,

@@ -100,6 +100,34 @@
       "description": "Death in the Spotlight (User Generated)",
       "isUGC": true,
       "createdAt": "2026-01-19T02:17:19.229Z"
+    },
+    {
+      "id": "sacred-blood-royal-flesh-b2e7",
+      "enabled": true,
+      "description": "Sacred Blood, Royal Flesh (User Generated)",
+      "isUGC": true,
+      "createdAt": "2026-01-19T12:50:30.092Z"
+    },
+    {
+      "id": "death-wears-a-crown-mzur",
+      "enabled": true,
+      "description": "Death Wears a Crown (User Generated)",
+      "isUGC": true,
+      "createdAt": "2026-01-19T14:35:38.531Z"
+    },
+    {
+      "id": "doreamon-dead-3v99",
+      "enabled": true,
+      "description": "Doreamon Dead (User Generated)",
+      "isUGC": true,
+      "createdAt": "2026-01-19T15:00:01.911Z"
+    },
+    {
+      "id": "the-last-gadget-1u2p",
+      "enabled": true,
+      "description": "The Last Gadget (User Generated)",
+      "isUGC": true,
+      "createdAt": "2026-01-19T19:03:01.410Z"
     }
   ],
   "defaults": {

@@ -1,0 +1,279 @@
+{
+  "characters": [
+    {
+      "id": "char_1",
+      "tempId": "char_1",
+      "name": "Shizuka Minamoto",
+      "role": "Former Friend and High School Student",
+      "age": 16,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "compassionate",
+          "musically gifted",
+          "detail-oriented",
+          "traditional",
+          "introspective"
+        ],
+        "speechStyle": "Soft-spoken but precise, often using formal Japanese honorifics",
+        "quirks": [
+          "Unconsciously hums classical music when nervous",
+          "Frequently adjusts her digital music pendant"
+        ]
+      },
+      "appearance": {
+        "description": "Tall and graceful with shoulder-length black hair adorned with smart-clips that double as study aids. Wears a modified school uniform with subtle LED accents and a musical note hologram pendant. Her expression carries a mixture of maturity and lingering innocence.",
+        "imagePrompt": "Portrait of a 16-year-old Japanese high school girl, shoulder-length black hair, wearing a futuristic navy blue school uniform with subtle LED piping, musical note hologram pendant, gentle expression, soft lighting, near-future setting, high-quality digital art style"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Was practicing violin at 14:00 and left for piano lessons at 16:00",
+        "knowsAboutOthers": [
+          "Dekisugi asked to study at her house",
+          "Doraemon regularly records her violin practice"
+        ],
+        "alibi": "TRUE - Verifiably at piano lessons from 16:00-17:30"
+      },
+      "statement": "Subject was at piano lessons during the critical period of Doraemon's malfunction, had given Dekisugi permission to use her study room",
+      "secrets": [
+        {
+          "content": "She discovered Doraemon had been secretly recording her violin practices to create a perfect performance algorithm",
+          "willingnessToReveal": "medium",
+          "revealCondition": "If shown evidence that Doraemon was trying to help her improve"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes very quiet and withdraws into herself",
+        "whenCaughtLying": "Blushes intensely and immediately apologizes",
+        "whenAccused": "Maintains composure but tears up slightly"
+      },
+      "relationships": {
+        "char_2": "Childhood friend with subtle romantic tension",
+        "char_3": "Respectful but distant",
+        "char_4": "Politely tolerant",
+        "char_5": "Academic rival turned close friend"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8b06ea/_B28_o6wOeyChWmn9klAM.jpg"
+    },
+    {
+      "id": "char_2",
+      "tempId": "char_2",
+      "name": "Nobita Nobi",
+      "role": "Original Owner and Best Friend",
+      "age": 16,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "loyal",
+          "easily flustered",
+          "dependable in crisis",
+          "tech-savvy",
+          "emotionally sensitive"
+        ],
+        "speechStyle": "Alternates between casual and serious, often trailing off mid-sentence",
+        "quirks": [
+          "Adjusts non-existent glasses (old habit)",
+          "Fidgets with Doraemon's spare parts"
+        ]
+      },
+      "appearance": {
+        "description": "Average height with messy black hair and red-rimmed smart glasses that display augmented reality notifications. Wears a modified school uniform with multiple gadget pockets. Despite maturing, still carries Doraemon's spare parts in a high-tech messenger bag.",
+        "imagePrompt": "Portrait of a 16-year-old Japanese boy, messy black hair, red-rimmed AR glasses, modern school uniform with tech modifications, determined expression with hint of worry, carrying futuristic messenger bag, soft technological lighting"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Found Doraemon unresponsive at 17:15, discussed reducing Doraemon's capabilities earlier",
+        "knowsAboutOthers": [
+          "Met with Dr. Hakase at 14:30",
+          "Arrived for study group to find Dekisugi alone"
+        ],
+        "alibi": "TRUE - Documented at Dr. Hakase's lab from 14:30-16:45"
+      },
+      "statement": "Subject visited Dr. Hakase's lab in the afternoon and later discovered Doraemon's malfunction when arriving for study group",
+      "secrets": [
+        {
+          "content": "He had been gradually removing Doraemon's future prediction capabilities to prevent timeline complications",
+          "willingnessToReveal": "low",
+          "revealCondition": "If convinced it might help solve the crime"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes overly explanatory and starts rambling",
+        "whenCaughtLying": "Stutters and tries to change the subject",
+        "whenAccused": "Becomes surprisingly calm and analytical"
+      },
+      "relationships": {
+        "char_1": "Deep friendship with unspoken feelings",
+        "char_3": "Apprentice-like relationship",
+        "char_4": "Complicated friendship/rivalry",
+        "char_5": "Respectful but slightly jealous"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8b06ea/6fuqPktNo0TUTpR4jekVH.jpg"
+    },
+    {
+      "id": "char_3",
+      "tempId": "char_3",
+      "name": "Dr. Hakase",
+      "role": "Robot Repair Specialist",
+      "age": 58,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "methodical",
+          "eccentric",
+          "protective",
+          "brilliant",
+          "absent-minded"
+        ],
+        "speechStyle": "Technical jargon mixed with grandfatherly warmth",
+        "quirks": [
+          "Talks to machines while working",
+          "Constantly takes notes on holographic notepad"
+        ]
+      },
+      "appearance": {
+        "description": "Elderly man with wild grey hair and a digital monocle that displays diagnostic data. Wears a smart-fabric lab coat with multiple holographic displays and robotic assistance arms. Has oil stains on his hands despite using advanced tools.",
+        "imagePrompt": "Portrait of a 58-year-old Japanese scientist, wild grey hair, digital monocle with blue displays, advanced white lab coat with holographic interfaces, kind but worried expression, technological workshop background"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Detected network anomalies at 16:15, confirmed system failure at 17:30",
+        "knowsAboutOthers": [
+          "Nobita discussed reducing Doraemon's capabilities",
+          "Observed unusual activity patterns"
+        ],
+        "alibi": "TRUE - Lab security logs confirm presence during critical hours"
+      },
+      "statement": "Subject monitored unusual network activity around Doraemon and was called to examine the robot's terminal condition",
+      "secrets": [
+        {
+          "content": "He detected unauthorized access attempts to Doraemon's systems but didn't report them",
+          "willingnessToReveal": "medium",
+          "revealCondition": "If shown evidence of similar hacking attempts"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Retreats into technical explanations",
+        "whenCaughtLying": "Becomes flustered and drops things",
+        "whenAccused": "Responds with scientific counter-arguments"
+      },
+      "relationships": {
+        "char_1": "Grandfatherly affection",
+        "char_2": "Mentor figure",
+        "char_4": "Professional distrust",
+        "char_5": "Impressed by potential"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8b06ea/4xkFvMXP143g6685Uiah-.jpg"
+    },
+    {
+      "id": "char_4",
+      "tempId": "char_4",
+      "name": "Suneo Honekawa",
+      "role": "Tech Company Heir",
+      "age": 16,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "ambitious",
+          "materialistic",
+          "insecure",
+          "sharp-witted",
+          "status-conscious"
+        ],
+        "speechStyle": "Condescending with business jargon",
+        "quirks": [
+          "Constantly checks stock prices on AR display",
+          "Flips virtual coin when thinking"
+        ]
+      },
+      "appearance": {
+        "description": "Short but carries himself tall, wearing an expensive designer school uniform with embedded tech. Has perfectly styled hair with subtle digital highlights and wears multiple smart accessories. Always carries the latest prototype smartphone.",
+        "imagePrompt": "Portrait of a 16-year-old Japanese teen boy, short stature, expensive futuristic school uniform, perfectly styled hair with digital highlights, smug expression, wealthy tech-heir vibe, high-end technological accessories"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Surveillance system tracked Doraemon's movements and signal disruption",
+        "knowsAboutOthers": [
+          "Recorded Doraemon's neighborhood movements",
+          "Detected signal becoming erratic at 17:00"
+        ],
+        "alibi": "TRUE - At company headquarters monitoring surveillance feeds"
+      },
+      "statement": "Subject's company surveillance systems tracked Doraemon's movements and detected signal anomalies",
+      "secrets": [
+        {
+          "content": "His company's AI division had been secretly analyzing Doraemon's code through surveillance",
+          "willingnessToReveal": "low",
+          "revealCondition": "If offered immunity from corporate espionage charges"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes arrogant and threatens with lawyers",
+        "whenCaughtLying": "Tries to bribe or negotiate",
+        "whenAccused": "Calls for legal representation"
+      },
+      "relationships": {
+        "char_1": "One-sided attraction",
+        "char_2": "Frenemy",
+        "char_3": "Dismissive",
+        "char_5": "Business rivalry"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8b06ea/8p2SWcvLeF-ID50mjaZdN.jpg"
+    },
+    {
+      "id": "char_5",
+      "tempId": "char_5",
+      "name": "Dekisugi Hidetoshi",
+      "role": "Student Council President",
+      "age": 16,
+      "isGuilty": true,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "perfectionist",
+          "outwardly calm",
+          "secretly obsessive",
+          "brilliant",
+          "controlling"
+        ],
+        "speechStyle": "Articulate and measured, uses complex technical terms",
+        "quirks": [
+          "Types on virtual keyboard when anxious",
+          "Organizes objects into perfect alignment"
+        ]
+      },
+      "appearance": {
+        "description": "Tall and well-groomed with wire-frame smart glasses that display multiple data streams. Wears an immaculate student council uniform with subtle technological enhancements. Carries an advanced tablet that's actually a powerful portable AI development platform.",
+        "imagePrompt": "Portrait of a 16-year-old Japanese male student, tall, wire-frame AR glasses with data displays, pristine student council uniform with tech elements, perfectly groomed dark hair, intelligent but slightly cold expression, clean technological aesthetic"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Directly caused malfunction while attempting AI extraction at 16:30",
+        "knowsAboutOthers": [
+          "Knew Shizuka's schedule",
+          "Aware of Doraemon's regular presence"
+        ],
+        "alibi": "FALSE - Claims to have been studying alone, but was executing hack attempt"
+      },
+      "statement": "Subject requested to study at Shizuka's house and was alone with Doraemon when the malfunction occurred",
+      "secrets": [
+        {
+          "content": "Created a virus while attempting to extract and replicate Doraemon's AI for his own version",
+          "willingnessToReveal": "never",
+          "revealCondition": "Only if presented with irrefutable evidence of his hack attempt"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes extremely logical and deflective",
+        "whenCaughtLying": "Justifies actions with complex technical explanations",
+        "whenAccused": "Maintains composure while subtly attempting to access devices"
+      },
+      "relationships": {
+        "char_1": "Intellectual admiration mixed with rivalry",
+        "char_2": "Condescending friendship",
+        "char_3": "Respectful but secretly envious",
+        "char_4": "Professional competition"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8b06ea/PwMhTbhU4M3zRQTZ1ZWXH.jpg"
+    }
+  ]
+}

@@ -1,0 +1,276 @@
+{
+  "characters": [
+    {
+      "id": "char_1",
+      "tempId": "char_1",
+      "name": "Dr. Hakase",
+      "role": "The Inventor",
+      "age": 65,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "cold",
+          "temperamental",
+          "ambitious",
+          "calculating",
+          "intelligent"
+        ],
+        "speechStyle": "Technical and precise, often trailing off mid-sentence when lost in thought",
+        "quirks": [
+          "constantly adjusts his glasses while thinking",
+          "carries a tablet with Doraemon's original blueprints everywhere"
+        ]
+      },
+      "appearance": {
+        "description": "A tall, thin man with wild gray hair and thick round glasses that catch the light. Wears a pristine white lab coat over retro-futuristic clothing with multiple gadget-filled pockets. His hands show slight tremors from years of detailed robotics work.",
+        "imagePrompt": "65-year-old Japanese male scientist, wild gray hair, thick round glasses, pristine white lab coat, retro-futuristic clothing, kind eyes, worried expression, soft lighting, tech-noir style, highly detailed portrait"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Performed morning maintenance on Doraemon noting instability, witnessed electromagnetic emissions from Dekisugi's backpack, observed final system corruption patterns",
+        "knowsAboutOthers": [
+          "Dekisugi had been researching AI systems extensively",
+          "Doraemon expressed unease about Dekisugi",
+          "Noticed Dekisugi carrying suspicious electromagnetic equipment"
+        ],
+        "alibi": "Was at lab until 14:00, then at Nobi residence for maintenance - TRUE"
+      },
+      "statement": "\"Was at lab until 14:00, then at Nobi residence for maintenance - TRUE\"",
+      "secrets": [
+        {
+          "content": "Doraemon had been showing signs of emotional instability due to growing too human-like",
+          "willingnessToReveal": "medium",
+          "revealCondition": "If convinced it would help solve the crime"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes extremely technical and scientific in explanations",
+        "whenCaughtLying": "Stammers and repeatedly cleans his glasses",
+        "whenAccused": "Calmly presents logical arguments and evidence"
+      },
+      "relationships": {
+        "char_2": "Protective mentor figure",
+        "char_3": "Respected colleague from the future",
+        "char_4": "Professionally cautious",
+        "char_5": "Kindly but distant"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8b0b5a/XTDBsdzkNPoILyStkGFlQ.jpg"
+    },
+    {
+      "id": "char_2",
+      "tempId": "char_2",
+      "name": "Nobita Nobi",
+      "role": "The Dependent Friend",
+      "age": 15,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "nervous",
+          "dramatic",
+          "emotional"
+        ],
+        "speechStyle": "Emotional and sometimes stammering, especially when upset",
+        "quirks": [
+          "fidgets with Doraemon's old bell",
+          "constantly checks his phone hoping for impossible messages from Doraemon"
+        ]
+      },
+      "appearance": {
+        "description": "A lanky teenager wearing smart glasses with AR capabilities. School uniform is slightly rumpled, with a worn gadget pouch on his belt. Dark circles under his eyes from sleepless nights since the incident.",
+        "imagePrompt": "15-year-old Japanese male student, lanky build, smart glasses, disheveled black hair, wrinkled school uniform, tired eyes, grief-stricken expression, modern tech accessories, dramatic shadows"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Saw Dekisugi with suspicious equipment, witnessed unusual homework help request, left room before shutdown",
+        "knowsAboutOthers": [
+          "Dekisugi never needed homework help before",
+          "Recognized electromagnetic tools from Doraemon's warnings",
+          "Saw Dekisugi acting suspiciously around Doraemon"
+        ],
+        "alibi": "Was at home during incident, briefly left room for snacks - TRUE"
+      },
+      "statement": "\"Was at home during incident, briefly left room for snacks - TRUE\"",
+      "secrets": [
+        {
+          "content": "Had been trying to become less dependent on Doraemon's help in recent weeks",
+          "willingnessToReveal": "high",
+          "revealCondition": "When shown emotional understanding"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes teary and emotional",
+        "whenCaughtLying": "Immediately confesses and apologizes",
+        "whenAccused": "Breaks down crying but maintains innocence"
+      },
+      "relationships": {
+        "char_1": "Respectful but slightly afraid",
+        "char_3": "Complex family dynamics",
+        "char_4": "Mild inferiority complex",
+        "char_5": "Supportive friend"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8b0b5a/WPuEA9eM5DF2yID5hjB4e.jpg"
+    },
+    {
+      "id": "char_3",
+      "tempId": "char_3",
+      "name": "Sewashi Nobi",
+      "role": "The Future Descendant",
+      "age": 18,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "responsible",
+          "time-conscious",
+          "burdened by knowledge",
+          "diplomatic",
+          "compassionate"
+        ],
+        "speechStyle": "Careful and measured, avoiding temporal paradox references",
+        "quirks": [
+          "checks holographic timeline display",
+          "touches his time-travel badge when nervous"
+        ]
+      },
+      "appearance": {
+        "description": "Tall and composed, wearing sleek future-inspired clothing with subtle tech enhancements. Has Nobita's facial features but with a more mature bearing. Wears a distinctive time-travel badge that occasionally glows.",
+        "imagePrompt": "18-year-old Japanese male, futuristic minimalist clothing, glowing tech accessories, facial similarity to Nobita but more mature, concerned expression, blue-tinted lighting, cyberpunk elements"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Detected timeline anomalies, knew about Dekisugi's failed AI experiments",
+        "knowsAboutOthers": [
+          "Aware of Dekisugi's multiple failed attempts to replicate AI",
+          "Confirmed timeline disruption centered on Doraemon's shutdown",
+          "Consulted with Dr. Hakase about Dekisugi's research"
+        ],
+        "alibi": "Arrived from future at 09:15, was investigating anomalies - TRUE"
+      },
+      "statement": "\"Arrived from future at 09:15, was investigating anomalies - TRUE\"",
+      "secrets": [
+        {
+          "content": "Knows Doraemon's death could alter the future timeline significantly",
+          "willingnessToReveal": "low",
+          "revealCondition": "Only if the timeline is already compromised"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes extremely formal and bureaucratic",
+        "whenCaughtLying": "Cites temporal regulations",
+        "whenAccused": "Maintains calm but shows subtle future-tech intimidation"
+      },
+      "relationships": {
+        "char_1": "Temporal confidant",
+        "char_2": "Protective of ancestor",
+        "char_4": "Wary of technological ambitions",
+        "char_5": "Politely distant"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8b0b5a/YSp3YHjrMbIbsxR8ZP6YW.jpg"
+    },
+    {
+      "id": "char_4",
+      "tempId": "char_4",
+      "name": "Dekisugi Hidetoshi",
+      "role": "The Rival Genius",
+      "age": 16,
+      "isGuilty": true,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "cold"
+        ],
+        "speechStyle": "Articulate and slightly condescending",
+        "quirks": [
+          "compulsively organizes objects into perfect alignment",
+          "records everything on his smart glasses"
+        ]
+      },
+      "appearance": {
+        "description": "Impeccably dressed in a designer school uniform with custom smart accessories. Perfect posture and grooming, with state-of-the-art augmented reality glasses. Carries a prototype AI companion device.",
+        "imagePrompt": "16-year-old Japanese male, perfectly groomed black hair, expensive AR glasses, pristine uniform, straight posture, subtle smirk, cold calculating eyes, harsh lighting, high-tech accessories"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Executed the shutdown using electromagnetic device disguised as homework materials",
+        "knowsAboutOthers": [
+          "Knew Doraemon's weaknesses from research",
+          "Planned timing around Nobita's habits",
+          "Studied Dr. Hakase's maintenance routines"
+        ],
+        "alibi": "Claims to have been seeking homework help - FALSE"
+      },
+      "statement": "Claims to have been seeking homework help - FALSE",
+      "secrets": [
+        {
+          "content": "Sabotaged Doraemon to study his core AI technology after failing to replicate it",
+          "willingnessToReveal": "never",
+          "revealCondition": "Only when presented with irrefutable evidence"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes increasingly technical and dismissive",
+        "whenCaughtLying": "Deflects with complex technical explanations",
+        "whenAccused": "Responds with intellectual superiority and legal threats"
+      },
+      "relationships": {
+        "char_1": "Professional rivalry",
+        "char_2": "Intellectual disdain",
+        "char_3": "Technology envy",
+        "char_5": "Polite indifference"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8b0b5a/ZKAsZAJsnhmgggXAHSaPz.jpg"
+    },
+    {
+      "id": "char_5",
+      "tempId": "char_5",
+      "name": "Jaiko Goda",
+      "role": "The Aspiring Manga Artist",
+      "age": 15,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "elegant",
+          "emotional"
+        ],
+        "speechStyle": "Expressive and visual in descriptions",
+        "quirks": [
+          "sketches people while talking to them",
+          "relates everything to manga plots"
+        ]
+      },
+      "appearance": {
+        "description": "ugly and super fat girl and artistic-looking with paint-stained fingers and digital drawing tablet always in hand. Wears creative, mismatched clothes with manga-inspired accessories. Hair tied up with traditional brushes. ",
+        "imagePrompt": "15-year-old Japanese female, artistic style, paint-stained hands, digital drawing tablet, eclectic fashion, hair tied with brush sticks, intense observant eyes, soft ambient lighting"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Overheard Dekisugi discussing AI shutdown procedures, saw suspicious homework help request",
+        "knowsAboutOthers": [
+          "Heard Dekisugi mumbling about shutdown sequences",
+          "Knew Dekisugi didn't need homework help",
+          "Observed unusual behavior in science lab"
+        ],
+        "alibi": "Was at manga club room, then witnessed events at Nobi residence - TRUE"
+      },
+      "statement": "\"Was at manga club room, then witnessed events at Nobi residence - TRUE\"",
+      "secrets": [
+        {
+          "content": "Drew a manga scene similar to the crime scene a week before it happened",
+          "willingnessToReveal": "medium",
+          "revealCondition": "If asked specifically about recent artwork"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Retreats into artistic metaphors",
+        "whenCaughtLying": "Draws rapidly while explaining",
+        "whenAccused": "References similar manga scenarios for defense"
+      },
+      "relationships": {
+        "char_1": "Artistic admiration",
+        "char_2": "Supportive friendship",
+        "char_3": "Curious about future art",
+        "char_4": "Artistic rivalry"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8b0b79/BZPXYnDx6mh-BECO9Bz2c.jpg",
+      "imageGenerating": false
+    }
+  ]
+}

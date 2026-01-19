@@ -153,6 +153,46 @@ export interface PromptTrace {
 }
 
 // ============================================================================
+// Statement Derivation Helper
+// ============================================================================
+
+/**
+ * Derive a third-person statement from a character's alibi
+ * Used instead of LLM generation since statement is just a reformatted alibi
+ */
+export function deriveStatementFromAlibi(name: string, alibi: string): string {
+  if (!alibi || alibi.length < 5) {
+    return `${name} was present during the incident. No detailed statement provided.`;
+  }
+
+  // Clean up internal annotations
+  let cleanAlibi = alibi
+    .replace(/\s*\(false\)\s*/gi, '')
+    .replace(/\s*\(true\)\s*/gi, '')
+    .trim();
+
+  // If already third-person style
+  if (/^claims?\s/i.test(cleanAlibi)) {
+    return cleanAlibi.charAt(0).toUpperCase() + cleanAlibi.slice(1);
+  }
+
+  // Convert first-person to third-person
+  if (/^i (was|am|have|had|went|saw|heard)/i.test(cleanAlibi)) {
+    return cleanAlibi
+      .replace(/^i was/i, `Claims to have been`)
+      .replace(/^i am/i, `Says they are`)
+      .replace(/^i have/i, `Says they have`)
+      .replace(/^i had/i, `Claims they had`)
+      .replace(/^i went/i, `Says they went`)
+      .replace(/^i saw/i, `Claims to have seen`)
+      .replace(/^i heard/i, `Claims to have heard`);
+  }
+
+  // Wrap as a claim
+  return `"${cleanAlibi}"`;
+}
+
+// ============================================================================
 // UGC Engine Class
 // ============================================================================
 
@@ -397,7 +437,7 @@ For EACH character, generate enhanced details. The output must be a JSON array w
     "isGuilty": true/false,
     "isVictim": true/false,
     "personality": {
-      "traits": ["use user's traits if provided, or generate 3 appropriate ones"],
+      "traits": "COPY the user's personalityTraits array exactly as provided",
       "speechStyle": "How they talk - formal, casual, nervous, etc.",
       "quirks": ["2 behavioral quirks or mannerisms"]
     },
@@ -410,7 +450,6 @@ For EACH character, generate enhanced details. The output must be a JSON array w
       "knowsAboutOthers": ["What they know about other characters that could be revealed in interrogation"],
       "alibi": "INTERNAL: Where they claim to have been (can include notes like 'false' for guilty character)"
     },
-    "statement": "Third-person case summary shown to player. 1-2 sentences describing their claimed whereabouts and connection to the incident. Like detective notes.",
     "secrets": [
       {
         "content": "Use user's secret if provided, or generate one",
@@ -436,30 +475,6 @@ CRITICAL RULES:
 4. The "knowsAboutOthers" should include actionable information about other suspects
 5. Relationships should create a web of connections between characters
 
-STATEMENT FIELD GUIDELINES (CRITICAL - this is shown to players!):
-- Written in THIRD PERSON, like detective case notes or a police report summary
-- 1-2 sentences describing: their claimed whereabouts + their connection to the incident
-- This gives players a starting point for interrogation without revealing the mystery
-
-WHAT TO INCLUDE:
-- Where they claim to be during the incident
-- How they relate to the crime (found body, was nearby, arrived late, etc.)
-- Neutral factual tone
-
-WHAT TO NEVER INCLUDE:
-- "(false)" or "(true)" annotations - those are internal only
-- What they know about OTHER characters - player discovers through interrogation
-- Evidence or clues - player must uncover these
-- Whether their alibi is actually true or not
-
-EXAMPLES:
-- GOOD: "Claims he was practicing basic spells near the paddock. Was present when the incident was discovered."
-- GOOD: "Was inside the hut preparing tea. Found the horse dead the following morning."
-- GOOD: "Says she was examining plants in the garden. Did not directly witness the incident."
-- BAD: "Claims he was far from the horse (false)" - reveals the lie!
-- BAD: "Noticed Ron's broken wand during tea" - reveals evidence!
-- BAD: "Is hiding that she saw everything" - reveals secret!
-
 Respond with ONLY the JSON array, no other text.`;
 
     // Trace the prompt before LLM call
@@ -474,11 +489,13 @@ Respond with ONLY the JSON array, no other text.`;
 
     const characters: UGCGeneratedCharacter[] = this.parseJSONResponse(text);
 
-    // Preserve uploaded image URLs
+    // Preserve uploaded image URLs and derive statement from alibi
     return characters.map(char => {
       const inputChar = formInput.characters.find(c => c.tempId === char.tempId);
       return {
         ...char,
+        // Derive statement from alibi instead of LLM generation
+        statement: deriveStatementFromAlibi(char.name, char.knowledge?.alibi || ''),
         imageUrl: inputChar?.uploadedImageUrl || undefined,
       };
     });
@@ -868,7 +885,6 @@ Generate a JSON array:
     "knowsAboutCrime": "What they directly witnessed or know about the crime from the timeline",
     "knowsAboutOthers": ["Specific info about other characters they could reveal"],
     "alibi": "Their claimed whereabouts during the crime (based on timeline)",
-    "statement": "1-2 sentence third-person case summary for player display",
     "behaviorUnderPressure": {
       "defensive": "How they deflect based on personality and secret",
       "whenCaughtLying": "Reaction based on personality",
@@ -889,15 +905,6 @@ FOR INNOCENT CHARACTERS:
 - knowsAboutCrime should include what they ACTUALLY witnessed per timeline
 - knowsAboutOthers should include ACTIONABLE info (things that help solve the mystery)
 - They may protect their OWN secret but should be honest about the crime
-
-STATEMENT GUIDELINES (shown to players):
-- Third person, like detective case notes
-- 1-2 sentences: claimed whereabouts + connection to incident
-- NEVER include: "(false)" markers, other characters' knowledge, evidence, secrets
-
-EXAMPLE STATEMENTS:
-- GOOD: "Claims to have been in the garden during the incident. Discovered the body when returning to the house."
-- BAD: "Claims to be in the garden (false alibi)" - reveals the lie!
 
 Respond with ONLY the JSON array, no other text.`;
 
@@ -954,7 +961,8 @@ Respond with ONLY the JSON array, no other text.`;
           knowsAboutOthers: charKnowledge.knowsAboutOthers,
           alibi: charKnowledge.alibi,
         },
-        statement: charKnowledge.statement,
+        // Derive statement from alibi instead of LLM generation
+        statement: deriveStatementFromAlibi(char.name, charKnowledge.alibi),
         secrets: [{
           content: char.secret,
           willingnessToReveal: char.isCulprit ? 'never' : 'medium',
@@ -1911,12 +1919,15 @@ Respond with ONLY the JSON object, no other text.`;
   }
 
   /**
-   * Main entry point for the new foundation-based flow.
+   * Main entry point for the new foundation-based flow (CLUES-FIRST).
    * Takes minimal foundation data + character sketches + culprit info and generates:
    * - Full character details with images
-   * - Timeline
-   * - Clues (without categories)
-   * - Solution
+   * - Clues (for solvability - generated BEFORE timeline)
+   * - Timeline (to support clues - internal implementation detail)
+   * - Character knowledge (aligned with clues)
+   *
+   * Key insight: Clues are the "contract" (what must be discoverable).
+   * Timeline is the "implementation" (how those clues came to exist).
    */
   async fleshOutAndGenerate(
     request: FleshOutRequest,
@@ -1932,24 +1943,39 @@ Respond with ONLY the JSON object, no other text.`;
       throw new Error('Culprit character not found in character list');
     }
 
+    // Build solution object from culprit info
+    const culpritChar = characters.find(c => c.id === culprit.characterId);
+    const solution: UGCSolution = {
+      culprit: culpritChar?.name || 'Unknown',
+      method: culprit.method,
+      motive: culprit.motive,
+      explanation: `${culpritChar?.name || 'The culprit'} committed the ${foundation.crimeType} because ${culprit.motive}. They used ${culprit.method} to carry out the crime.`,
+    };
+
     // Step 1: Generate full character details (0% → 20%)
     onProgress(this.createProgressEvent('characters', 'Generating character appearances and personalities...', 0));
     const fleshedOutCharacters = await this.generateFullCharacterDetails(foundation, characters, culprit);
     onProgress(this.createProgressEvent('characters', 'Character details generated', 20));
 
-    // Step 2: Generate timeline and solution (20% → 40%)
-    onProgress(this.createProgressEvent('timeline', 'Building the story timeline...', 20));
-    const { timeline, solution } = await this.generateTimelineAndSolution(foundation, fleshedOutCharacters, culprit);
-    onProgress(this.createProgressEvent('timeline', 'Timeline created', 40));
+    // Step 2: Generate clues for solvability (20% → 40%) - CLUES FIRST!
+    onProgress(this.createProgressEvent('clues', 'Designing mystery clues...', 20));
+    const { clues, scoring } = await this.generateCluesForSolvability(foundation, fleshedOutCharacters, solution);
+    onProgress(this.createProgressEvent('clues', 'Clues designed', 40));
 
-    // Step 3: Generate clues (40% → 60%)
-    onProgress(this.createProgressEvent('clues', 'Creating discoverable clues...', 40));
-    const { clues, scoring } = await this.generateCluesWithoutCategories(foundation, fleshedOutCharacters, timeline, solution);
-    onProgress(this.createProgressEvent('clues', 'Clues generated', 60));
+    // Step 3: Generate timeline to support clues (40% → 60%)
+    onProgress(this.createProgressEvent('timeline', 'Building story timeline to support clues...', 40));
+    const timeline = await this.generateTimelineFromClues({
+      clues,
+      characters: fleshedOutCharacters,
+      solution,
+      setting: foundation.setting,
+    });
+    onProgress(this.createProgressEvent('timeline', 'Timeline created', 60));
 
     // Step 4: Generate character knowledge (60% → 75%)
+    // Pass clues so character knowledge aligns with who reveals what
     onProgress(this.createProgressEvent('knowledge', 'Deriving what each character knows...', 60));
-    const charactersWithKnowledge = await this.addCharacterKnowledge(fleshedOutCharacters, timeline, solution);
+    const charactersWithKnowledge = await this.addCharacterKnowledge(fleshedOutCharacters, timeline, solution, clues);
     onProgress(this.createProgressEvent('knowledge', 'Character knowledge derived', 75));
 
     // Step 5: Generate character images (75% → 100%)
@@ -2012,7 +2038,7 @@ For EACH character, generate a complete profile. Output a JSON array:
     "isGuilty": true_if_culprit_false_otherwise,
     "isVictim": false,
     "personality": {
-      "traits": ["3-5 personality traits fitting their role and the setting"],
+      "traits": [],
       "speechStyle": "How they speak - formal, nervous, confident, etc.",
       "quirks": ["2 behavioral quirks or mannerisms"]
     },
@@ -2225,13 +2251,146 @@ Respond with ONLY the JSON object.`;
   }
 
   /**
-   * Add knowledge to characters based on timeline
+   * Generate clues for mystery solvability WITHOUT a timeline (clues-first flow)
+   * Clues are based on characters, their secrets, and the solution
+   * The key insight: Clues are the "contract" (what must be discoverable)
+   * Timeline is the "implementation" (how those clues came to exist)
    */
-  private async addCharacterKnowledge(
+  private async generateCluesForSolvability(
+    foundation: UGCFoundation,
+    characters: UGCGeneratedCharacter[],
+    solution: UGCSolution
+  ): Promise<{ clues: UGCGeneratedClue[]; scoring: { minimumPointsToAccuse: number; perfectScoreThreshold: number } }> {
+    // Filter out victims - they can't reveal clues during interrogation
+    const interactableCharacters = characters.filter(c => !c.isVictim);
+    const culprit = characters.find(c => c.isGuilty);
+
+    // Build character info section including their secrets
+    const characterInfoSection = interactableCharacters.map(c => {
+      const secretInfo = c.secrets.length > 0 ? c.secrets[0].content : 'No specific secret';
+      return `- ${c.id}: ${c.name} (${c.role})
+    Secret: ${secretInfo}
+    Is Culprit: ${c.isGuilty}`;
+    }).join('\n');
+
+    const prompt = `You are designing clues for a mystery game. Generate clues that would allow a detective to solve this mystery through character interrogation.
+
+STORY FOUNDATION:
+- Title: ${foundation.title}
+- Setting: ${foundation.setting.location}, ${foundation.setting.timePeriod}
+- Crime Type: ${foundation.crimeType}
+- Victim: ${foundation.victimParagraph}
+
+SOLUTION TO PROVE:
+- Culprit: ${culprit?.name || solution.culprit} (${culprit?.role || 'unknown'})
+- Method: ${solution.method}
+- Motive: ${solution.motive}
+
+CHARACTERS AND THEIR SECRETS:
+${characterInfoSection}
+
+Generate 8-12 clues that would allow a detective to solve this mystery.
+
+CLUE REQUIREMENTS BY CATEGORY:
+1. MOTIVE CLUES (2+ required) - Why the culprit did it
+   - Financial troubles, relationship issues, grudges, etc.
+   - Revealed by characters who witnessed or know about the motive
+
+2. ALIBI CLUES (2+ required) - Holes in culprit's story
+   - Contradictions in their timeline
+   - Witnesses who saw them elsewhere
+   - Physical evidence disproving claims
+
+3. OPPORTUNITY CLUES (1+ required) - Culprit had access/means
+   - Access to the crime scene
+   - Possession of murder weapon or tools
+   - Knowledge only the perpetrator would have
+
+4. CORROBORATION CLUES (2+ required) - Supporting evidence
+   - Physical evidence (footprints, fingerprints, items)
+   - Witness statements that connect pieces
+   - Documents, letters, or records
+
+For each clue, assign revealedBy based on:
+- Who would LOGICALLY know this given their role and position?
+- Who has a related secret that connects to this information?
+- Who would have been nearby or involved in the relevant events?
+
+Output a JSON object:
+{
+  "clues": [
+    {
+      "id": "clue_snake_case_id",
+      "description": "What the player learns when this clue is revealed",
+      "points": 10-30,
+      "revealedBy": ["character_ids_who_can_reveal_this"],
+      "detectionHints": ["keywords", "phrases", "topics that trigger this clue"]
+    }
+  ],
+  "minimumPointsToAccuse": 50,
+  "perfectScoreThreshold": calculated_total_of_all_points
+}
+
+RULES:
+1. EVERY clue MUST be assigned to at least one LIVING character who can reveal it
+2. Critical clues should be worth more points (25-30), supporting clues less (10-15)
+3. Total possible points should be around 150-200
+4. Detection hints should include keywords like "where were you", "alibi", "that night", character names
+5. revealedBy should be character IDs (like char_xxx), not names
+6. Clues are what characters OBSERVED or KNOW - they don't know who the killer is, so clues are factual observations
+
+Respond with ONLY the JSON object.`;
+
+    this.tracePrompt('generate-clues-for-solvability', prompt);
+
+    const { text } = await generateText({
+      config: this.config.llm,
+      prompt,
+      maxTokens: 3000,
+      temperature: 0.7,
+    });
+
+    const result = this.parseJSONResponse(text);
+    return {
+      clues: result.clues || [],
+      scoring: {
+        minimumPointsToAccuse: result.minimumPointsToAccuse || 50,
+        perfectScoreThreshold: result.perfectScoreThreshold || 150,
+      },
+    };
+  }
+
+  /**
+   * Generate timeline from clues (for initial generation in clues-first flow)
+   * This is the internal method - the public one is regenerateTimelineFromClues
+   */
+  async generateTimelineFromClues(request: RegenerateTimelineRequest): Promise<string[]> {
+    return this.regenerateTimelineFromClues(request);
+  }
+
+  /**
+   * Add knowledge to characters based on timeline and clues
+   * IMPORTANT: Clues define who reveals what, so character knowledge must align
+   */
+  async addCharacterKnowledge(
     characters: UGCGeneratedCharacter[],
     timeline: string[],
-    solution: UGCSolution
+    solution: UGCSolution,
+    clues: UGCGeneratedClue[] = []
   ): Promise<UGCGeneratedCharacter[]> {
+    // Build clue alignment section only if clues are provided
+    const clueAlignmentSection = clues.length > 0 ? `
+CLUES AND WHO REVEALS THEM:
+${clues.map(clue => `- "${clue.description}" → Revealed by: ${clue.revealedBy.join(', ')}`).join('\n')}
+
+CRITICAL - CLUE ALIGNMENT:
+6. For each clue, look at who reveals it (revealedBy)
+7. Those characters MUST have related knowledge in knowsAboutOthers or knowsAboutCrime
+8. Example: If clue "Saw gardener near shed at 9pm" is revealed by char_lord,
+   then char_lord's knowsAboutOthers must include info about seeing the gardener
+9. This ensures gameplay consistency - characters can only reveal what they know
+` : '';
+
     const prompt = `Derive what each character knows based on the timeline of events.
 
 TIMELINE:
@@ -2244,14 +2403,13 @@ SOLUTION:
 
 CHARACTERS:
 ${characters.map(c => `- ${c.id}: ${c.name} (${c.role}) - Guilty: ${c.isGuilty}`).join('\n')}
-
+${clueAlignmentSection}
 Generate a JSON object mapping each character ID to their knowledge:
 {
   "character_id": {
     "knowsAboutCrime": "What they directly witnessed or know about the crime",
     "knowsAboutOthers": ["Info they have about other characters from timeline"],
-    "alibi": "Where they claim to have been (FALSE for culprit, TRUE for innocents)",
-    "statement": "Third-person case summary for player display (1-2 sentences, like detective notes)"
+    "alibi": "Where they claim to have been (FALSE for culprit, TRUE for innocents)"
   }
 }
 
@@ -2260,7 +2418,6 @@ RULES:
 2. Innocent characters should have TRUE, verifiable alibis
 3. Each character should know something useful based on timeline events they witnessed
 4. knowsAboutOthers should be information they could reveal during interrogation
-5. Statements should be neutral, factual, and NOT reveal whether alibis are true
 
 Respond with ONLY the JSON object.`;
 
@@ -2279,14 +2436,16 @@ Respond with ONLY the JSON object.`;
       const knowledge = knowledgeMap[char.id];
       if (!knowledge) return char;
 
+      const alibi = knowledge.alibi || '';
       return {
         ...char,
         knowledge: {
           knowsAboutCrime: knowledge.knowsAboutCrime || '',
           knowsAboutOthers: knowledge.knowsAboutOthers || [],
-          alibi: knowledge.alibi || '',
+          alibi,
         },
-        statement: knowledge.statement || '',
+        // Derive statement from alibi instead of LLM generation
+        statement: deriveStatementFromAlibi(char.name, alibi),
       };
     });
   }

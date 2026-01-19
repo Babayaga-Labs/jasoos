@@ -1,0 +1,160 @@
+{
+  "plotPoints": [
+    {
+      "id": "dekisugi_ai_obsession",
+      "description": "Dekisugi has been intensely researching AI architecture and robotics, frequently asking detailed questions about Doraemon's capabilities",
+      "points": 25,
+      "revealedBy": [
+        "char_2",
+        "char_1"
+      ],
+      "detectionHints": [
+        "interests",
+        "robotics",
+        "AI",
+        "research",
+        "Dekisugi's hobbies",
+        "technology"
+      ],
+      "category": "evidence",
+      "importance": "critical"
+    },
+    {
+      "id": "network_anomaly",
+      "description": "Unusual network activity was detected around Doraemon's signal at 16:15, indicating an unauthorized access attempt",
+      "points": 30,
+      "revealedBy": [
+        "char_3"
+      ],
+      "detectionHints": [
+        "technical problems",
+        "malfunction",
+        "network",
+        "signal",
+        "interference"
+      ],
+      "category": "evidence",
+      "importance": "critical"
+    },
+    {
+      "id": "surveillance_footage",
+      "description": "Security cameras show Doraemon entering Shizuka's house at 15:45, but signal becomes erratic around 17:00",
+      "points": 20,
+      "revealedBy": [
+        "char_4"
+      ],
+      "detectionHints": [
+        "cameras",
+        "security",
+        "footage",
+        "movements",
+        "timeline"
+      ],
+      "category": "evidence",
+      "importance": "high"
+    },
+    {
+      "id": "study_session_request",
+      "description": "Dekisugi specifically requested to study at Shizuka's house, which was unusual as he normally prefers the library",
+      "points": 15,
+      "revealedBy": [
+        "char_1"
+      ],
+      "detectionHints": [
+        "study group",
+        "that afternoon",
+        "arrangements",
+        "location"
+      ],
+      "category": "evidence",
+      "importance": "high"
+    },
+    {
+      "id": "alone_time",
+      "description": "Dekisugi was alone in the house between 16:00 and 17:15, as Shizuka had piano lessons",
+      "points": 25,
+      "revealedBy": [
+        "char_1"
+      ],
+      "detectionHints": [
+        "whereabouts",
+        "timeline",
+        "piano lesson",
+        "house",
+        "alone"
+      ],
+      "category": "evidence",
+      "importance": "critical"
+    },
+    {
+      "id": "recent_behavior",
+      "description": "Dekisugi had been making detailed sketches of Doraemon's internal systems during class",
+      "points": 20,
+      "revealedBy": [
+        "char_2"
+      ],
+      "detectionHints": [
+        "behavior",
+        "drawings",
+        "class",
+        "suspicious",
+        "notes"
+      ],
+      "category": "evidence",
+      "importance": "high"
+    },
+    {
+      "id": "technical_expertise",
+      "description": "The virus that corrupted Doraemon required advanced programming knowledge that few students possess",
+      "points": 15,
+      "revealedBy": [
+        "char_3",
+        "char_4"
+      ],
+      "detectionHints": [
+        "programming",
+        "virus",
+        "technical skills",
+        "expertise"
+      ],
+      "category": "evidence",
+      "importance": "high"
+    },
+    {
+      "id": "perfect_grades",
+      "description": "Dekisugi had become obsessed with achieving perfection in robotics, beyond his usual academic excellence",
+      "points": 20,
+      "revealedBy": [
+        "char_1",
+        "char_2"
+      ],
+      "detectionHints": [
+        "grades",
+        "performance",
+        "personality",
+        "changes",
+        "perfectionism"
+      ],
+      "category": "evidence",
+      "importance": "high"
+    },
+    {
+      "id": "failed_alibi",
+      "description": "Dekisugi claimed to be in the library during the incident, but library records show he never checked in",
+      "points": 30,
+      "revealedBy": [
+        "char_4"
+      ],
+      "detectionHints": [
+        "alibi",
+        "where were you",
+        "library",
+        "that afternoon"
+      ],
+      "category": "evidence",
+      "importance": "critical"
+    }
+  ],
+  "minimumPointsToAccuse": 120,
+  "perfectScoreThreshold": 200
+}

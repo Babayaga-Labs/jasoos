@@ -1,0 +1,38 @@
+{
+  "id": "doreamon-dead-3v99",
+  "title": "Doreamon Dead",
+  "premise": "In a shocking turn of events, the beloved robotic companion Doraemon is found deactivated in Shizuka's bedroom during their high school years. What drove a once-innocent friendship to such a dark conclusion? The investigation reveals that Doraemon's core memory chip is missing, suggesting this wasn't a simple malfunction.",
+  "synopsis": "In a shocking turn of events, the beloved robotic companion Doraemon is found deactivated in Shizuka's bedroom during their high school years. What drove a once-innocent friendship to such a dark conclusion? The investigation reveals that Doraemon's core memory chip is missing, suggesting this wasn't a simple malfunction.",
+  "crimeType": "murder",
+  "setting": {
+    "location": "Nerima District, Tokyo",
+    "timePeriod": "Near-future Tokyo",
+    "atmosphere": "Melancholic technological dystopia with remnants of childhood innocence"
+  },
+  "victimParagraph": "Doraemon wasn't just a robot; he was a beloved friend who had shaped the childhood of an entire neighborhood. His advanced AI and dedication to helping others made him irreplaceable, but as his young friends entered their teenage years, his knowledge of their futures and access to powerful gadgets became increasingly complicated. Someone may have decided that some secrets were better left in the fourth dimension.",
+  "sceneImageUrl": "https://v3b.fal.media/files/b/0a8b0717/DXYsXJck1ckybBxfUVEXk.jpg",
+  "timeline": [
+    "14:00 - Shizuka practices violin at home, Doraemon secretly records her performance as usual",
+    "14:30 - Nobita visits Dr. Hakase's lab to discuss reducing Doraemon's future prediction capabilities",
+    "15:00 - Suneo's company surveillance cameras track Doraemon moving through the neighborhood",
+    "15:30 - Dekisugi asks Shizuka if he can study at her house, knowing Doraemon often visits there",
+    "16:00 - Shizuka leaves for piano lessons, giving Dekisugi access to her home study room",
+    "16:15 - Dr. Hakase detects unusual network activity around Doraemon's signal",
+    "16:30 - Dekisugi attempts to extract Doraemon's AI code while alone with him",
+    "16:45 - Doraemon experiences system malfunction as Dekisugi's virus accidentally activates",
+    "17:00 - Suneo's surveillance logs show Doraemon's signal becoming erratic",
+    "17:15 - Nobita arrives at Shizuka's house for study group, finds Doraemon unresponsive",
+    "17:30 - Dr. Hakase arrives to examine Doraemon, declares permanent system failure"
+  ],
+  "solution": {
+    "culprit": "Dekisugi Hidetoshi",
+    "method": "Created a sophisticated program to extract Doraemon's AI architecture, but the extraction attempt created an unexpected virus that corrupted Doraemon's core systems. The hack was performed during a planned study session at Shizuka's house when he knew he would be alone with Doraemon.",
+    "motive": "Obsessed with creating his own perfect AI companion, Dekisugi believed he could reverse-engineer Doraemon's advanced capabilities. His perfectionist nature and desire to prove his technical brilliance drove him to attempt the dangerous extraction.",
+    "explanation": "Dekisugi's presence at Shizuka's house coincides perfectly with the system breach detected by Dr. Hakase and the erratic behavior logged by Suneo's surveillance. His extensive programming knowledge and access to Doraemon through his friendship with Shizuka provided the perfect opportunity. The virus signature matches his known programming style, and his recent research into AI development establishes clear intent."
+  },
+  "scoring": {
+    "minimumPointsToAccuse": 120,
+    "perfectScoreThreshold": 200
+  },
+  "createdAt": "2026-01-19T15:00:01.911Z"
+}

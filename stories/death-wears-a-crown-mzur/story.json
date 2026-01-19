@@ -1,0 +1,39 @@
+{
+  "id": "death-wears-a-crown-mzur",
+  "title": "Death Wears a Crown",
+  "premise": "When Queen Victoria is discovered lifeless in her private bathroom at Windsor Castle, what first appears to be natural causes quickly reveals itself as something far more sinister. As accusations fly among the royal family, the truth lies hidden behind a veil of loyalty, duty, and long-buried secrets.",
+  "synopsis": "When Queen Victoria is discovered lifeless in her private bathroom at Windsor Castle, what first appears to be natural causes quickly reveals itself as something far more sinister. As accusations fly among the royal family, the truth lies hidden behind a veil of loyalty, duty, and long-buried secrets.",
+  "crimeType": "murder",
+  "setting": {
+    "location": "Windsor Castle",
+    "timePeriod": "Victorian Era (1901)",
+    "atmosphere": "opulent yet suffocating, heavy with tradition and unspoken tensions"
+  },
+  "victimParagraph": "Queen Victoria, the longest-reigning British monarch, was more than just a sovereign - she was the very embodiment of an era. Despite her advanced age, she maintained iron control over both her family and empire, making decisions that affected millions. Her death marks not just the end of a reign, but the potential collapse of a carefully maintained web of international royal alliances and closely guarded royal secrets.",
+  "sceneImageUrl": "https://v3b.fal.media/files/b/0a8b0684/rrzupBgJBWiWbJ6rH7lXG.jpg",
+  "timeline": [
+    "6:00 AM - James Harrison begins his morning duties, appearing unusually agitated to kitchen staff",
+    "7:15 AM - Dr. Gull arrives early for the Queen's morning check-up, but is delayed by Princess Beatrice seeking private consultation about her secret marriage plans",
+    "7:30 AM - Lady Marlborough observes Edward, Prince of Wales, sneaking out for his clandestine political meeting",
+    "8:00 AM - Queen Victoria requests her morning bath, attended by Lady Marlborough who then leaves to write her newspaper correspondence",
+    "8:15 AM - James Harrison enters a manic episode while delivering fresh towels, fatally stabbing the Queen in her bath",
+    "8:20 AM - Harrison, in panic, runs through the castle corridors with the bloody knife, witnessed by Dr. Gull who assumes he's rushing on an errand",
+    "8:25 AM - Harrison plants the murder weapon in Edward's chambers, knowing the Prince is away at his secret meeting",
+    "8:45 AM - Princess Beatrice passes the bathroom, noting unusual silence but assuming her mother is resting",
+    "9:00 AM - Edward returns from his meeting, going directly to his study, unaware of the planted weapon",
+    "9:15 AM - Lady Marlborough returns to check on the Queen, discovering the body and raising the alarm",
+    "9:20 AM - Dr. Gull arrives to pronounce death, noting the water temperature indicates time of death around 8:15 AM",
+    "9:30 AM - Castle locked down, Harrison appears perfectly composed during initial questioning"
+  ],
+  "solution": {
+    "culprit": "James Harrison",
+    "method": "During a manic episode, Harrison used a castle kitchen knife to stab the Queen while she was vulnerable in her bath. In his panic, he hid the weapon in Edward's chambers, knowing the Prince was away at a secret meeting, hoping to deflect suspicion.",
+    "motive": "Harrison's untreated bipolar disorder led to a severe manic episode, triggering a violent outburst against the person he saw as the ultimate symbol of the order and control he struggled to maintain in his own mind.",
+    "explanation": "Harrison's mental state deteriorated that morning, noticed by kitchen staff. The opportunity presented itself when he delivered towels to the Queen's bath, and Dr. Gull's witness account places him fleeing the scene. His composed behavior afterward demonstrates the swing in his bipolar condition, while the weapon's location in Edward's room was an opportunistic attempt to frame the heir, possible only because Harrison knew of the Prince's secret meeting schedule."
+  },
+  "scoring": {
+    "minimumPointsToAccuse": 100,
+    "perfectScoreThreshold": 185
+  },
+  "createdAt": "2026-01-19T14:35:38.531Z"
+}

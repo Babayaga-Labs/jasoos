@@ -352,10 +352,13 @@ export interface RegenerateTimelineRequest {
 
 /**
  * Response from /api/ugc/regenerate-timeline
+ * Now includes updated characters with knowledge aligned to clues
  */
 export interface RegenerateTimelineResponse {
   /** Regenerated timeline events */
   timeline: string[];
+  /** Updated characters with knowledge aligned to clues and timeline */
+  characters: UGCGeneratedCharacter[];
 }
 
 /**

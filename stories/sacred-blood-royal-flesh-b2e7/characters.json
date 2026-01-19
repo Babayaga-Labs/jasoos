@@ -1,0 +1,270 @@
+{
+  "characters": [
+    {
+      "id": "char_1",
+      "tempId": "char_1",
+      "name": "Septa Unella",
+      "role": "High-ranking Religious Figure",
+      "age": 45,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "austere",
+          "zealously devout",
+          "judgmental",
+          "unwavering"
+        ],
+        "speechStyle": "stern and formal, often quoting religious texts",
+        "quirks": [
+          "constantly fingers her prayer beads",
+          "maintains uncomfortably long eye contact"
+        ]
+      },
+      "appearance": {
+        "description": "Tall and gaunt with sharp features and deep-set grey eyes. Wears modest grey robes of rough wool and a crystal pendant symbolizing the Faith. Her weathered face bears the stern lines of one who rarely smiles.",
+        "imagePrompt": "Portrait of a stern middle-aged woman with austere features, grey robes, religious crystal pendant, deep-set eyes, thin lips, medieval style, harsh lighting, serious expression, weathered skin"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Saw Cersei's unusual agitation at 7:00 PM and discovered her body at 10:00 PM",
+        "knowsAboutOthers": [
+          "Observed Cersei's anxious state during evening prayers",
+          "Was first to find the body"
+        ],
+        "alibi": true
+      },
+      "statement": "Septa Unella observed Cersei at evening prayers appearing unusually agitated, then later discovered her body during routine evening reports delivery.",
+      "secrets": [
+        {
+          "content": "She secretly witnessed Cersei performing forbidden rituals months ago. She also knew about possession of john snow by his ancestors.",
+          "willingnessToReveal": "medium",
+          "revealCondition": "If convinced it would serve the Faith's interests"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Quotes religious texts and claims divine protection",
+        "whenCaughtLying": "Becomes rigid and claims any lies were 'in service to the Gods'",
+        "whenAccused": "Maintains stoic calm while invoking religious authority"
+      },
+      "relationships": {
+        "char_2": "Distrusts his experiments and considers them unholy",
+        "char_3": "Views her as a corrupting influence",
+        "char_4": "Sees him as morally weak"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8b03a8/HOEX7iarRC65NhFGP83he.jpg"
+    },
+    {
+      "id": "char_2",
+      "tempId": "char_2",
+      "name": "Qyburn",
+      "role": "Court Physician and Advisor",
+      "age": 55,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "calculating",
+          "intellectually curious",
+          "amoral",
+          "quietly ambitious"
+        ],
+        "speechStyle": "precise and academic, with underlying dark humor",
+        "quirks": [
+          "frequently cleans his hands with cloth",
+          "tilts head when analyzing others"
+        ]
+      },
+      "appearance": {
+        "description": "A dignified older man with receding grey hair and calculating eyes. Wears dark robes with many hidden pockets, stained with various medicinal substances. His hands are surprisingly steady and clean despite his age.",
+        "imagePrompt": "Portrait of an intelligent-looking older man, receding grey hair, shrewd eyes, dark medieval robes with many pockets, scholarly appearance, calm expression, medieval setting, dramatic shadows"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Delivered potions to Cersei at 8:15 PM and saw John Snow disheveled at 9:45 PM",
+        "knowsAboutOthers": [
+          "Noticed blue light under Snow's door",
+          "Witnessed Snow's strange behavior after the murder",
+          "Delivered potions to Cersei's chambers"
+        ],
+        "alibi": true
+      },
+      "statement": "Qyburn made his usual evening deliveries to Cersei's chambers and later encountered John Snow in an unusual state.",
+      "secrets": [
+        {
+          "content": "Has been conducting forbidden experiments in the castle dungeons.  Saw aggressive behaviour of john snow but as he is his friend so doesn't want to rat him out. ",
+          "willingnessToReveal": "low",
+          "revealCondition": "Only if offered immunity and resources for research"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes clinically analytical and deflects with scientific observations",
+        "whenCaughtLying": "Quickly adapts his story with plausible explanations",
+        "whenAccused": "Maintains clinical detachment while pointing out logical flaws in accusations"
+      },
+      "relationships": {
+        "char_1": "Dismissive of her religious fervor",
+        "char_3": "Professional courtesy masking mutual suspicion",
+        "char_4": "Views him as a useful but dim tool"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8b03a8/KPKPtWoyGqSIHwGTdyaDg.jpg"
+    },
+    {
+      "id": "char_3",
+      "tempId": "char_3",
+      "name": "Lady Taena Merryweather",
+      "role": "Court Confidante",
+      "age": 32,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "manipulative",
+          "sensual",
+          "observant",
+          "adaptable"
+        ],
+        "speechStyle": "smooth and seductive, with carefully chosen words",
+        "quirks": [
+          "plays with her jewelry when lying",
+          "speaks in whispered tones"
+        ]
+      },
+      "appearance": {
+        "description": "Exotic beauty with olive skin and long dark hair. Wears luxurious gowns in deep colors that hint at her Myrish heritage. Moving with fluid grace, she adorns herself with subtle but expensive jewelry.",
+        "imagePrompt": "Portrait of a beautiful Mediterranean woman, long dark hair, olive skin, luxurious medieval dress in deep colors, subtle jewelry, seductive smile, medieval court setting"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Saw John Snow speaking Valyrian at 7:30 PM and noticed unusual silence at 9:30 PM",
+        "knowsAboutOthers": [
+          "Witnessed Snow's strange behavior in garden",
+          "Noticed absence of usual activity in Cersei's chambers"
+        ],
+        "alibi": true
+      },
+      "statement": "Lady Taena was in the gardens for a meeting and later passed by unusually quiet royal chambers.",
+      "secrets": [
+        {
+          "content": "Has been spying for a foreign power",
+          "willingnessToReveal": "never",
+          "revealCondition": "Would rather die than reveal this"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes flirtatious and tries to redirect attention",
+        "whenCaughtLying": "Creates elaborate diversions and emotional scenes",
+        "whenAccused": "Plays the innocent foreigner while subtly threatening with political connections"
+      },
+      "relationships": {
+        "char_1": "Feigns religious respect while secretly mocking",
+        "char_2": "Uneasy alliance of mutual benefit",
+        "char_4": "Manipulates him with subtle flirtation"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8b03a8/zOKqJZJIHS5Blwr4pmdEm.jpg"
+    },
+    {
+      "id": "char_4",
+      "tempId": "char_4",
+      "name": "Ser Osmund Kettleblack",
+      "role": "Kingsguard Knight",
+      "age": 35,
+      "isGuilty": false,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "opportunistic",
+          "physically imposing",
+          "crude",
+          "easily swayed"
+        ],
+        "speechStyle": "rough and direct, often inappropriate",
+        "quirks": [
+          "constantly adjusts his sword belt",
+          "scratches his beard when nervous"
+        ]
+      },
+      "appearance": {
+        "description": "Tall and muscular with a thick black beard and calloused hands. Wears white Kingsguard armor that never seems quite clean enough. His eyes dart around constantly, betraying his common birth despite his elevated position.",
+        "imagePrompt": "Portrait of a rugged warrior, thick black beard, muscular build, white medieval armor slightly unkempt, suspicious eyes, medieval castle background, strong lighting"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Abandoned post after receiving payment at 8:45 PM",
+        "knowsAboutOthers": [
+          "Left corridor unguarded during critical time"
+        ],
+        "alibi": true
+      },
+      "statement": "Ser Osmund left his post guarding Cersei's corridor after receiving payment from an unknown source.",
+      "secrets": [
+        {
+          "content": "Accepted bribes to look the other way during guard duty and was caught by cesari. Was involved in elobrate plan to overthrow cersai's rule",
+          "willingnessToReveal": "medium",
+          "revealCondition": "If offered protection from punishment"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Becomes physically intimidating and aggressive",
+        "whenCaughtLying": "Blunders into more obvious lies",
+        "whenAccused": "Alternates between threats and clumsy denials"
+      },
+      "relationships": {
+        "char_1": "Uncomfortable around her religious intensity",
+        "char_2": "Fearful of his mysterious activities",
+        "char_3": "Attracted to her but wary of her motives"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8b03a8/AxGeL35_aAnLlg5scZcCl.jpg"
+    },
+    {
+      "id": "char_1768825656313_sp8k",
+      "tempId": "char_1768825656313_sp8k",
+      "name": "John Snow",
+      "role": "Warden of the North",
+      "age": 28,
+      "isGuilty": true,
+      "isVictim": false,
+      "personality": {
+        "traits": [
+          "brooding",
+          "honorable",
+          "troubled",
+          "increasingly unstable"
+        ],
+        "speechStyle": "measured and solemn, with occasional bursts of ancient Targaryen phrases",
+        "quirks": [
+          "frequently touches his sword pommel",
+          "stares into flames absently"
+        ]
+      },
+      "appearance": {
+        "description": "Handsome with dark curly hair and haunted grey eyes. Wears black leather and fur-trimmed armor bearing the Stark direwolf. Recently acquired a strange, almost ethereal pallor to his skin, with occasional flickers of violet in his eyes.",
+        "imagePrompt": "Portrait of a handsome young man with dark curly hair, pale skin, haunted expression, black medieval leather armor with fur trim, direwolf sigil, slight supernatural aura, occasional violet glint in grey eyes"
+      },
+      "knowledge": {
+        "knowsAboutCrime": "Committed murder while possessed by Aemon's spirit",
+        "knowsAboutOthers": [
+          "Used Ser Osmund's absence to gain entry",
+          "Encountered Qyburn after the murder"
+        ],
+        "alibi": ""
+      },
+      "statement": "John Snow was seen walking alone in the garden speaking Valyrian, and later encountered by Qyburn in a disheveled state.",
+      "secrets": [
+        {
+          "content": "Possessed by Aemon Targaryen's spirit seeking vengeance against the Lannisters. Can't account for his fatigues but can't disclose the info to prevent panic in the people.",
+          "willingnessToReveal": "never",
+          "revealCondition": "Only if the possession is forcibly exorcised"
+        }
+      ],
+      "behaviorUnderPressure": {
+        "defensive": "Switches between noble composure and bursts of ancient Targaryen rage",
+        "whenCaughtLying": "Claims gaps in memory or confusion about recent events",
+        "whenAccused": "Maintains stoic denial while struggling with inner turmoil"
+      },
+      "relationships": {
+        "char_1": "Avoids her due to fear of religious detection",
+        "char_2": "Wary of his ability to detect supernatural influences",
+        "char_3": "Distrusts her political connections",
+        "char_4": "Maintains professional distance"
+      },
+      "imageUrl": "https://v3b.fal.media/files/b/0a8b03a8/0cRHFLAb5LSXjIuPm-HMq.jpg"
+    }
+  ]
+}

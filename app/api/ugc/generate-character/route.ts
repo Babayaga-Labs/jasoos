@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { loadAIConfig } from '@/packages/ai/config';
 import { generateText } from '@/packages/ai/llm-client';
 import { ImageClient } from '@/packages/ai/image-client';
+import { deriveStatementFromAlibi } from '@/packages/ai/ugc-engine';
 import type {
   UGCCharacterInput,
   UGCGeneratedStory,
@@ -72,7 +73,7 @@ Generate a JSON object with this structure:
   "isGuilty": false,
   "isVictim": ${characterInput.isVictim || false},
   "personality": {
-    "traits": ["use user's traits if provided, or generate 3 appropriate ones"],
+    "traits": ${JSON.stringify(characterInput.personalityTraits || [])},
     "speechStyle": "How they talk - formal, casual, nervous, dramatic, etc.",
     "quirks": ["2 behavioral quirks or mannerisms"]
   },
@@ -85,7 +86,6 @@ Generate a JSON object with this structure:
     "knowsAboutOthers": ["What they know about other characters"],
     "alibi": "Their general whereabouts during the evening (to be refined)"
   },
-  "statement": "Third-person case summary, 1-2 sentences describing their connection to the setting and their claimed whereabouts. Like detective notes.",
   "secrets": [
     {
       "content": "Use user's secret if provided, or generate one appropriate to character",
@@ -104,11 +104,10 @@ Generate a JSON object with this structure:
 }
 
 IMPORTANT GUIDELINES:
-1. The statement should be THIRD PERSON, like detective notes - NOT first person
-2. Keep isGuilty as false - culprit is determined in the clues stage
-3. Generate rich, interesting personality details
-4. The imagePrompt should be detailed enough for AI portrait generation
-5. If this is a victim, their knowledge and alibi are less important
+1. Keep isGuilty as false - culprit is determined in the clues stage
+2. Generate rich, interesting personality details
+3. The imagePrompt should be detailed enough for AI portrait generation
+4. If this is a victim, their knowledge and alibi are less important
 
 Respond with ONLY the JSON object, no other text.`;
 
@@ -120,6 +119,12 @@ Respond with ONLY the JSON object, no other text.`;
     });
 
     const character = parseJSONResponse(text) as UGCGeneratedCharacter;
+
+    // Derive statement from alibi instead of LLM generation
+    const statement = deriveStatementFromAlibi(
+      character.name,
+      character.knowledge?.alibi || ''
+    );
 
     // Generate portrait image if no uploaded image
     let imageUrl: string | undefined;
@@ -140,6 +145,7 @@ Respond with ONLY the JSON object, no other text.`;
       success: true,
       character: {
         ...character,
+        statement,
         imageUrl,
       },
     });

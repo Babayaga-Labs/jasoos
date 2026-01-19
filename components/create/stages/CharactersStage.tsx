@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import { useWizard } from '../wizard/WizardContext';
 import type { UGCGeneratedCharacter } from '@/packages/ai/types/ugc-types';
@@ -9,7 +10,10 @@ const MAX_TRAITS = 5;
 
 export function CharactersStage() {
   const { state, dispatch, canProceedFromCharacters } = useWizard();
-  const { generatedCharacters, foundation } = state;
+  const {
+    generatedCharacters,
+    foundation,
+  } = state;
 
   if (generatedCharacters.length === 0) {
     return (
@@ -68,6 +72,35 @@ export function CharactersStage() {
     dispatch({ type: 'GO_TO_STAGE', stage: 'foundation' });
   };
 
+  const handleContinueToClues = () => {
+    // Timeline regeneration now happens at publish time, not on navigation
+    // This simplifies the flow and ensures consistency
+
+    // Start scene image generation in background (don't block navigation)
+    if (foundation?.setting && !state.sceneImageUrl) {
+      dispatch({ type: 'START_SCENE_GEN' });
+      fetch('/api/ugc/generate-scene', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          story: { setting: foundation.setting },
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.imageUrl) {
+            dispatch({ type: 'COMPLETE_SCENE_GEN', imageUrl: data.imageUrl });
+          }
+        })
+        .catch((err) => {
+          console.warn('Scene generation failed:', err);
+          // Don't show error to user - scene is optional
+        });
+    }
+
+    dispatch({ type: 'GO_TO_STAGE', stage: 'clues' });
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Header */}
@@ -102,7 +135,7 @@ export function CharactersStage() {
         </button>
 
         <button
-          onClick={() => dispatch({ type: 'GO_TO_STAGE', stage: 'clues' })}
+          onClick={handleContinueToClues}
           disabled={!canProceedFromCharacters}
           className={`
             py-4 px-8 rounded-xl font-semibold text-lg transition-all duration-300
@@ -112,7 +145,7 @@ export function CharactersStage() {
             }
           `}
         >
-          Continue to Clues →
+          Continue to Clues
         </button>
       </div>
     </div>
@@ -131,19 +164,25 @@ function CharacterCard({
   onRegenerateImage,
 }: CharacterCardProps) {
   const isImageGenerating = 'imageGenerating' in character && Boolean((character as Record<string, unknown>).imageGenerating);
-  const selectedTraits = character.personality.traits;
+  // Normalize traits to lowercase for consistent comparison
+  // Only count traits that exist in PERSONALITY_TRAITS (LLM may have generated non-standard ones)
+  const normalizedStoredTraits = character.personality.traits.map(t => t.toLowerCase());
+  const selectedTraits = normalizedStoredTraits.filter(t =>
+    (PERSONALITY_TRAITS as readonly string[]).includes(t)
+  );
 
   const handleToggleTrait = (trait: string) => {
-    const isSelected = selectedTraits.includes(trait);
+    const normalizedTrait = trait.toLowerCase();
+    const isSelected = selectedTraits.includes(normalizedTrait);
     let newTraits: string[];
 
     if (isSelected) {
-      // Remove trait
-      newTraits = selectedTraits.filter(t => t !== trait);
+      // Remove trait (filter by lowercase comparison)
+      newTraits = selectedTraits.filter(t => t !== normalizedTrait);
     } else {
       // Add trait (if under limit)
       if (selectedTraits.length >= MAX_TRAITS) return;
-      newTraits = [...selectedTraits, trait];
+      newTraits = [...selectedTraits, normalizedTrait];
     }
 
     onUpdate({
@@ -260,10 +299,15 @@ function CharacterCard({
         {/* Personality Tags */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="text-xs text-slate-400">Personality Traits</label>
-            <span className="text-xs text-slate-500">{selectedTraits.length}/{MAX_TRAITS} selected</span>
+            <label className="text-xs text-slate-400">
+              Personality Traits
+              <span className="text-red-400 ml-1">*</span>
+            </label>
+            <span className={`text-xs ${selectedTraits.length === 0 ? 'text-red-400' : 'text-slate-500'}`}>
+              {selectedTraits.length === 0 ? 'Select at least 1' : `${selectedTraits.length}/${MAX_TRAITS} selected`}
+            </span>
           </div>
-          <div className="flex flex-wrap gap-1.5">
+          <div className={`flex flex-wrap gap-1.5 p-2 rounded-lg ${selectedTraits.length === 0 ? 'bg-red-500/5 border border-red-500/30' : ''}`}>
             {PERSONALITY_TRAITS.map((trait) => {
               const isSelected = selectedTraits.includes(trait);
               const isDisabled = !isSelected && selectedTraits.length >= MAX_TRAITS;
@@ -309,6 +353,7 @@ function CharacterCard({
             />
           </div>
         )}
+
       </div>
     </div>
   );

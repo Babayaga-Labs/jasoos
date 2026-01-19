@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { UGCEngine, loadAIConfig } from '@/packages/ai';
 import type { RegenerateTimelineRequest, RegenerateTimelineResponse } from '@/packages/ai/types/ugc-types';
 
-export const maxDuration = 60; // 1 minute max for timeline regeneration
+export const maxDuration = 90; // 90 seconds for timeline + knowledge regeneration
 
 /**
  * Validate regenerate timeline request
@@ -43,11 +43,15 @@ function validateRequest(request: RegenerateTimelineRequest): string | null {
 }
 
 /**
- * Regenerate timeline from edited clues
+ * Regenerate timeline and character knowledge from edited clues
  * POST /api/ugc/regenerate-timeline
  *
+ * This endpoint now performs TWO operations:
+ * 1. Regenerates timeline to support the clues
+ * 2. Regenerates character knowledge to align with clues' revealedBy
+ *
  * Request body: RegenerateTimelineRequest
- * Response: { timeline: string[] }
+ * Response: { timeline: string[], characters: UGCGeneratedCharacter[] }
  */
 export async function POST(request: NextRequest) {
   try {
@@ -71,11 +75,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Regenerate timeline
     const ugcEngine = new UGCEngine(config);
+
+    // Step 1: Regenerate timeline to support the clues
     const timeline = await ugcEngine.regenerateTimelineFromClues(body);
 
-    const response: RegenerateTimelineResponse = { timeline };
+    // Step 2: Regenerate character knowledge to align with:
+    // - The new timeline
+    // - The clues' revealedBy (who can reveal what)
+    const { characters, clues, solution } = body;
+    const updatedCharacters = await ugcEngine.addCharacterKnowledge(
+      characters,
+      timeline,
+      solution,
+      clues
+    );
+
+    const response: RegenerateTimelineResponse = {
+      timeline,
+      characters: updatedCharacters,
+    };
 
     return new Response(
       JSON.stringify(response),
