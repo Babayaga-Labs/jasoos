@@ -18,7 +18,7 @@ import * as dotenv from 'dotenv';
 // Load environment variables from .env.local
 dotenv.config({ path: '.env.local' });
 
-import { generateText, loadAIConfig } from '../packages/ai';
+import { loadAIConfig, LLMClient } from '../packages/ai';
 
 const STORIES_DIR = path.join(process.cwd(), 'stories');
 
@@ -55,16 +55,18 @@ async function main() {
   console.log('─'.repeat(50));
   console.log('');
 
-  // Initialize LLM config
+  // Initialize LLM client
   const config = loadAIConfig();
   if (!config.llm.apiKey) {
     console.error('❌ LLM_API_KEY not set in .env.local');
     process.exit(1);
   }
 
+  const llm = new LLMClient(config.llm);
+
   // Step 1: Generate story structure
   console.log('🎭 Generating story structure...');
-  const story = await generateStory(config, synopsis, storyId);
+  const story = await generateStory(llm, synopsis, storyId);
   fs.writeFileSync(
     path.join(storyDir, 'story.json'),
     JSON.stringify(story, null, 2)
@@ -73,7 +75,7 @@ async function main() {
 
   // Step 2: Generate characters
   console.log('👥 Generating characters...');
-  const characters = await generateCharacters(config, synopsis, story);
+  const characters = await generateCharacters(llm, synopsis, story);
   fs.writeFileSync(
     path.join(storyDir, 'characters.json'),
     JSON.stringify({ characters }, null, 2)
@@ -82,7 +84,7 @@ async function main() {
 
   // Step 3: Generate plot points
   console.log('🔍 Generating plot points...');
-  const plotPoints = await generatePlotPoints(config, story, characters);
+  const plotPoints = await generatePlotPoints(llm, story, characters);
   fs.writeFileSync(
     path.join(storyDir, 'plot-points.json'),
     JSON.stringify(plotPoints, null, 2)
@@ -103,7 +105,7 @@ async function main() {
   console.log('3. Generate images: npx tsx scripts/generate-images.ts ' + storyId);
 }
 
-async function generateStory(config: any, synopsis: string, storyId: string) {
+async function generateStory(llm: LLMClient, synopsis: string, storyId: string) {
   const prompt = `You are a mystery story writer. Based on the following synopsis, create a detailed story structure for a detective game.
 
 SYNOPSIS:
@@ -140,17 +142,12 @@ Generate a JSON object with this exact structure:
 
 Respond with ONLY the JSON object, no other text.`;
 
-  const { text } = await generateText({
-    config: config.llm,
-    prompt,
-    maxTokens: 2000,
-    temperature: 0.7,
-  });
+  const response = await llm.generate(prompt, { maxTokens: 2000, temperature: 0.7 });
 
-  return JSON.parse(text);
+  return JSON.parse(response.content);
 }
 
-async function generateCharacters(config: any, synopsis: string, story: any) {
+async function generateCharacters(llm: LLMClient, synopsis: string, story: any) {
   const prompt = `You are creating characters for a detective mystery game.
 
 STORY CONTEXT:
@@ -211,17 +208,12 @@ Generate a JSON array of characters with this structure for EACH character:
 
 Respond with ONLY the JSON array, no other text.`;
 
-  const { text } = await generateText({
-    config: config.llm,
-    prompt,
-    maxTokens: 4000,
-    temperature: 0.7,
-  });
+  const response = await llm.generate(prompt, { maxTokens: 4000, temperature: 0.7 });
 
-  return JSON.parse(text);
+  return JSON.parse(response.content);
 }
 
-async function generatePlotPoints(config: any, story: any, characters: any[]) {
+async function generatePlotPoints(llm: LLMClient, story: any, characters: any[]) {
   const characterNames = characters.map(c => `${c.id} (${c.name})`).join(', ');
   const guiltyChar = characters.find(c => c.isGuilty);
 
@@ -262,14 +254,9 @@ Ensure total possible points is around 150-200.
 
 Respond with ONLY the JSON object, no other text.`;
 
-  const { text } = await generateText({
-    config: config.llm,
-    prompt,
-    maxTokens: 3000,
-    temperature: 0.7,
-  });
+  const response = await llm.generate(prompt, { maxTokens: 3000, temperature: 0.7 });
 
-  return JSON.parse(text);
+  return JSON.parse(response.content);
 }
 
 main().catch(console.error);

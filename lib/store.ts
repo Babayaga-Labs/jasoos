@@ -24,6 +24,8 @@ export interface Story {
     motive: string;
     explanation: string;
   };
+  /** URL to scene image in Supabase Storage */
+  sceneImageUrl?: string;
 }
 
 export interface Character {
@@ -42,6 +44,8 @@ export interface Character {
   };
   /** Third-person case summary (like detective notes) */
   statement: string;
+  /** URL to character portrait image in Supabase Storage */
+  imageUrl?: string;
 }
 
 export interface GameState {

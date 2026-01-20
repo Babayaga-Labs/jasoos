@@ -1,12 +1,6 @@
 import { ScenarioCard } from '@/components/home/ScenarioCard';
-import { CreateMysteryCard } from '@/components/create/CreateMysteryCard';
-import fs from 'fs';
-import path from 'path';
-
-interface StoryConfig {
-  id: string;
-  enabled: boolean;
-}
+import { CreateMysteryCard } from '@/components/home/CreateMysteryCard';
+import { getPublishedStories } from '@/lib/supabase/queries';
 
 interface Story {
   id: string;
@@ -14,36 +8,20 @@ interface Story {
   difficulty: string;
   estimatedMinutes: number;
   premise: string;
+  sceneImage?: string;
 }
 
-async function getStories(): Promise<(Story & { sceneImage?: string })[]> {
-  const storiesConfigPath = path.join(process.cwd(), 'stories.config.json');
-  const storiesConfig = JSON.parse(fs.readFileSync(storiesConfigPath, 'utf-8'));
+async function getStories(): Promise<Story[]> {
+  const storyRows = await getPublishedStories();
 
-  const stories: (Story & { sceneImage?: string })[] = [];
-
-  for (const config of storiesConfig.stories as StoryConfig[]) {
-    if (!config.enabled) continue;
-
-    const storyPath = path.join(process.cwd(), 'stories', config.id, 'story.json');
-
-    if (fs.existsSync(storyPath)) {
-      const story = JSON.parse(fs.readFileSync(storyPath, 'utf-8'));
-
-      // Check if scene image exists
-      const sceneImagePath = path.join(process.cwd(), 'stories', config.id, 'assets', 'scene.png');
-      const hasSceneImage = fs.existsSync(sceneImagePath);
-
-      stories.push({
-        ...story,
-        // Use folder name (config.id) as the ID for routing, not story.id
-        id: config.id,
-        sceneImage: hasSceneImage ? `/stories/${config.id}/assets/scene.png` : undefined,
-      });
-    }
-  }
-
-  return stories;
+  return storyRows.map((row) => ({
+    id: row.id,
+    title: row.title,
+    difficulty: 'medium', // Default difficulty
+    estimatedMinutes: 30, // Default estimate
+    premise: row.synopsis,
+    sceneImage: row.scene_image_url || undefined,
+  }));
 }
 
 export default async function HomePage() {
@@ -73,10 +51,7 @@ export default async function HomePage() {
         </h2>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Create Your Own Mystery Card - always first */}
           <CreateMysteryCard />
-
-          {/* Existing story cards */}
           {stories.map((story) => (
             <ScenarioCard
               key={story.id}

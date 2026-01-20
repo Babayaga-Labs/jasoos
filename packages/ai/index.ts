@@ -1,112 +1,32 @@
-// AI Package - LLM client, UGC engine, and image generation
+// AI Package - LLM and image generation clients
 
 // Configuration
 export { loadAIConfig } from './config';
 export type { AIConfig, LLMConfig, ImageConfig, LLMProvider, ImageProvider } from './config';
 
-// LLM client (OpenAI SDK compatible with OpenRouter)
-export { LLMClient, generateText } from './llm-client';
-export type { ChatMessage, LLMResponse, GenerateOptions } from './llm-client';
-
-// UGC Engine - Story and character generation
-export { StoryGenerator } from './story-generator';
-export { CharacterAgent } from './character-agent';
-export { UGCEngine } from './ugc-engine';
-export type {
-  GenerationStep,
-  GenerationProgress,
-  GenerationResult,
-  StructuredGenerationResult,
-  StoryData,
-  CharacterData,
-  PlotPointData,
-  PlotPointsData,
-  PromptTrace,
-} from './ugc-engine';
-
-// UGC Types - Structured input/output types
-export type {
-  // Legacy/current types
-  UGCFormInput,
-  UGCCharacterInput,
-  UGCCrimeInput,
-  UGCGeneratedData,
-  UGCGeneratedStory,
-  UGCGeneratedCharacter,
-  UGCGeneratedPlotPoint,
-  UGCDraftState,
-  UGCFinalStory,
-  UGCFinalCharacter,
-  UGCFinalPlotPoints,
-  EditableSection,
-  GenerateRequest,
-  GenerateProgressEvent,
-  GenerateCompleteEvent,
-  GenerateErrorEvent,
-  GenerateSSEEvent,
-  RegenerateSectionRequest,
-  RegenerateSectionResponse,
-  SaveRequest,
-  SaveResponse,
-  // Scaffold-based types (character-driven flow)
-  UGCStoryScaffold,
-  UGCCharacterSuggestion,
-  UGCCharacterFromScaffold,
-  UGCScaffoldFormInput,
-  UGCGeneratedTimeline,
-  UGCGeneratedCharacterKnowledge,
-  GenerateScaffoldRequest,
-  GenerateScaffoldResponse,
-  GenerateFromScaffoldRequest,
-  ScaffoldGenerateProgressEvent,
-  ScaffoldGenerateCompleteEvent,
-  ScaffoldGenerateSSEEvent,
-  // NEW: Foundation-based types (UGC Pipeline Redesign v2)
-  UGCFoundationCharacter,
-  UGCFoundation,
-  CulpritInfo,
-  FleshOutRequest,
-  FleshOutResponse,
-  UGCGeneratedClue,
-  UGCSolution,
-  FleshOutProgressEvent,
-  FleshOutCompleteEvent,
-  FleshOutSSEEvent,
-  RegenerateTimelineRequest,
-  RegenerateTimelineResponse,
-  RegenerateImageRequest,
-  RegenerateImageResponse,
-} from './types/ugc-types';
-export {
-  TIME_PERIODS,
-  CRIME_TYPES,
-  PERSONALITY_TRAITS,
-  MAX_CHARACTERS,
-  MIN_CHARACTERS,
-} from './types/ugc-types';
-
-// Image generation
+// Low-level clients (for custom usage)
+export { LLMClient } from './llm-client';
+export type { ChatMessage, LLMResponse } from './llm-client';
 export { ImageClient } from './image-client';
 export type { ImageGenerationOptions, ImageResult } from './image-client';
+
+// High-level abstractions
+export { CharacterAgent } from './character-agent';
+export { StoryGenerator } from './story-generator';
 export { ImageGenerator } from './image-generator';
 
-// UGC Validation
-export {
-  validateStoryConsistency,
-  validateClueRevealers,
-  validateClueKnowledgeAlignment,
-  validateKnowledgeCoherence,
-  validateSolvability,
-  validateCulpritAlibi,
-  // New validation for foundation-based flow
-  validateFoundationStory,
-  validateNewClueRevealers,
-  validateNewSolvability,
-  validateNewCulprit,
-  validateNewTimeline,
-} from './ugc-validation';
+// UGC Generation & Validation
+export { UGCEngine } from './ugc-engine';
+export type { GenerationProgress } from './ugc-engine';
+export { validateFoundationStory } from './ugc-validation';
+export type { ValidationResult, ValidationWarning } from './ugc-validation';
+
+// UGC Types & Constants
+export { MIN_CHARACTERS, MAX_CHARACTERS } from './types/ugc-types';
 export type {
-  ValidationWarning,
-  ValidationResult,
-  FoundationValidationInput,
-} from './ugc-validation';
+  UGCFormInput,
+  UGCDraftState,
+  EditableSection,
+  PromptTrace,
+  RegenerateSectionResponse,
+} from './types/ugc-types';

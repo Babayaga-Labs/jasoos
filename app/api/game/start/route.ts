@@ -1,63 +1,59 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import {
+  getStoryById,
+  getCharactersByStoryId,
+  characterRowToGameFormat,
+} from '@/lib/supabase/queries';
 
 export async function POST(request: NextRequest) {
   try {
     const { storyId } = await request.json();
 
-    const storyDir = path.join(process.cwd(), 'stories', storyId);
-
-    // Load story data
-    const storyPath = path.join(storyDir, 'story.json');
-    const charactersPath = path.join(storyDir, 'characters.json');
-
-    if (!fs.existsSync(storyPath)) {
+    // Load story from Supabase
+    const storyRow = await getStoryById(storyId);
+    if (!storyRow) {
       return NextResponse.json({ error: 'Story not found' }, { status: 404 });
     }
 
-    const storyRaw = JSON.parse(fs.readFileSync(storyPath, 'utf-8'));
-    // Handle both 'premise' and 'synopsis' fields for compatibility
-    const story = {
-      ...storyRaw,
-      premise: storyRaw.premise || storyRaw.synopsis || '',
-    };
-    const charactersData = JSON.parse(fs.readFileSync(charactersPath, 'utf-8'));
-
-    // Handle both formats: { characters: [...] } or just [...]
-    const allCharacters = Array.isArray(charactersData) ? charactersData : charactersData.characters;
-
-    if (!allCharacters) {
-      return NextResponse.json({ error: 'Invalid characters data' }, { status: 500 });
+    // Load characters from Supabase
+    const characterRows = await getCharactersByStoryId(storyId);
+    if (!characterRows || characterRows.length === 0) {
+      return NextResponse.json({ error: 'No characters found' }, { status: 500 });
     }
 
+    // Convert to game format
+    const allCharacters = characterRows.map(characterRowToGameFormat);
+
     // Filter out victims - they can't be interrogated (they're dead/missing)
-    const interactableCharacters = allCharacters.filter((c: any) => !c.isVictim);
+    const interactableCharacters = allCharacters.filter((c) => !c.isVictim);
 
     // Process characters - ensure they have statement field (top-level, player-facing)
-    let needsSave = false;
-    const processedCharacters = interactableCharacters.map((c: any) => {
+    const processedCharacters = interactableCharacters.map((c) => {
       // If character doesn't have a top-level statement, generate one
       if (!c.statement) {
-        needsSave = true;
         c.statement = generateFallbackStatement(c);
       }
       return c;
     });
 
-    // Save updated characters if any were modified
-    if (needsSave) {
-      const allUpdated = allCharacters.map((c: any) => {
-        const processed = processedCharacters.find((p: any) => p.id === c.id);
-        return processed || c;
-      });
-      fs.writeFileSync(charactersPath, JSON.stringify({ characters: allUpdated }, null, 2));
-      console.log(`[Start] Generated fallback statements for ${storyId}`);
-    }
+    // Build story object for frontend
+    const story = {
+      id: storyRow.id,
+      title: storyRow.title,
+      premise: storyRow.synopsis,
+      synopsis: storyRow.synopsis,
+      crimeType: storyRow.crime_type,
+      setting: storyRow.setting,
+      victimParagraph: storyRow.victim_paragraph,
+      sceneImageUrl: storyRow.scene_image_url,
+      timeline: storyRow.timeline,
+      solution: storyRow.solution,
+      scoring: storyRow.scoring,
+    };
 
     return NextResponse.json({
       story,
-      characters: processedCharacters.map((c: any) => ({
+      characters: processedCharacters.map((c) => ({
         id: c.id,
         name: c.name,
         role: c.role,
@@ -68,6 +64,7 @@ export async function POST(request: NextRequest) {
           speechStyle: c.personality.speechStyle,
         },
         statement: c.statement || '',
+        imageUrl: c.imageUrl,
         // Don't send isGuilty, isVictim, knowledge, or secrets to client!
       })),
     });

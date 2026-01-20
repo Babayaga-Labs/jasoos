@@ -12,6 +12,9 @@ interface CharacterCardProps {
 }
 
 export function CharacterCard({ character, storyId, isSelected, hasMessages, onChat }: CharacterCardProps) {
+  // Use imageUrl from Supabase, fallback to filesystem path for legacy stories
+  const imageUrl = character.imageUrl || `/stories/${storyId}/assets/characters/${character.id}.png`;
+
   return (
     <div
       className={`
@@ -26,7 +29,7 @@ export function CharacterCard({ character, storyId, isSelected, hasMessages, onC
         {/* Portrait */}
         <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 border border-slate-600">
           <Image
-            src={`/stories/${storyId}/assets/characters/${character.id}.png`}
+            src={imageUrl}
             alt={character.name}
             fill
             className="object-cover"

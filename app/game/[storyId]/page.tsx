@@ -47,7 +47,7 @@ export default function GamePage() {
     <div className="min-h-screen">
       {/* Main game scene */}
       <GameScene
-        sceneImage={`/stories/${storyId}/assets/scene.png`}
+        sceneImage={story.sceneImageUrl || `/stories/${storyId}/assets/scene.png`}
         characters={characters}
         storyId={storyId}
         premise={story.premise}

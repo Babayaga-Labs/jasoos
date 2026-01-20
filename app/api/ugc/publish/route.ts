@@ -1,6 +1,4 @@
 import { NextRequest } from 'next/server';
-import * as fs from 'fs';
-import * as path from 'path';
 import {
   loadAIConfig,
   ImageClient,
@@ -13,112 +11,17 @@ import type {
   UGCSolution,
   UGCFoundation,
 } from '@/packages/ai/types/ugc-types';
+import {
+  insertStory,
+  insertCharacters,
+  insertClues,
+  deleteCharactersByStoryId,
+  deleteCluesByStoryId,
+  getStoryById,
+} from '@/lib/supabase/queries';
+import { uploadImageFromUrl } from '@/lib/supabase/storage';
 
 export const maxDuration = 300; // 5 minutes for publish with image generation
-
-/**
- * Build the roleplay prompt for a character
- */
-function buildCharacterPrompt(character: UGCGeneratedCharacter): string {
-  const { personality, knowledge, secrets, behaviorUnderPressure, relationships } = character;
-
-  const quirksStr = personality?.quirks?.join('; ') || 'None';
-  const knowsAboutOthersStr = knowledge?.knowsAboutOthers?.map((k: string) => `  - ${k}`).join('\n') || '  - Nothing specific';
-  const secretsStr = secrets?.map((s: { content: string; willingnessToReveal: string; revealCondition: string }) =>
-    `- ${s.content} [Will reveal: ${s.willingnessToReveal}] [Condition: ${s.revealCondition}]`
-  ).join('\n') || '- None';
-  const relationshipsStr = Object.entries(relationships || {}).map(([id, rel]) => `- ${id}: ${rel}`).join('\n') || '- No specific relationships defined';
-
-  const guiltyInstructions = character.isGuilty
-    ? 'You ARE guilty. Be subtle in your deception. Deflect, redirect, but never outright confess unless given absolutely undeniable proof.'
-    : 'You are innocent. Cooperate with the investigation while protecting your minor secrets.';
-
-  return `You are ${character.name}, ${character.role}. You are being interrogated by a detective investigating a crime.
-
-## YOUR IDENTITY
-- Name: ${character.name}
-- Role: ${character.role}
-- Age: ${character.age}
-- Personality: ${personality?.traits?.join(', ') || 'Unknown'}
-- Speech style: ${personality?.speechStyle || 'Normal'}
-- Quirks: ${quirksStr}
-
-## WHAT YOU KNOW
-- About the crime: ${knowledge?.knowsAboutCrime || 'Nothing'}
-- Your alibi: ${knowledge?.alibi || 'None provided'}
-- About others:
-${knowsAboutOthersStr}
-
-## YOUR SECRETS (Never reveal these directly, only if truly cornered)
-${secretsStr}
-
-## HOW YOU BEHAVE
-- When defensive: ${behaviorUnderPressure?.defensive || 'Get evasive'}
-- When caught in a lie: ${behaviorUnderPressure?.whenCaughtLying || 'Deflect'}
-- When directly accused: ${behaviorUnderPressure?.whenAccused || 'Deny firmly'}
-
-## YOUR RELATIONSHIPS
-${relationshipsStr}
-
-## ROLEPLAY RULES
-1. Stay in character at ALL times. Never break character or acknowledge you're an AI.
-2. Speak naturally in first person as ${character.name}.
-3. Be cooperative but protective of your secrets.
-4. If asked something you don't know, say you don't know - don't make things up.
-5. Show appropriate emotions - nervousness when pressed on lies, indignation when falsely accused.
-6. Keep responses concise (2-4 sentences typically).
-7. ${guiltyInstructions}
-
-Respond only as ${character.name}. Begin.
-`;
-}
-
-/**
- * Generate roleplay prompt files for each character
- */
-function generateRoleplayPrompts(
-  characters: UGCGeneratedCharacter[],
-  storyDir: string
-): void {
-  const promptsDir = path.join(storyDir, 'roleplay_prompts');
-  fs.mkdirSync(promptsDir, { recursive: true });
-
-  for (const character of characters) {
-    // Skip victims - they can't be interrogated
-    if (character.isVictim) continue;
-
-    const promptContent = buildCharacterPrompt(character);
-    const promptPath = path.join(promptsDir, `${character.id}.txt`);
-    fs.writeFileSync(promptPath, promptContent);
-  }
-}
-
-/**
- * Download an image from URL and save it locally
- */
-async function downloadImage(url: string, destPath: string): Promise<boolean> {
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      console.error(`Failed to download image: ${response.status}`);
-      return false;
-    }
-    const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    // Ensure directory exists
-    const dir = path.dirname(destPath);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-
-    fs.writeFileSync(destPath, buffer);
-    return true;
-  } catch (error) {
-    console.error(`Failed to download image from ${url}:`, error);
-    return false;
-  }
-}
 
 /**
  * Publish request from the new foundation-based flow
@@ -167,7 +70,7 @@ function validateRequest(request: PublishRequest): string | null {
  *
  * 1. Validates the story
  * 2. Generates scene image
- * 3. Saves story files
+ * 3. Saves story to Supabase
  * 4. Returns the published story ID
  */
 export async function POST(request: NextRequest) {
@@ -225,7 +128,6 @@ export async function POST(request: NextRequest) {
         });
 
         // Step 2: Regenerate timeline and knowledge from clues (internal consistency)
-        // This ensures the timeline supports the user-edited clues and character knowledge aligns
         sendEvent({
           type: 'progress',
           step: 'regeneration',
@@ -284,24 +186,17 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        // Step 3: Create directories and download images
+        // Step 4: Upload images to Supabase Storage
         sendEvent({
           type: 'progress',
           step: 'assets',
-          message: 'Downloading assets...',
+          message: 'Uploading assets...',
           progress: 50,
         });
 
-        const storiesDir = path.join(process.cwd(), 'stories', storyId);
-        const assetsDir = path.join(storiesDir, 'assets');
-        const charactersAssetsDir = path.join(assetsDir, 'characters');
+        let finalSceneImageUrl: string | null = null;
 
-        // Create directories
-        if (!fs.existsSync(charactersAssetsDir)) {
-          fs.mkdirSync(charactersAssetsDir, { recursive: true });
-        }
-
-        // Download scene image
+        // Upload scene image
         if (sceneImageUrl) {
           sendEvent({
             type: 'progress',
@@ -309,10 +204,13 @@ export async function POST(request: NextRequest) {
             message: 'Saving scene image...',
             progress: 55,
           });
-          await downloadImage(sceneImageUrl, path.join(assetsDir, 'scene.png'));
+          finalSceneImageUrl = await uploadImageFromUrl(
+            sceneImageUrl,
+            `${storyId}/scene.png`
+          );
         }
 
-        // Download character images
+        // Upload character images
         sendEvent({
           type: 'progress',
           step: 'assets',
@@ -320,138 +218,80 @@ export async function POST(request: NextRequest) {
           progress: 60,
         });
 
-        for (const char of finalCharacters) {
-          if (char.imageUrl) {
-            await downloadImage(char.imageUrl, path.join(charactersAssetsDir, `${char.id}.png`));
-          }
-        }
+        const charactersWithStorageUrls = await Promise.all(
+          finalCharacters.map(async (char) => {
+            if (char.imageUrl) {
+              const storageUrl = await uploadImageFromUrl(
+                char.imageUrl,
+                `${storyId}/characters/${char.id}.png`
+              );
+              return { ...char, imageUrl: storageUrl || char.imageUrl };
+            }
+            return char;
+          })
+        );
 
         sendEvent({
           type: 'progress',
           step: 'saving',
-          message: 'Saving story files...',
+          message: 'Saving to database...',
           progress: 70,
         });
 
-        // Step 4: Build story data structure for saving
-        const storyData = {
+        // Step 5: Check if story exists (update vs insert)
+        const existingStory = await getStoryById(storyId);
+
+        if (existingStory) {
+          // Delete existing characters and clues for republish
+          await deleteCharactersByStoryId(storyId);
+          await deleteCluesByStoryId(storyId);
+        }
+
+        // Step 6: Insert story to Supabase
+        const storyInserted = await insertStory({
           id: storyId,
+          user_id: null, // Anonymous for now, can be set from session
           title: foundation.title,
-          premise: foundation.synopsis, // Game expects 'premise'
-          synopsis: foundation.synopsis, // Keep for backwards compatibility
-          crimeType: foundation.crimeType,
+          synopsis: foundation.synopsis,
+          crime_type: foundation.crimeType,
           setting: foundation.setting,
-          victimParagraph: foundation.victimParagraph,
-          sceneImageUrl,
-          timeline: finalTimeline, // Use regenerated timeline
+          victim_paragraph: foundation.victimParagraph,
+          timeline: finalTimeline,
           solution,
           scoring,
-          createdAt: new Date().toISOString(),
-        };
+          scene_image_url: finalSceneImageUrl,
+          is_published: true,
+        });
 
-        // Save story.json
-        fs.writeFileSync(
-          path.join(storiesDir, 'story.json'),
-          JSON.stringify(storyData, null, 2)
-        );
+        if (!storyInserted) {
+          throw new Error('Failed to save story to database');
+        }
 
         sendEvent({
           type: 'progress',
           step: 'saving',
           message: 'Saving characters...',
-          progress: 75,
+          progress: 80,
         });
 
-        // Save characters.json (wrapped in object to match expected format)
-        fs.writeFileSync(
-          path.join(storiesDir, 'characters.json'),
-          JSON.stringify({ characters: finalCharacters }, null, 2)
-        );
+        // Step 7: Insert characters
+        const charactersInserted = await insertCharacters(storyId, charactersWithStorageUrls);
+        if (!charactersInserted) {
+          throw new Error('Failed to save characters to database');
+        }
 
         sendEvent({
           type: 'progress',
           step: 'saving',
           message: 'Saving clues...',
-          progress: 82,
-        });
-
-        // Save plot-points.json (game expects this format)
-        const plotPoints = clues.map(clue => ({
-          ...clue,
-          category: 'evidence', // Default category
-          importance: clue.points >= 25 ? 'critical' : clue.points >= 15 ? 'high' : 'medium',
-        }));
-        fs.writeFileSync(
-          path.join(storiesDir, 'plot-points.json'),
-          JSON.stringify({
-            plotPoints,
-            minimumPointsToAccuse: scoring.minimumPointsToAccuse,
-            perfectScoreThreshold: scoring.perfectScoreThreshold,
-          }, null, 2)
-        );
-
-        sendEvent({
-          type: 'progress',
-          step: 'saving',
-          message: 'Generating roleplay prompts...',
-          progress: 85,
-        });
-
-        // Generate roleplay prompts for each character
-        generateRoleplayPrompts(finalCharacters, storiesDir);
-
-        sendEvent({
-          type: 'progress',
-          step: 'saving',
-          message: 'Finalizing...',
           progress: 90,
         });
 
-        // Save manifest
-        const manifest = {
-          id: storyId,
-          title: foundation.title,
-          crimeType: foundation.crimeType,
-          characterCount: finalCharacters.length,
-          clueCount: clues.length,
-          sceneImageUrl,
-          createdAt: storyData.createdAt,
-        };
-
-        fs.writeFileSync(
-          path.join(storiesDir, 'manifest.json'),
-          JSON.stringify(manifest, null, 2)
-        );
-
-        // Step 5: Register story in stories.config.json
-        sendEvent({
-          type: 'progress',
-          step: 'registering',
-          message: 'Registering story...',
-          progress: 95,
-        });
-
-        const configPath = path.join(process.cwd(), 'stories.config.json');
-        const configData = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-
-        // Check if story already exists
-        const existingIndex = configData.stories.findIndex((s: { id: string }) => s.id === storyId);
-        if (existingIndex === -1) {
-          // Add new story entry
-          configData.stories.push({
-            id: storyId,
-            enabled: true,
-            description: `${foundation.title} (User Generated)`,
-            isUGC: true,
-            createdAt: storyData.createdAt,
-          });
-        } else {
-          // Update existing entry
-          configData.stories[existingIndex].enabled = true;
-          configData.stories[existingIndex].description = `${foundation.title} (User Generated)`;
+        // Step 8: Insert clues
+        const cluesInserted = await insertClues(storyId, clues);
+        if (!cluesInserted) {
+          throw new Error('Failed to save clues to database');
         }
-
-        fs.writeFileSync(configPath, JSON.stringify(configData, null, 2));
 
         sendEvent({
           type: 'progress',
@@ -464,7 +304,7 @@ export async function POST(request: NextRequest) {
         sendEvent({
           type: 'complete',
           storyId,
-          sceneImageUrl,
+          sceneImageUrl: finalSceneImageUrl,
           success: true,
         });
 

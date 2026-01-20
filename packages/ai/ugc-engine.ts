@@ -1473,23 +1473,14 @@ Respond with ONLY the explanation text (no JSON, just the explanation string).`;
   // ==========================================================================
 
   /**
-   * Generate roleplay prompt files for each character
+   * @deprecated Roleplay prompts are now generated on-the-fly in the chat route.
+   * This method is a no-op.
    */
   private generateRoleplayPrompts(
-    characters: UGCGeneratedCharacter[],
-    storyDir: string
+    _characters: UGCGeneratedCharacter[],
+    _storyDir: string
   ): void {
-    const promptsDir = path.join(storyDir, 'roleplay_prompts');
-    fs.mkdirSync(promptsDir, { recursive: true });
-
-    for (const character of characters) {
-      // Skip victims - they can't be interrogated
-      if (character.isVictim) continue;
-
-      const promptContent = this.buildCharacterPrompt(character);
-      const promptPath = path.join(promptsDir, `${character.id}.txt`);
-      fs.writeFileSync(promptPath, promptContent);
-    }
+    console.log('[UGCEngine] generateRoleplayPrompts is deprecated - prompts generated on-the-fly');
   }
 
   /**
@@ -1628,31 +1619,26 @@ Respond only as ${character.name}. Begin.
   /**
    * Create the story directory structure
    */
-  createStoryDirectory(storyId: string): string {
-    const storyDir = path.join(this.storiesDir, storyId);
-    const assetsDir = path.join(storyDir, 'assets', 'characters');
-    fs.mkdirSync(assetsDir, { recursive: true });
-    return storyDir;
+  /**
+   * @deprecated Stories are now stored in Supabase. This method is a no-op.
+   */
+  createStoryDirectory(_storyId: string): string {
+    console.log('[UGCEngine] createStoryDirectory is deprecated - stories are stored in Supabase');
+    return '';
   }
 
   /**
-   * Delete a story directory (for cleanup on failure)
+   * @deprecated Stories are now stored in Supabase. This method is a no-op.
    */
-  private deleteStoryDirectory(storyId: string): void {
-    const storyDir = path.join(this.storiesDir, storyId);
-    if (fs.existsSync(storyDir)) {
-      fs.rmSync(storyDir, { recursive: true, force: true });
-    }
+  private deleteStoryDirectory(_storyId: string): void {
+    console.log('[UGCEngine] deleteStoryDirectory is deprecated - stories are stored in Supabase');
   }
 
   /**
-   * Save JSON data to a file
+   * @deprecated Stories are now stored in Supabase. This method is a no-op.
    */
-  saveJSON(storyDir: string, filename: string, data: unknown): void {
-    fs.writeFileSync(
-      path.join(storyDir, filename),
-      JSON.stringify(data, null, 2)
-    );
+  saveJSON(_storyDir: string, _filename: string, _data: unknown): void {
+    console.log('[UGCEngine] saveJSON is deprecated - stories are stored in Supabase');
   }
 
   /**
@@ -1869,38 +1855,18 @@ Respond with ONLY the JSON object, no other text.`;
   }
 
   /**
-   * Download an image from URL to local file
+   * @deprecated Images are now uploaded to Supabase Storage. This method is a no-op.
    */
-  private async downloadImage(url: string, outputPath: string): Promise<void> {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Failed to download image: ${response.status}`);
-    }
-    const buffer = await response.arrayBuffer();
-    fs.writeFileSync(outputPath, Buffer.from(buffer));
+  private async downloadImage(_url: string, _outputPath: string): Promise<void> {
+    console.log('[UGCEngine] downloadImage is deprecated - images are stored in Supabase Storage');
   }
 
   /**
-   * Add the generated story to stories.config.json
+   * @deprecated Stories are now stored in Supabase. This method is a no-op.
    */
-  addToStoriesConfig(storyId: string, title: string): void {
-    const configPath = path.join(process.cwd(), 'stories.config.json');
-    const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-
-    // Check if story already exists
-    const exists = config.stories.some((s: { id: string }) => s.id === storyId);
-    if (exists) return;
-
-    // Add new story entry
-    config.stories.push({
-      id: storyId,
-      enabled: true,
-      description: `${title} (User Generated)`,
-      isUGC: true,
-      createdAt: new Date().toISOString(),
-    });
-
-    fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+  addToStoriesConfig(_storyId: string, _title: string): void {
+    // No-op: Stories are now stored in Supabase, not stories.config.json
+    console.log('[UGCEngine] addToStoriesConfig is deprecated - stories are stored in Supabase');
   }
 
   // ==========================================================================

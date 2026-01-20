@@ -1,7 +1,9 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { signInWithGoogle } from '@/lib/supabase/auth';
 
 interface ScenarioCardProps {
   id: string;
@@ -20,6 +22,18 @@ export function ScenarioCard({
   premise,
   sceneImage,
 }: ScenarioCardProps) {
+  const router = useRouter();
+  const { user } = useAuth();
+
+  const handleClick = async () => {
+    if (user) {
+      router.push(`/game/${id}`);
+    } else {
+      const callbackUrl = `${window.location.origin}/auth/callback?next=/game/${id}`;
+      await signInWithGoogle(callbackUrl);
+    }
+  };
+
   const difficultyColors = {
     easy: 'bg-green-500/20 text-green-400',
     medium: 'bg-amber-500/20 text-amber-400',
@@ -27,7 +41,7 @@ export function ScenarioCard({
   };
 
   return (
-    <Link href={`/game/${id}`} className="block">
+    <button onClick={handleClick} className="block w-full text-left">
       <div className="card group hover:border-amber-500/50 transition-all duration-300 hover:scale-[1.02]">
         {/* Scene thumbnail */}
         <div className="relative h-48 bg-slate-700 overflow-hidden">
@@ -73,6 +87,6 @@ export function ScenarioCard({
           </div>
         </div>
       </div>
-    </Link>
+    </button>
   );
 }

@@ -5,8 +5,8 @@ import type { Story, Character, PlotPoint } from '../types';
 export class StoryGenerator {
   private client: LLMClient;
 
-  constructor(config: LLMConfig) {
-    this.client = new LLMClient(config);
+  constructor(llmConfig: LLMConfig) {
+    this.client = new LLMClient(llmConfig);
   }
 
   /**
@@ -54,7 +54,7 @@ Expand the personality, add behavioral details, and ensure the character has dep
     // Construct a detailed prompt for consistent portrait generation
     return `Portrait of ${role}, ${age} years old. ${appearance.description}. ` +
       `Expression suggests ${personality.traits[0]} personality. ` +
-      `Victorian era style, painterly, dramatic lighting, detailed face, ` +
-      `professional portrait composition, muted colors, atmospheric.`;
+      `Dramatic lighting, detailed face, ` +
+      `professional portrait composition, cinematic, atmospheric.`;
   }
 }

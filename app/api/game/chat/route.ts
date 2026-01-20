@@ -1,102 +1,70 @@
-import { NextRequest } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { NextRequest, NextResponse } from 'next/server';
+
+// Load env
+import 'dotenv/config';
+import * as dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+
+import { loadAIConfig, LLMClient } from '@/packages/ai';
+import {
+  getCharactersByStoryId,
+  getCluesByStoryId,
+  characterRowToGameFormat,
+  clueRowToGameFormat,
+} from '@/lib/supabase/queries';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const { storyId, characterId, message, history } = await request.json();
 
-    // Support both useChat format (messages array) and legacy format (message + history)
-    const { storyId, characterId, messages: useChatMessages, message, history } = body;
+    // Load character data from Supabase
+    const characterRows = await getCharactersByStoryId(storyId);
+    const characters = characterRows.map(characterRowToGameFormat);
 
-    const storyDir = path.join(process.cwd(), 'stories', storyId);
-
-    // Load character data
-    const charactersPath = path.join(storyDir, 'characters.json');
-    const charactersData = JSON.parse(fs.readFileSync(charactersPath, 'utf-8'));
-    const characters = Array.isArray(charactersData) ? charactersData : charactersData.characters;
-
-    const character = characters.find((c: any) => c.id === characterId);
+    const character = characters.find((c) => c.id === characterId);
     if (!character) {
-      return new Response(JSON.stringify({ error: 'Character not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return NextResponse.json({ error: 'Character not found' }, { status: 404 });
     }
+
+    // Load clues from Supabase
+    const clueRows = await getCluesByStoryId(storyId);
+    const plotPoints = clueRows.map(clueRowToGameFormat);
 
     // Build system prompt
     const systemPrompt = buildCharacterPrompt(character);
 
-    // Build message history - use useChat format if available, otherwise legacy format
-    let messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
+    // Initialize LLM
+    const config = loadAIConfig();
+    const llm = new LLMClient(config.llm);
 
-    if (useChatMessages && Array.isArray(useChatMessages)) {
-      // useChat sends messages array directly
-      messages = useChatMessages.map((msg: any) => ({
-        role: msg.role === 'user' ? 'user' : 'assistant',
-        content: typeof msg.content === 'string' ? msg.content : msg.content?.text || '',
-      }));
-    } else {
-      // Legacy format: message + history
-      messages = (history || []).map((msg: any) => ({
-        role: msg.role === 'user' ? 'user' : 'assistant',
-        content: msg.content,
-      }));
-      if (message) {
-        messages.push({ role: 'user', content: message });
-      }
-    }
+    // Build message history
+    const messages = history.map((msg: any) => ({
+      role: msg.role === 'user' ? 'user' : 'assistant',
+      content: msg.content,
+    }));
 
-    // Proxy to Python backend
-    const pythonBackendUrl = process.env.PYTHON_BACKEND_URL || 'http://localhost:8000';
-    console.log(`[Chat] Sending ${messages.length} messages to Python backend for ${characterId}`);
+    messages.push({ role: 'user', content: message });
 
-    let response: Response;
-    try {
-      response = await fetch(`${pythonBackendUrl}/api/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          story_id: storyId,
-          character_id: characterId,
-          messages: messages,
-          system_prompt: systemPrompt,
-        }),
-      });
-    } catch (fetchError) {
-      console.error('[Chat] Failed to connect to Python backend:', fetchError);
-      return new Response(JSON.stringify({ error: 'Backend service unavailable' }), {
-        status: 503,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
+    // Get response
+    const response = await llm.chat(systemPrompt, messages, {
+      maxTokens: 300,
+      temperature: 0.8,
+    });
 
-    if (!response.ok) {
-      const error = await response.text();
-      console.error(`[Chat] Python backend error (${response.status}):`, error);
-      return new Response(JSON.stringify({ error }), {
-        status: response.status,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
+    // Check for plot points revealed
+    const plotPointsRevealed = checkForPlotPoints(
+      response.content,
+      characterId,
+      plotPoints
+    );
 
-    // Stream the response directly
-    return new Response(response.body, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
+    return NextResponse.json({
+      response: response.content,
+      plotPointsRevealed,
     });
   } catch (error) {
-    console.error('[Chat] Unhandled error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: `Failed to get response: ${errorMessage}` }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    console.error('Error in chat:', error);
+    return NextResponse.json({ error: 'Failed to get response' }, { status: 500 });
   }
 }
 
@@ -142,4 +110,29 @@ ${Object.entries(relationships || {}).map(([id, rel]) => `- ${id}: ${rel}`).join
     : 'You are innocent. Cooperate with the investigation while protecting your minor secrets.'}
 
 Respond only as ${character.name}. Begin.`;
+}
+
+function checkForPlotPoints(
+  response: string,
+  characterId: string,
+  plotPoints: any[]
+): string[] {
+  const revealed: string[] = [];
+  const responseLower = response.toLowerCase();
+
+  for (const pp of plotPoints) {
+    // Check if this character can reveal this plot point
+    if (!pp.revealedBy?.includes(characterId)) continue;
+
+    // Check for detection hints
+    const hasHint = pp.detectionHints?.some((hint: string) =>
+      responseLower.includes(hint.toLowerCase())
+    );
+
+    if (hasHint) {
+      revealed.push(pp.id);
+    }
+  }
+
+  return revealed;
 }
