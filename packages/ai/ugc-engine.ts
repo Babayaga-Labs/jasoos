@@ -15,8 +15,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import type { AIConfig } from './config';
-import { generateText } from './llm-client';
+import { generateText, LLMClient } from './llm-client';
 import { ImageClient } from './image-client';
+import { CharacterKnowledgeSchema, type CharacterKnowledgeResponse } from './schemas/character-knowledge';
 import type {
   UGCFormInput,
   UGCGeneratedData,
@@ -1960,6 +1961,54 @@ Respond with ONLY the JSON object, no other text.`;
   }
 
   /**
+   * Flesh out characters ONLY - for staged generation flow
+   * Skips clues, timeline, and knowledge generation (done later after user edits)
+   */
+  async fleshOutCharactersOnly(
+    request: FleshOutRequest,
+    onProgress: (event: FleshOutProgressEvent) => void
+  ): Promise<{
+    storyId: string;
+    characters: UGCGeneratedCharacter[];
+    solution: UGCSolution;
+  }> {
+    this.resetPromptTraces();
+
+    const { foundation, characters, culprit } = request;
+    const storyId = this.generateStoryIdFromTitle(foundation.title);
+
+    // Validate culprit exists
+    if (!characters.some(c => c.id === culprit.characterId)) {
+      throw new Error('Culprit character not found in character list');
+    }
+
+    // Build solution object from culprit info
+    const culpritChar = characters.find(c => c.id === culprit.characterId);
+    const solution: UGCSolution = {
+      culprit: culpritChar?.name || 'Unknown',
+      method: culprit.method,
+      motive: culprit.motive,
+      explanation: `${culpritChar?.name || 'The culprit'} committed the ${foundation.crimeType} because ${culprit.motive}. They used ${culprit.method} to carry out the crime.`,
+    };
+
+    // Step 1: Generate full character details (0% → 50%)
+    onProgress(this.createProgressEvent('characters', 'Generating character appearances and personalities...', 0));
+    const fleshedOutCharacters = await this.generateFullCharacterDetails(foundation, characters, culprit);
+    onProgress(this.createProgressEvent('characters', 'Character details generated', 50));
+
+    // Step 2: Generate character images (50% → 100%)
+    onProgress(this.createProgressEvent('images', 'Generating character portraits...', 50));
+    const charactersWithImages = await this.generateCharacterImagesForFleshOut(fleshedOutCharacters, foundation.setting);
+    onProgress(this.createProgressEvent('images', 'Generation complete!', 100));
+
+    return {
+      storyId,
+      characters: charactersWithImages,
+      solution,
+    };
+  }
+
+  /**
    * Generate full character details from minimal foundation input
    */
   private async generateFullCharacterDetails(
@@ -2222,7 +2271,7 @@ Respond with ONLY the JSON object.`;
    * The key insight: Clues are the "contract" (what must be discoverable)
    * Timeline is the "implementation" (how those clues came to exist)
    */
-  private async generateCluesForSolvability(
+  async generateCluesForSolvability(
     foundation: UGCFoundation,
     characters: UGCGeneratedCharacter[],
     solution: UGCSolution
@@ -2370,48 +2419,53 @@ SOLUTION:
 CHARACTERS:
 ${characters.map(c => `- ${c.id}: ${c.name} (${c.role}) - Guilty: ${c.isGuilty}`).join('\n')}
 ${clueAlignmentSection}
-Generate a JSON object mapping each character ID to their knowledge:
+Generate a JSON object with a "characters" array containing each character's knowledge:
 {
-  "character_id": {
-    "knowsAboutCrime": "What they directly witnessed or know about the crime",
-    "knowsAboutOthers": ["Info they have about other characters from timeline"],
-    "alibi": "Where they claim to have been (FALSE for culprit, TRUE for innocents)"
-  }
+  "characters": [
+    {
+      "characterId": "char_xxx",
+      "knowsAboutCrime": "What they directly witnessed or know about the crime",
+      "knowsAboutOthers": ["Info they have about other characters from timeline"],
+      "alibi": "Where they claim to have been (FALSE for culprit, TRUE for innocents)"
+    }
+  ]
 }
 
 RULES:
-1. Culprit's alibi MUST have holes or be verifiably false
-2. Innocent characters should have TRUE, verifiable alibis
-3. Each character should know something useful based on timeline events they witnessed
-4. knowsAboutOthers should be information they could reveal during interrogation
-
-Respond with ONLY the JSON object.`;
+1. Include ALL characters listed above in the response
+2. Culprit's alibi MUST have holes or be verifiably false
+3. Innocent characters should have TRUE, verifiable alibis
+4. Each character should know something useful based on timeline events they witnessed
+5. knowsAboutOthers should be information they could reveal during interrogation`;
 
     this.tracePrompt('add-character-knowledge', prompt);
 
-    const { text } = await generateText({
-      config: this.config.llm,
-      prompt,
+    // Use structured outputs for guaranteed valid, typed JSON
+    const llmClient = new LLMClient(this.config.llm);
+    const response = await llmClient.generateJSON<CharacterKnowledgeResponse>(prompt, {
+      schema: CharacterKnowledgeSchema,
       maxTokens: 2500,
       temperature: 0.7,
     });
 
-    const knowledgeMap = this.parseJSONResponse(text);
+    // Convert array response to map for easier lookup
+    const knowledgeMap = new Map(
+      response.characters.map(k => [k.characterId, k])
+    );
 
     return characters.map(char => {
-      const knowledge = knowledgeMap[char.id];
+      const knowledge = knowledgeMap.get(char.id);
       if (!knowledge) return char;
 
-      const alibi = knowledge.alibi || '';
       return {
         ...char,
         knowledge: {
-          knowsAboutCrime: knowledge.knowsAboutCrime || '',
-          knowsAboutOthers: knowledge.knowsAboutOthers || [],
-          alibi,
+          knowsAboutCrime: knowledge.knowsAboutCrime,
+          knowsAboutOthers: knowledge.knowsAboutOthers,
+          alibi: knowledge.alibi,
         },
         // Derive statement from alibi instead of LLM generation
-        statement: deriveStatementFromAlibi(char.name, alibi),
+        statement: deriveStatementFromAlibi(char.name, knowledge.alibi),
       };
     });
   }

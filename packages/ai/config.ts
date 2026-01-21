@@ -1,7 +1,7 @@
 // AI Provider Configuration
 // Supports multiple LLM and image generation providers
 
-export type LLMProvider = 'anthropic' | 'openai' | 'openrouter';
+export type LLMProvider = 'anthropic' | 'openai' | 'openrouter' | 'azure';
 export type ImageProvider = 'replicate' | 'fal' | 'openai';
 
 export interface LLMConfig {
@@ -40,6 +40,10 @@ export const LLM_MODELS: Record<LLMProvider, { roleplay: string; judge: string }
   openrouter: {
     roleplay: 'anthropic/claude-3.5-sonnet',
     judge: 'anthropic/claude-3-haiku'
+  },
+  azure: {
+    roleplay: 'gpt-5-chat',
+    judge: 'gpt-5-chat'
   }
 };
 
@@ -91,6 +95,8 @@ function getDefaultBaseUrl(provider: LLMProvider): string | undefined {
       return 'https://api.anthropic.com';
     case 'openai':
       return 'https://api.openai.com/v1';
+    case 'azure':
+      return 'https://anvit-mkmyzxnp-eastus2.cognitiveservices.azure.com/openai/v1/';
     default:
       return undefined;
   }

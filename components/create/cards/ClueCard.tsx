@@ -56,7 +56,7 @@ export function ClueCard({ plotPoint, characters, delay = 0, onEdit }: ClueCardP
             `}>
               {plotPoint.importance.toUpperCase()}
             </span>
-            <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30">
               +{plotPoint.points} pts
             </span>
           </div>
@@ -130,7 +130,7 @@ export function ClueSummary({
       className="opacity-0 animate-fade-in-up"
       style={{ animationDelay: `${delay}ms`, animationFillMode: 'forwards' }}
     >
-      <div className="rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 p-5">
+      <div className="rounded-xl bg-violet-500/10 border border-violet-500/20 p-5">
         <div className="flex items-center gap-3 mb-4">
           <span className="text-2xl">🎯</span>
           <h3 className="font-semibold text-white">Mystery Statistics</h3>
@@ -142,7 +142,7 @@ export function ClueSummary({
             <p className="text-xs text-slate-400">Total Clues</p>
           </div>
           <div className="text-center p-3 rounded-lg bg-slate-800/30">
-            <p className="text-2xl font-bold text-emerald-400">{totalPoints}</p>
+            <p className="text-2xl font-bold text-violet-400">{totalPoints}</p>
             <p className="text-xs text-slate-400">Max Points</p>
           </div>
           <div className="text-center p-3 rounded-lg bg-slate-800/30">

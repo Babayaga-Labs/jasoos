@@ -55,7 +55,7 @@ export function EditableTimeline({
     >
       <div className="relative rounded-2xl bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-slate-700/40 backdrop-blur-sm overflow-hidden">
         {/* Gradient accent line */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 opacity-60" />
+        <div className="absolute top-0 left-0 right-0 h-1 bg-violet-500 opacity-60" />
 
         <div className="p-5">
           <div className="flex items-center justify-between mb-4">
@@ -68,7 +68,7 @@ export function EditableTimeline({
 
           <div className="relative pl-6">
             {/* Timeline line */}
-            <div className="absolute left-2 top-2 bottom-2 w-0.5 bg-gradient-to-b from-emerald-500/50 via-teal-500/50 to-cyan-500/50" />
+            <div className="absolute left-2 top-2 bottom-2 w-0.5 bg-violet-500/50" />
 
             <div className="space-y-3">
               {events.map((event, index) => (
@@ -77,21 +77,21 @@ export function EditableTimeline({
                   className="relative group"
                 >
                   {/* Timeline dot */}
-                  <div className="absolute -left-6 top-1.5 w-3 h-3 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 border-2 border-slate-900" />
+                  <div className="absolute -left-6 top-1.5 w-3 h-3 rounded-full bg-violet-500 border-2 border-slate-900" />
 
                   {editingIndex === index ? (
                     <div className="flex flex-col gap-2">
                       <textarea
                         value={editValue}
                         onChange={(e) => setEditValue(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg bg-slate-700/50 border border-teal-500/50 text-white text-sm focus:border-teal-400 focus:outline-none resize-none"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-700/50 border border-violet-500/50 text-white text-sm focus:border-violet-400 focus:outline-none resize-none"
                         rows={2}
                         autoFocus
                       />
                       <div className="flex items-center gap-2">
                         <button
                           onClick={handleSaveEdit}
-                          className="px-3 py-1 text-xs font-medium rounded-lg bg-emerald-600/30 text-emerald-300 hover:bg-emerald-500/40 transition-colors"
+                          className="px-3 py-1 text-xs font-medium rounded-lg bg-violet-600/30 text-violet-300 hover:bg-violet-500/40 transition-colors"
                         >
                           Save
                         </button>
@@ -115,7 +115,7 @@ export function EditableTimeline({
                             e.stopPropagation();
                             handleStartEdit(index);
                           }}
-                          className="p-1 rounded text-slate-500 hover:text-teal-400 transition-colors"
+                          className="p-1 rounded text-slate-500 hover:text-violet-400 transition-colors"
                           title="Edit"
                         >
                           ✏️
@@ -146,7 +146,7 @@ export function EditableTimeline({
                   value={newEventValue}
                   onChange={(e) => setNewEventValue(e.target.value)}
                   placeholder="e.g., 8:30 PM - The lights flickered and went out..."
-                  className="w-full px-3 py-2 rounded-lg bg-slate-700/50 border border-slate-600/50 text-white text-sm placeholder-slate-500 focus:border-teal-500/50 focus:outline-none resize-none"
+                  className="w-full px-3 py-2 rounded-lg bg-slate-700/50 border border-slate-600/50 text-white text-sm placeholder-slate-500 focus:border-violet-500/50 focus:outline-none resize-none"
                   rows={2}
                   autoFocus
                 />
@@ -156,7 +156,7 @@ export function EditableTimeline({
                     disabled={!newEventValue.trim()}
                     className={`px-3 py-1 text-xs font-medium rounded-lg transition-colors ${
                       newEventValue.trim()
-                        ? 'bg-emerald-600/30 text-emerald-300 hover:bg-emerald-500/40'
+                        ? 'bg-violet-600/30 text-violet-300 hover:bg-violet-500/40'
                         : 'bg-slate-700/30 text-slate-500 cursor-not-allowed'
                     }`}
                   >
@@ -176,7 +176,7 @@ export function EditableTimeline({
             ) : (
               <button
                 onClick={() => setShowAddForm(true)}
-                className="w-full py-2 px-4 rounded-lg border border-dashed border-slate-600/50 text-slate-400 hover:border-teal-500/50 hover:text-teal-300 transition-all text-sm"
+                className="w-full py-2 px-4 rounded-lg border border-dashed border-slate-600/50 text-slate-400 hover:border-violet-500/50 hover:text-violet-300 transition-all text-sm"
               >
                 + Add Timeline Event
               </button>

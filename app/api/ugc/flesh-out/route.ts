@@ -114,17 +114,28 @@ export async function POST(request: NextRequest) {
         try {
           const ugcEngine = new UGCEngine(config);
 
-          const result = await ugcEngine.fleshOutAndGenerate(
+          // Stage 1: Generate characters only (clues/timeline generated later after user edits)
+          const result = await ugcEngine.fleshOutCharactersOnly(
             body,
             (progress: FleshOutProgressEvent) => {
               sendEvent(progress);
             }
           );
 
-          // Send complete event with full generated data
+          // Send complete event with characters and solution
+          // Note: clues, timeline, scoring are NOT included - generated in later stages
           sendEvent({
             type: 'complete',
-            result,
+            result: {
+              ...result,
+              // Provide empty defaults for fields that will be populated later
+              clues: [],
+              timeline: [],
+              scoring: {
+                minimumPointsToAccuse: 50,
+                perfectScoreThreshold: 150,
+              },
+            },
           });
         } catch (error) {
           console.error('Flesh-out generation error:', error);

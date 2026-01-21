@@ -80,7 +80,7 @@ export function WizardStepper() {
                 <div className="absolute top-6 left-1/2 w-full h-0.5 -translate-y-1/2">
                   <div className={`
                     h-full transition-colors duration-300
-                    ${isPast || isComplete ? 'bg-gradient-to-r from-emerald-500 to-teal-500' : 'bg-slate-700/50'}
+                    ${isPast || isComplete ? 'bg-violet-500' : 'bg-slate-700/50'}
                   `} />
                 </div>
               )}
@@ -99,9 +99,9 @@ export function WizardStepper() {
                     relative w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold
                     transition-all duration-300 transform
                     ${isActive
-                      ? 'bg-gradient-to-br from-amber-400 via-violet-500 to-pink-500 scale-110 shadow-lg shadow-violet-500/30 text-white'
+                      ? 'bg-violet-500 scale-110 shadow-lg shadow-violet-500/30 text-white'
                       : isComplete || isPast
-                        ? 'bg-gradient-to-br from-emerald-400 to-teal-500 shadow-md shadow-emerald-500/20 text-white'
+                        ? 'bg-violet-500 shadow-md shadow-violet-500/20 text-white'
                         : 'bg-slate-800 border-2 border-slate-600 text-slate-400'
                     }
                     ${isAccessible && !isActive ? 'group-hover:scale-105 group-hover:border-violet-400' : ''}
@@ -126,7 +126,7 @@ export function WizardStepper() {
                     ${isActive
                       ? 'text-white'
                       : isComplete || isPast
-                        ? 'text-emerald-400'
+                        ? 'text-violet-400'
                         : 'text-slate-500'
                     }
                   `}
@@ -139,7 +139,7 @@ export function WizardStepper() {
                     ${isActive
                       ? 'text-white'
                       : isComplete || isPast
-                        ? 'text-emerald-400'
+                        ? 'text-violet-400'
                         : 'text-slate-500'
                     }
                   `}

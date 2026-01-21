@@ -30,7 +30,7 @@ export function StoryElementCard({
     >
       <div className="relative group rounded-2xl bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-slate-700/40 backdrop-blur-sm overflow-hidden hover:border-violet-500/30 transition-colors">
         {/* Gradient accent line */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-violet-500 to-pink-500 opacity-60" />
+        <div className="absolute top-0 left-0 right-0 h-1 bg-violet-500 opacity-60" />
 
         <div className="p-5">
           {/* Header */}
@@ -86,7 +86,7 @@ export function TimelineCard({ events, delay = 0 }: TimelineCardProps) {
     >
       <div className="relative rounded-2xl bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-slate-700/40 backdrop-blur-sm overflow-hidden">
         {/* Gradient accent line */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 opacity-60" />
+        <div className="absolute top-0 left-0 right-0 h-1 bg-violet-500 opacity-60" />
 
         <div className="p-5">
           <div className="flex items-center gap-3 mb-4">
@@ -96,7 +96,7 @@ export function TimelineCard({ events, delay = 0 }: TimelineCardProps) {
 
           <div className="relative pl-6">
             {/* Timeline line */}
-            <div className="absolute left-2 top-2 bottom-2 w-0.5 bg-gradient-to-b from-emerald-500/50 via-teal-500/50 to-cyan-500/50" />
+            <div className="absolute left-2 top-2 bottom-2 w-0.5 bg-violet-500/50" />
 
             <div className="space-y-3">
               {events.map((event, index) => (
@@ -109,7 +109,7 @@ export function TimelineCard({ events, delay = 0 }: TimelineCardProps) {
                   }}
                 >
                   {/* Timeline dot */}
-                  <div className="absolute -left-6 top-1.5 w-3 h-3 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 border-2 border-slate-900" />
+                  <div className="absolute -left-6 top-1.5 w-3 h-3 rounded-full bg-violet-500 border-2 border-slate-900" />
 
                   <p className="text-slate-300 text-sm leading-relaxed">{event}</p>
                 </div>

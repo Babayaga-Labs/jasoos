@@ -58,9 +58,9 @@ export function AccusationModal({ characters, storyId }: AccusationModalProps) {
                     : 'border-slate-600 hover:border-slate-500 bg-slate-700/50'}
                 `}
               >
-                <div className="relative w-16 h-16 mx-auto rounded-full overflow-hidden mb-2">
+                <div className="relative w-16 h-16 mx-auto rounded-full overflow-hidden mb-2 bg-slate-600">
                   <Image
-                    src={`/stories/${storyId}/assets/characters/${character.id}.png`}
+                    src={character.imageUrl || `/stories/${storyId}/assets/characters/${character.id}.png`}
                     alt={character.name}
                     fill
                     className="object-cover"

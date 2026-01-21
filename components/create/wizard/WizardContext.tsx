@@ -40,11 +40,19 @@ export interface WizardState {
   generationProgress: { step: string; progress: number } | null;
   hasGeneratedOnce: boolean; // tracks if characters were generated (for back nav warning)
 
+  // Clue generation (Characters → Clues transition)
+  cluesGenerating: boolean;
+  cluesGenerationProgress: { step: string; progress: number } | null;
+
   // Clue review stage
   clues: UGCGeneratedClue[];
   timeline: string[];
   solution: UGCSolution | null;
   timelineRegenerating: boolean;
+
+  // Timeline/Knowledge generation (Clues → Publish transition)
+  timelineKnowledgeGenerating: boolean;
+  timelineKnowledgeProgress: { step: string; progress: number } | null;
 
   // Scoring
   minimumPointsToAccuse: number;
@@ -102,6 +110,11 @@ type WizardAction =
   | { type: 'COMPLETE_IMAGE_REGEN'; characterId: string; imageUrl: string }
   | { type: 'SET_CHARACTER_IMAGE'; characterId: string; imageUrl: string }
 
+  // Clue generation (Characters → Clues transition)
+  | { type: 'START_CLUES_GEN' }
+  | { type: 'UPDATE_CLUES_GEN_PROGRESS'; step: string; progress: number }
+  | { type: 'COMPLETE_CLUES_GEN'; clues: UGCGeneratedClue[]; scoring: { minimumPointsToAccuse: number; perfectScoreThreshold: number } }
+
   // Clue review stage - clue edits
   | { type: 'UPDATE_CLUE'; id: string; updates: Partial<UGCGeneratedClue> }
   | { type: 'ADD_CLUE' }
@@ -113,6 +126,11 @@ type WizardAction =
   | { type: 'DELETE_TIMELINE_EVENT'; index: number }
   | { type: 'START_TIMELINE_REGEN' }
   | { type: 'COMPLETE_TIMELINE_REGEN'; timeline: string[]; characters?: UGCGeneratedCharacter[] }
+
+  // Timeline/Knowledge generation (Clues → Publish transition)
+  | { type: 'START_TIMELINE_KNOWLEDGE_GEN' }
+  | { type: 'UPDATE_TIMELINE_KNOWLEDGE_PROGRESS'; step: string; progress: number }
+  | { type: 'COMPLETE_TIMELINE_KNOWLEDGE_GEN'; timeline: string[]; characters: UGCGeneratedCharacter[] }
 
   // Publish
   | { type: 'START_SCENE_GEN' }
@@ -150,11 +168,19 @@ function createInitialState(): WizardState {
     generationProgress: null,
     hasGeneratedOnce: false,
 
+    // Clue generation
+    cluesGenerating: false,
+    cluesGenerationProgress: null,
+
     // Clues
     clues: [],
     timeline: [],
     solution: null,
     timelineRegenerating: false,
+
+    // Timeline/Knowledge generation
+    timelineKnowledgeGenerating: false,
+    timelineKnowledgeProgress: null,
 
     // Scoring
     minimumPointsToAccuse: 50,
@@ -360,6 +386,32 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
         ),
       };
 
+    // ===================== Clue Generation (Characters → Clues) =====================
+    case 'START_CLUES_GEN':
+      return {
+        ...state,
+        cluesGenerating: true,
+        cluesGenerationProgress: null,
+        error: null,
+      };
+
+    case 'UPDATE_CLUES_GEN_PROGRESS':
+      return {
+        ...state,
+        cluesGenerationProgress: { step: action.step, progress: action.progress },
+      };
+
+    case 'COMPLETE_CLUES_GEN':
+      return {
+        ...state,
+        cluesGenerating: false,
+        cluesGenerationProgress: null,
+        clues: action.clues,
+        minimumPointsToAccuse: action.scoring.minimumPointsToAccuse,
+        perfectScoreThreshold: action.scoring.perfectScoreThreshold,
+        currentStage: 'clues',
+      };
+
     // ===================== Clue Review Stage - Clue Edits =====================
     case 'UPDATE_CLUE':
       return {
@@ -424,6 +476,31 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
         secretsEditedSinceGeneration: false, // Reset since timeline now reflects secrets
       };
 
+    // ===================== Timeline/Knowledge Generation (Clues → Publish) =====================
+    case 'START_TIMELINE_KNOWLEDGE_GEN':
+      return {
+        ...state,
+        timelineKnowledgeGenerating: true,
+        timelineKnowledgeProgress: null,
+        error: null,
+      };
+
+    case 'UPDATE_TIMELINE_KNOWLEDGE_PROGRESS':
+      return {
+        ...state,
+        timelineKnowledgeProgress: { step: action.step, progress: action.progress },
+      };
+
+    case 'COMPLETE_TIMELINE_KNOWLEDGE_GEN':
+      return {
+        ...state,
+        timelineKnowledgeGenerating: false,
+        timelineKnowledgeProgress: null,
+        timeline: action.timeline,
+        generatedCharacters: action.characters,
+        secretsEditedSinceGeneration: false,
+      };
+
     // ===================== Publish =====================
     case 'START_SCENE_GEN':
       return { ...state, sceneGenerating: true, error: null };
@@ -453,10 +530,14 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
         error: action.error,
         scaffoldGenerating: false,
         charactersGenerating: false,
+        cluesGenerating: false,
         timelineRegenerating: false,
+        timelineKnowledgeGenerating: false,
         sceneGenerating: false,
         isPublishing: false,
         generationProgress: null,
+        cluesGenerationProgress: null,
+        timelineKnowledgeProgress: null,
       };
 
     case 'CLEAR_ERROR':
@@ -523,19 +604,20 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 
   // Can publish?
   // - Has clues
-  // - Has timeline
   // - Has solution
+  // Note: Timeline is generated when "Review & Publish" is clicked, so it's not a prerequisite
   const canPublish =
     state.clues.length > 0 &&
-    state.timeline.length > 0 &&
     state.solution !== null &&
     !state.isPublishing;
 
   // Unified loading state for major generation operations
   // NOT including: timelineRegenerating (small operation), per-character image regen
+  // NOT including: timelineKnowledgeGenerating (CluesStage handles its own loading UI and needs to stay mounted for modal)
   const isAnyGenerating =
-    state.scaffoldGenerating ||    // Prompt → Foundation
-    state.charactersGenerating;    // Foundation → Characters (SSE streaming)
+    state.scaffoldGenerating ||        // Prompt → Foundation
+    state.charactersGenerating ||      // Foundation → Characters
+    state.cluesGenerating;             // Characters → Clues
 
   const value: WizardContextValue = {
     state,

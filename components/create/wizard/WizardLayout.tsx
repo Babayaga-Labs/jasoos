@@ -89,7 +89,7 @@ function LoadingIndicator() {
         <div className="mt-6 w-64">
           <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-amber-500 via-violet-500 to-pink-500 transition-all duration-500"
+              className="h-full bg-violet-500 transition-all duration-500"
               style={{ width: `${state.generationProgress.progress}%` }}
             />
           </div>

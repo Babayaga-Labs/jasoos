@@ -72,11 +72,13 @@ export function CharactersStage() {
     dispatch({ type: 'GO_TO_STAGE', stage: 'foundation' });
   };
 
-  const handleContinueToClues = () => {
-    // Timeline regeneration now happens at publish time, not on navigation
-    // This simplifies the flow and ensures consistency
+  const handleContinueToClues = async () => {
+    if (!foundation || !state.solution) return;
 
-    // Start scene image generation in background (don't block navigation)
+    // Start clue generation
+    dispatch({ type: 'START_CLUES_GEN' });
+
+    // Start scene image generation in background (don't block clue generation)
     if (foundation?.setting && !state.sceneImageUrl) {
       dispatch({ type: 'START_SCENE_GEN' });
       fetch('/api/ugc/generate-scene', {
@@ -94,11 +96,40 @@ export function CharactersStage() {
         })
         .catch((err) => {
           console.warn('Scene generation failed:', err);
-          // Don't show error to user - scene is optional
         });
     }
 
-    dispatch({ type: 'GO_TO_STAGE', stage: 'clues' });
+    try {
+      // Generate clues based on finalized characters
+      const response = await fetch('/api/ugc/generate-clues-staged', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          foundation,
+          characters: generatedCharacters,
+          solution: state.solution,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to generate clues');
+      }
+
+      const data = await response.json();
+
+      // Complete clue generation - this navigates to clues stage
+      dispatch({
+        type: 'COMPLETE_CLUES_GEN',
+        clues: data.clues,
+        scoring: data.scoring,
+      });
+    } catch (error) {
+      dispatch({
+        type: 'SET_ERROR',
+        error: error instanceof Error ? error.message : 'Failed to generate clues',
+      });
+    }
   };
 
   return (
@@ -136,16 +167,26 @@ export function CharactersStage() {
 
         <button
           onClick={handleContinueToClues}
-          disabled={!canProceedFromCharacters}
+          disabled={!canProceedFromCharacters || state.cluesGenerating}
           className={`
             py-4 px-8 rounded-xl font-semibold text-lg transition-all duration-300
-            ${canProceedFromCharacters
+            ${canProceedFromCharacters && !state.cluesGenerating
               ? 'bg-gradient-to-r from-amber-500 via-violet-500 to-pink-500 text-white shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 hover:scale-[1.02]'
               : 'bg-slate-700 text-slate-500 cursor-not-allowed'
             }
           `}
         >
-          Continue to Clues
+          {state.cluesGenerating ? (
+            <span className="flex items-center gap-2">
+              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              Generating Clues...
+            </span>
+          ) : (
+            'Continue to Clues'
+          )}
         </button>
       </div>
     </div>

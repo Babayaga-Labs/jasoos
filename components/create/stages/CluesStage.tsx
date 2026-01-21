@@ -49,11 +49,52 @@ export function CluesStage() {
     );
   }
 
-  const handleOpenPublishModal = () => {
-    setShowPublishModal(true);
-    setModalStep('preview');
-    setValidationWarnings([]);
-    setPublishProgress(null);
+  const handleOpenPublishModal = async () => {
+    if (!foundation || !solution) return;
+
+    // First, generate timeline and character knowledge based on finalized clues
+    dispatch({ type: 'START_TIMELINE_KNOWLEDGE_GEN' });
+
+    try {
+      const response = await fetch('/api/ugc/generate-timeline-knowledge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          foundation,
+          characters: generatedCharacters,
+          clues,
+          solution,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to generate timeline');
+      }
+
+      const data = await response.json();
+      console.log('[CluesStage] API response:', { timeline: data.timeline?.length, characters: data.characters?.length });
+
+      // Update state with generated timeline and character knowledge
+      dispatch({
+        type: 'COMPLETE_TIMELINE_KNOWLEDGE_GEN',
+        timeline: data.timeline,
+        characters: data.characters,
+      });
+
+      // Now show the publish modal
+      console.log('[CluesStage] Opening publish modal');
+      setShowPublishModal(true);
+      setModalStep('preview');
+      setValidationWarnings([]);
+      setPublishProgress(null);
+    } catch (error) {
+      console.error('[CluesStage] Error in handleOpenPublishModal:', error);
+      dispatch({
+        type: 'SET_ERROR',
+        error: error instanceof Error ? error.message : 'Failed to generate timeline',
+      });
+    }
   };
 
   const handleRunValidation = async () => {
@@ -285,20 +326,31 @@ export function CluesStage() {
 
         <button
           onClick={handleOpenPublishModal}
-          disabled={!canPublish || isPublishing || sceneGenerating}
+          disabled={!canPublish || isPublishing || sceneGenerating || state.timelineKnowledgeGenerating}
           className={`
             py-4 px-8 rounded-xl font-semibold text-lg transition-all duration-300
-            ${canPublish && !isPublishing && !sceneGenerating
-              ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white shadow-lg shadow-teal-500/30 hover:shadow-xl hover:shadow-teal-500/40 hover:scale-[1.02]'
+            ${canPublish && !isPublishing && !sceneGenerating && !state.timelineKnowledgeGenerating
+              ? 'bg-violet-500 text-white shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 hover:scale-[1.02]'
               : 'bg-slate-700 text-slate-500 cursor-not-allowed'
             }
           `}
         >
-          Review & Publish
+          {state.timelineKnowledgeGenerating ? (
+            <span className="flex items-center gap-2">
+              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              Generating Timeline...
+            </span>
+          ) : (
+            'Review & Publish'
+          )}
         </button>
       </div>
 
       {/* Review & Publish Modal */}
+      {console.log('[CluesStage] Modal render check:', { showPublishModal, modalStep, hasFoundation: !!foundation })}
       {showPublishModal && (
         <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-slate-900 rounded-2xl max-w-4xl w-full shadow-2xl border border-slate-800 overflow-hidden max-h-[90vh] flex flex-col">
@@ -566,7 +618,7 @@ export function CluesStage() {
                   <p className="text-slate-300 text-center">{publishProgress.step}</p>
                   <div className="h-3 bg-slate-700 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 transition-all duration-500"
+                      className="h-full bg-violet-500 transition-all duration-500"
                       style={{ width: `${publishProgress.progress}%` }}
                     />
                   </div>
@@ -588,7 +640,7 @@ export function CluesStage() {
                   </button>
                   <button
                     onClick={handleRunValidation}
-                    className="px-6 py-2 bg-gradient-to-r from-violet-500 to-purple-500 text-white rounded-lg hover:from-violet-600 hover:to-purple-600 transition-all"
+                    className="px-6 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-all"
                   >
                     Run Validation
                   </button>
@@ -614,7 +666,7 @@ export function CluesStage() {
                   </button>
                   <button
                     onClick={handleConfirmPublish}
-                    className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:from-emerald-600 hover:to-teal-600 transition-all"
+                    className="px-6 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-all"
                   >
                     {validationWarnings.length > 0 ? 'Publish Anyway' : 'Publish Now'}
                   </button>
