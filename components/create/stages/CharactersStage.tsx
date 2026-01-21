@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { useWizard } from '../wizard/WizardContext';
 import type { UGCGeneratedCharacter } from '@/packages/ai/types/ugc-types';
@@ -28,6 +28,42 @@ export function CharactersStage() {
       </div>
     );
   }
+
+  const [uploadingCharacterId, setUploadingCharacterId] = useState<string | null>(null);
+
+  const handleUploadImage = async (characterId: string, file: File) => {
+    setUploadingCharacterId(characterId);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('characterId', characterId);
+
+      const response = await fetch('/api/ugc/upload-character-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to upload image');
+      }
+
+      const result = await response.json();
+      dispatch({
+        type: 'SET_CHARACTER_IMAGE',
+        characterId,
+        imageUrl: result.imageUrl,
+      });
+    } catch (error) {
+      dispatch({
+        type: 'SET_ERROR',
+        error: error instanceof Error ? error.message : 'Failed to upload image',
+      });
+    } finally {
+      setUploadingCharacterId(null);
+    }
+  };
 
   const handleRegenerateImage = async (character: UGCGeneratedCharacter) => {
     dispatch({ type: 'START_IMAGE_REGEN', characterId: character.id });
@@ -152,6 +188,8 @@ export function CharactersStage() {
             character={character}
             onUpdate={(updates) => dispatch({ type: 'UPDATE_GENERATED_CHARACTER', id: character.id, updates })}
             onRegenerateImage={() => handleRegenerateImage(character)}
+            onUploadImage={(file) => handleUploadImage(character.id, file)}
+            isUploading={uploadingCharacterId === character.id}
           />
         ))}
       </div>
@@ -197,14 +235,28 @@ interface CharacterCardProps {
   character: UGCGeneratedCharacter;
   onUpdate: (updates: Partial<UGCGeneratedCharacter>) => void;
   onRegenerateImage: () => void;
+  onUploadImage: (file: File) => void;
+  isUploading: boolean;
 }
 
 function CharacterCard({
   character,
   onUpdate,
   onRegenerateImage,
+  onUploadImage,
+  isUploading,
 }: CharacterCardProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const isImageGenerating = 'imageGenerating' in character && Boolean((character as Record<string, unknown>).imageGenerating);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      onUploadImage(file);
+    }
+    // Reset input so the same file can be selected again
+    e.target.value = '';
+  };
   // Normalize traits to lowercase for consistent comparison
   // Only count traits that exist in PERSONALITY_TRAITS (LLM may have generated non-standard ones)
   const normalizedStoredTraits = character.personality.traits.map(t => t.toLowerCase());
@@ -295,35 +347,71 @@ function CharacterCard({
 
       {/* Body Section */}
       <div className="px-4 pb-4 space-y-4">
-        {/* Appearance with Regenerate Button */}
+        {/* Appearance with Regenerate/Upload Buttons */}
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className="text-xs text-slate-400">Appearance</label>
-            <button
-              onClick={onRegenerateImage}
-              disabled={isImageGenerating}
-              className="flex items-center gap-1 text-xs text-violet-400 hover:text-violet-300 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isImageGenerating ? (
-                <>
-                  <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  <span>Generating...</span>
-                </>
-              ) : (
-                <>
-                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 2v6h-6" />
-                    <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
-                    <path d="M3 22v-6h6" />
-                    <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
-                  </svg>
-                  <span>Regenerate Image</span>
-                </>
-              )}
-            </button>
+            <div className="flex items-center gap-3">
+              {/* Upload Image Button */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading || isImageGenerating}
+                className="flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isUploading ? (
+                  <>
+                    <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    <span>Uploading...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="17 8 12 3 7 8" />
+                      <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    <span>Upload Image</span>
+                  </>
+                )}
+              </button>
+
+              {/* Regenerate Image Button */}
+              <button
+                onClick={onRegenerateImage}
+                disabled={isImageGenerating || isUploading}
+                className="flex items-center gap-1 text-xs text-violet-400 hover:text-violet-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isImageGenerating ? (
+                  <>
+                    <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    <span>Generating...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 2v6h-6" />
+                      <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+                      <path d="M3 22v-6h6" />
+                      <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+                    </svg>
+                    <span>Regenerate Image</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
           <textarea
             value={character.appearance.description}

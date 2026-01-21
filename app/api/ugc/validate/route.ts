@@ -11,15 +11,14 @@ interface ValidateRequest {
   clues: UGCGeneratedClue[];
   timeline: string[];
   solution: UGCSolution;
-  scoring: {
-    minimumPointsToAccuse: number;
-    perfectScoreThreshold: number;
-  };
+  deepCheck?: boolean; // If true, runs LLM-based semantic validation
 }
 
 /**
  * Validate story without publishing
  * POST /api/ugc/validate
+ *
+ * Set deepCheck: true to run LLM-based semantic analysis (slower but more thorough)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -36,15 +35,16 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: 'Solution is required' }, { status: 400 });
     }
 
-    // Run validation
-    const validationResult = validateFoundationStory({
-      clues: body.clues,
-      characters: body.characters,
-      timeline: body.timeline || [],
-      solution: body.solution,
-      minimumPointsToAccuse: body.scoring?.minimumPointsToAccuse || 50,
-      perfectScoreThreshold: body.scoring?.perfectScoreThreshold || 150,
-    });
+    // Run validation (async now due to optional LLM check)
+    const validationResult = await validateFoundationStory(
+      {
+        clues: body.clues,
+        characters: body.characters,
+        timeline: body.timeline || [],
+        solution: body.solution,
+      },
+      { deepCheck: body.deepCheck }
+    );
 
     return Response.json({
       warnings: validationResult.warnings,

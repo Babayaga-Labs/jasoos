@@ -7,7 +7,7 @@ import type { UGCGeneratedClue, UGCGeneratedCharacter } from '@/packages/ai/type
 
 interface ValidationWarning {
   category: string;
-  severity: 'info' | 'warning' | 'critical';
+  severity: 'major' | 'medium' | 'minor';
   message: string;
   suggestion?: string;
 }
@@ -97,7 +97,7 @@ export function CluesStage() {
     }
   };
 
-  const handleRunValidation = async () => {
+  const handleRunDeepCheck = async () => {
     setModalStep('validating');
 
     try {
@@ -109,10 +109,7 @@ export function CluesStage() {
           clues,
           timeline,
           solution,
-          scoring: {
-            minimumPointsToAccuse,
-            perfectScoreThreshold,
-          },
+          deepCheck: true, // Run LLM-based semantic validation
         }),
       });
 
@@ -205,13 +202,12 @@ export function CluesStage() {
     }
   };
 
-  const criticalCount = validationWarnings.filter(w => w.severity === 'critical').length;
-  const warningCount = validationWarnings.filter(w => w.severity === 'warning').length;
-  const infoCount = validationWarnings.filter(w => w.severity === 'info').length;
+  const majorCount = validationWarnings.filter(w => w.severity === 'major').length;
+  const mediumCount = validationWarnings.filter(w => w.severity === 'medium').length;
+  const minorCount = validationWarnings.filter(w => w.severity === 'minor').length;
 
   const culprit = generatedCharacters.find(c => c.isGuilty);
   const victim = generatedCharacters.find(c => c.isVictim);
-  const totalPoints = clues.reduce((sum, c) => sum + c.points, 0);
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -235,23 +231,17 @@ export function CluesStage() {
       </div>
 
       {/* Side-by-Side Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:h-[600px] overflow-hidden">
         {/* Left: Clues Section (3/5 width) */}
-        <div className="lg:col-span-3 space-y-4">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xl font-semibold text-white">Clues</h3>
-            <button
-              onClick={() => dispatch({ type: 'ADD_CLUE' })}
-              className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors text-sm"
-            >
-              + Add Clue
-            </button>
-          </div>
-          <p className="text-sm text-slate-400 mb-4">
-            These clues shape how players solve your mystery. Select which characters reveal each clue during interrogation.
-          </p>
+        <div className="lg:col-span-3 flex flex-col gap-4 overflow-hidden">
+          <button
+            onClick={() => dispatch({ type: 'ADD_CLUE' })}
+            className="w-full py-3 bg-violet-500/20 text-violet-400 rounded-lg hover:bg-violet-500/30 transition-colors text-sm border border-dashed border-violet-500 hover:border-violet-400 shrink-0"
+          >
+            + Add Clue
+          </button>
 
-          <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+          <div className="flex-1 min-h-0 overflow-y-auto space-y-3 pr-2">
             {clues.map((clue) => (
               <ClueCard
                 key={clue.id}
@@ -262,48 +252,22 @@ export function CluesStage() {
               />
             ))}
           </div>
-
-          {/* Scoring Summary */}
-          <div className="bg-slate-800/30 rounded-lg p-4 border border-slate-700/50 mt-4">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-400">Total Points Available:</span>
-              <span className="text-white font-medium">{totalPoints} pts</span>
-            </div>
-            <div className="flex items-center justify-between text-sm mt-2">
-              <span className="text-slate-400">Points to Accuse:</span>
-              <span className="text-amber-400 font-medium">{minimumPointsToAccuse} pts</span>
-            </div>
-          </div>
         </div>
 
         {/* Right: Reference Panel (2/5 width) */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="lg:col-span-2 flex flex-col gap-4 overflow-hidden">
           {/* Story Premise */}
-          <ReferencePanel title="Story Premise">
-            <p className="text-slate-300 text-sm leading-relaxed mb-3">
+          <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-4 shrink-0">
+            <h4 className="text-sm font-medium text-slate-400 mb-3 uppercase tracking-wide">Story Premise</h4>
+            <p className="text-slate-300 text-sm leading-relaxed">
               {foundation?.synopsis || 'No synopsis available'}
             </p>
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="text-slate-500">Setting:</span>
-                <span className="text-slate-300">{foundation?.setting.location}, {foundation?.setting.timePeriod}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-slate-500">Crime:</span>
-                <span className="text-slate-300 capitalize">{foundation?.crimeType}</span>
-              </div>
-              {solution && (
-                <div className="flex items-center gap-2">
-                  <span className="text-slate-500">Motive:</span>
-                  <span className="text-slate-300">{solution.motive}</span>
-                </div>
-              )}
-            </div>
-          </ReferencePanel>
+          </div>
 
-          {/* Character Reference */}
-          <ReferencePanel title="Character Reference">
-            <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1">
+          {/* Character References */}
+          <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-4 flex-1 min-h-0 flex flex-col">
+            <h4 className="text-sm font-medium text-slate-400 mb-3 uppercase tracking-wide shrink-0">Character References</h4>
+            <div className="flex-1 min-h-0 overflow-y-auto space-y-2 pr-1">
               {generatedCharacters.map((char) => (
                 <CharacterRefCard
                   key={char.id}
@@ -311,7 +275,7 @@ export function CluesStage() {
                 />
               ))}
             </div>
-          </ReferencePanel>
+          </div>
         </div>
       </div>
 
@@ -358,8 +322,8 @@ export function CluesStage() {
               <div className="p-6 border-b border-slate-700 shrink-0">
                 <h3 className="text-xl font-bold text-white">
                   {modalStep === 'publishing' ? 'Publishing...' :
-                   modalStep === 'validating' ? 'Validating...' :
-                   'Validation Results'}
+                   modalStep === 'validating' ? 'Deep Check...' :
+                   'Deep Check Results'}
                 </h3>
               </div>
             )}
@@ -504,7 +468,7 @@ export function CluesStage() {
                           </div>
                           <div>
                             <p className="text-slate-500 text-xs mb-1">Evidence Trail</p>
-                            <p className="text-slate-300">{clues.length} clues &middot; {totalPoints} pts</p>
+                            <p className="text-slate-300">{clues.length} clues</p>
                           </div>
                         </div>
                       </div>
@@ -521,11 +485,6 @@ export function CluesStage() {
                         <p className="text-xl font-bold text-white">{clues.length}</p>
                         <p className="text-[10px] text-slate-500 uppercase tracking-wide">Clues</p>
                       </div>
-                      <div className="w-px h-8 bg-slate-700/50" />
-                      <div className="text-center">
-                        <p className="text-xl font-bold text-white">{totalPoints}</p>
-                        <p className="text-[10px] text-slate-500 uppercase tracking-wide">Points</p>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -538,7 +497,8 @@ export function CluesStage() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  <p className="text-slate-300">Checking your mystery for issues...</p>
+                  <p className="text-slate-300">Running deep check on your mystery...</p>
+                  <p className="text-slate-500 text-sm mt-2">Analyzing clues, alibis, and logical consistency</p>
                 </div>
               )}
 
@@ -561,19 +521,19 @@ export function CluesStage() {
 
                       {/* Warning Summary */}
                       <div className="flex gap-4 text-sm">
-                        {criticalCount > 0 && (
+                        {majorCount > 0 && (
                           <span className="px-3 py-1 bg-red-900/30 text-red-400 rounded-full">
-                            {criticalCount} critical
+                            {majorCount} major
                           </span>
                         )}
-                        {warningCount > 0 && (
+                        {mediumCount > 0 && (
                           <span className="px-3 py-1 bg-amber-900/30 text-amber-400 rounded-full">
-                            {warningCount} warnings
+                            {mediumCount} medium
                           </span>
                         )}
-                        {infoCount > 0 && (
+                        {minorCount > 0 && (
                           <span className="px-3 py-1 bg-slate-700 text-slate-400 rounded-full">
-                            {infoCount} info
+                            {minorCount} minor
                           </span>
                         )}
                       </div>
@@ -584,17 +544,17 @@ export function CluesStage() {
                           <div
                             key={i}
                             className={`p-3 rounded-lg border ${
-                              warning.severity === 'critical'
+                              warning.severity === 'major'
                                 ? 'bg-red-900/20 border-red-500/30'
-                                : warning.severity === 'warning'
+                                : warning.severity === 'medium'
                                   ? 'bg-amber-900/20 border-amber-500/30'
                                   : 'bg-slate-700/50 border-slate-600'
                             }`}
                           >
                             <p className={`text-sm ${
-                              warning.severity === 'critical'
+                              warning.severity === 'major'
                                 ? 'text-red-300'
-                                : warning.severity === 'warning'
+                                : warning.severity === 'medium'
                                   ? 'text-amber-300'
                                   : 'text-slate-300'
                             }`}>
@@ -638,10 +598,16 @@ export function CluesStage() {
                     Cancel
                   </button>
                   <button
-                    onClick={handleRunValidation}
+                    onClick={handleRunDeepCheck}
+                    className="px-6 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition-all border border-slate-600"
+                  >
+                    Sanity Check
+                  </button>
+                  <button
+                    onClick={handleConfirmPublish}
                     className="px-6 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-all"
                   >
-                    Run Validation
+                    Publish
                   </button>
                 </>
               )}
@@ -651,7 +617,7 @@ export function CluesStage() {
                   disabled
                   className="px-6 py-2 bg-slate-700 text-slate-500 rounded-lg cursor-not-allowed"
                 >
-                  Validating...
+                  Checking...
                 </button>
               )}
 
@@ -739,8 +705,8 @@ function CharacterRefCard({ character }: { character: UGCGeneratedCharacter }) {
 
       {/* Secret preview (if exists and not victim) */}
       {secret && !character.isVictim && (
-        <p className="text-slate-400 text-xs mt-2 italic line-clamp-2">
-          Secret: {secret}
+        <p className="text-slate-400 text-xs mt-2">
+          <span className="font-bold">Secret:</span> {secret}
         </p>
       )}
     </div>
@@ -758,8 +724,6 @@ interface ClueCardProps {
 }
 
 function ClueCard({ clue, characters, onUpdate, onDelete }: ClueCardProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
-
   // Filter to only show interactable characters (not victims)
   const interactableCharacters = characters.filter(c => !c.isVictim);
 
@@ -774,66 +738,40 @@ function ClueCard({ clue, characters, onUpdate, onDelete }: ClueCardProps) {
         className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
       />
 
-      {/* Points */}
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <label className="text-sm text-slate-400">Points:</label>
-          <input
-            type="number"
-            value={clue.points}
-            onChange={(e) => onUpdate({ points: parseInt(e.target.value) || 0 })}
-            className="w-16 px-2 py-1 bg-slate-900/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
-          />
+      {/* Revealed By */}
+      <div className="pt-3 border-t border-slate-700">
+        <label className="block text-xs text-slate-400 mb-2">Revealed By:</label>
+        <div className="flex flex-wrap items-center gap-2">
+          {interactableCharacters.map((char) => (
+            <button
+              key={char.id}
+              onClick={() => {
+                const isSelected = clue.revealedBy.includes(char.id);
+                onUpdate({
+                  revealedBy: isSelected
+                    ? clue.revealedBy.filter((id) => id !== char.id)
+                    : [...clue.revealedBy, char.id],
+                });
+              }}
+              className={`
+                px-3 py-1 rounded-lg text-sm transition-all
+                ${clue.revealedBy.includes(char.id)
+                  ? 'bg-violet-500/20 text-violet-400 border border-violet-500'
+                  : 'bg-slate-700 text-slate-400 border border-slate-600 hover:border-slate-500'
+                }
+              `}
+            >
+              {char.name}
+            </button>
+          ))}
+          <button
+            onClick={onDelete}
+            className="ml-auto px-3 py-1 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all"
+          >
+            Delete
+          </button>
         </div>
-
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="text-sm text-slate-400 hover:text-white"
-        >
-          {isExpanded ? 'Hide Details' : 'Show Details'}
-        </button>
-
-        <button
-          onClick={onDelete}
-          className="ml-auto text-sm text-slate-500 hover:text-red-400"
-        >
-          Delete
-        </button>
       </div>
-
-      {/* Expanded Details */}
-      {isExpanded && (
-        <div className="pt-3 border-t border-slate-700">
-          {/* Revealed By */}
-          <div>
-            <label className="block text-xs text-slate-400 mb-2">Revealed By:</label>
-            <div className="flex flex-wrap gap-2">
-              {interactableCharacters.map((char) => (
-                <button
-                  key={char.id}
-                  onClick={() => {
-                    const isSelected = clue.revealedBy.includes(char.id);
-                    onUpdate({
-                      revealedBy: isSelected
-                        ? clue.revealedBy.filter((id) => id !== char.id)
-                        : [...clue.revealedBy, char.id],
-                    });
-                  }}
-                  className={`
-                    px-3 py-1 rounded-lg text-sm transition-all
-                    ${clue.revealedBy.includes(char.id)
-                      ? 'bg-violet-500/20 text-violet-400 border border-violet-500'
-                      : 'bg-slate-700 text-slate-400 border border-slate-600 hover:border-slate-500'
-                    }
-                  `}
-                >
-                  {char.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

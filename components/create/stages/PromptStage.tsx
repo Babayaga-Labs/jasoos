@@ -78,11 +78,6 @@ export function PromptStage() {
           </button>
         </div>
 
-        {/* Helper text */}
-        <p className="text-center text-sm text-slate-500">
-          We&apos;ll generate a title, synopsis, setting, and suggested characters based on your idea.
-          You can edit everything on the next page.
-        </p>
       </div>
     </div>
   );
