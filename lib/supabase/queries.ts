@@ -3,6 +3,7 @@ import type {
   UGCGeneratedCharacter,
   UGCGeneratedClue,
   UGCSolution,
+  CaseFile,
 } from '@/packages/ai/types/ugc-types';
 
 // ============================================================================
@@ -28,6 +29,7 @@ export interface StoryRow {
     perfectScoreThreshold: number;
   };
   scene_image_url: string | null;
+  case_file: CaseFile | null;
   is_published: boolean;
   created_at: string;
 }

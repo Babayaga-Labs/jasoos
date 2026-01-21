@@ -27,12 +27,10 @@ export async function POST(request: NextRequest) {
     // Filter out victims - they can't be interrogated (they're dead/missing)
     const interactableCharacters = allCharacters.filter((c) => !c.isVictim);
 
-    // Process characters - ensure they have statement field (top-level, player-facing)
+    // Process characters - ALWAYS derive statement from alibi to strip revealing info
     const processedCharacters = interactableCharacters.map((c) => {
-      // If character doesn't have a top-level statement, generate one
-      if (!c.statement) {
-        c.statement = generateFallbackStatement(c);
-      }
+      // Always regenerate statement from alibi to ensure no revealing text
+      c.statement = deriveStatementFromAlibi(c.name, c.knowledge?.alibi || '');
       return c;
     });
 
@@ -49,6 +47,7 @@ export async function POST(request: NextRequest) {
       timeline: storyRow.timeline,
       solution: storyRow.solution,
       scoring: storyRow.scoring,
+      caseFile: storyRow.case_file,
     };
 
     return NextResponse.json({
@@ -75,32 +74,52 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Generate a fallback statement for characters without one
- * Creates a third-person case-file style summary
+ * Derive a third-person statement from a character's alibi
+ * Strips any text that reveals whether the alibi is true or false
  */
-function generateFallbackStatement(character: any): string {
-  const rawAlibi = character.knowledge?.alibi || '';
-  const name = character.name || 'This person';
-
-  // Clean up the alibi - remove meta annotations
-  let cleanAlibi = rawAlibi
-    .replace(/\s*\(false\)\s*/gi, '')
-    .replace(/\s*\(true\)\s*/gi, '')
-    .trim();
-
-  // If empty or too messy, create a generic one
-  if (!cleanAlibi || cleanAlibi.length < 5) {
+function deriveStatementFromAlibi(name: string, alibi: string): string {
+  if (!alibi || alibi.length < 5) {
     return `${name} was present during the incident. No detailed statement provided.`;
   }
 
-  // If already starts with "Claims" or similar, clean it up
+  // Clean up internal annotations - remove anything that reveals alibi validity
+  let cleanAlibi = alibi
+    // Remove parenthetical annotations
+    .replace(/\s*\(false\)\s*/gi, '')
+    .replace(/\s*\(true\)\s*/gi, '')
+    .replace(/\s*\(verified\)\s*/gi, '')
+    .replace(/\s*\(unverified\)\s*/gi, '')
+    // Remove "FALSE" / "TRUE" markers at end
+    .replace(/\s*[-–—]\s*(FALSE|TRUE)\s*$/i, '')
+    .replace(/\s+(FALSE|TRUE)\s*$/i, '')
+    // Remove sentences/clauses that reveal alibi validity
+    .replace(/,?\s*but\s+(this\s+is|it\s+is|was)\s+(disproved|proven false|contradicted|refuted)[^.]*\.?/gi, '.')
+    .replace(/,?\s*[-–—]\s*(this\s+)?(alibi\s+)?(is\s+)?(false|unverified|a lie|contradicted)[^.]*\.?/gi, '.')
+    .replace(/,?\s*[-–—]\s*her alibi is false\.?/gi, '.')
+    .replace(/,?\s*[-–—]\s*his alibi is false\.?/gi, '.')
+    .replace(/,?\s*which\s+(is|was)\s+(later\s+)?(disproved|proven false|contradicted)[^.]*\.?/gi, '.')
+    .replace(/;\s*(however|but),?\s+(this\s+)?(is|was)\s+(disproved|false|a lie)[^.]*\.?/gi, '.')
+    // Remove phrases indicating verification status at end
+    .replace(/\s*[-–—]\s*verified by[^.]*\.?$/gi, '')
+    .replace(/\s*[-–—]\s*confirmed by[^.]*\.?$/gi, '')
+    .replace(/\s*[-–—]\s*corroborated by[^.]*\.?$/gi, '')
+    // Clean up any trailing punctuation issues
+    .replace(/\.\s*\./g, '.')
+    .replace(/,\s*\./g, '.')
+    .replace(/\s+\./g, '.')
+    .trim();
+
+  // Remove trailing period if the alibi ends awkwardly after cleanup
+  cleanAlibi = cleanAlibi.replace(/[,;]\s*$/, '').trim();
+
+  // If already third-person style
   if (/^claims?\s/i.test(cleanAlibi)) {
     return cleanAlibi.charAt(0).toUpperCase() + cleanAlibi.slice(1);
   }
 
-  // If it's first person, convert to third person
+  // Convert first-person to third-person
   if (/^i (was|am|have|had|went|saw|heard)/i.test(cleanAlibi)) {
-    cleanAlibi = cleanAlibi
+    return cleanAlibi
       .replace(/^i was/i, `Claims to have been`)
       .replace(/^i am/i, `Says they are`)
       .replace(/^i have/i, `Says they have`)
@@ -108,9 +127,8 @@ function generateFallbackStatement(character: any): string {
       .replace(/^i went/i, `Says they went`)
       .replace(/^i saw/i, `Claims to have seen`)
       .replace(/^i heard/i, `Claims to have heard`);
-    return cleanAlibi;
   }
 
-  // Otherwise wrap it as a claim
-  return `Claims: "${cleanAlibi}"`;
+  // Wrap as a claim
+  return `"${cleanAlibi}"`;
 }

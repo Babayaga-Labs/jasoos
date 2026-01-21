@@ -2,18 +2,25 @@
 
 import Image from 'next/image';
 import { CharacterCard } from './CharacterCard';
+import { CaseFile } from './CaseFile';
 import { Timer } from './Timer';
 import { useGameStore, Character } from '@/lib/store';
+import type { CaseFile as CaseFileType } from '@/packages/ai/types/ugc-types';
 
 interface GameSceneProps {
   sceneImage?: string;
   characters: Character[];
   storyId: string;
   premise?: string;
+  caseFile?: CaseFileType | null;
+  setting?: {
+    location: string;
+    timePeriod?: string;
+  };
 }
 
-export function GameScene({ sceneImage, characters, storyId, premise }: GameSceneProps) {
-  const { selectedCharacter, selectCharacter, openAccusation, chatHistories, isTimeUp } = useGameStore();
+export function GameScene({ sceneImage, characters, storyId, premise, caseFile, setting }: GameSceneProps) {
+  const { selectedCharacter, selectCharacter, openAccusation, chatHistories } = useGameStore();
 
   return (
     <div className="relative w-full min-h-screen bg-slate-900">
@@ -44,13 +51,15 @@ export function GameScene({ sceneImage, characters, storyId, premise }: GameScen
 
         {/* Main content */}
         <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-6">
-          {/* Premise */}
-          {premise && (
+          {/* Case File (newspaper style) or fallback to premise */}
+          {caseFile && setting ? (
+            <CaseFile caseFile={caseFile} setting={setting} />
+          ) : premise ? (
             <div className="mb-6 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
               <h2 className="text-amber-400 font-semibold mb-2">The Case</h2>
               <p className="text-slate-300">{premise}</p>
             </div>
-          )}
+          ) : null}
 
           {/* Section header */}
           <h2 className="text-lg font-semibold text-slate-300 mb-4">
@@ -77,15 +86,9 @@ export function GameScene({ sceneImage, characters, storyId, premise }: GameScen
           <div className="max-w-4xl mx-auto px-4 py-4">
             <button
               onClick={openAccusation}
-              className={`
-                w-full py-3 px-6 rounded-lg font-semibold text-lg transition-all
-                ${isTimeUp
-                  ? 'bg-red-600 hover:bg-red-500 text-white animate-pulse'
-                  : 'bg-amber-600 hover:bg-amber-500 text-white'
-                }
-              `}
+              className="w-full py-3 px-6 rounded-lg font-semibold text-lg transition-all bg-amber-600 hover:bg-amber-500 text-white"
             >
-              {isTimeUp ? 'Time\'s Up! Make Your Accusation' : 'Make Accusation'}
+              Make Accusation
             </button>
           </div>
         </footer>

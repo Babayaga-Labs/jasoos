@@ -18,6 +18,7 @@ import type { AIConfig } from './config';
 import { generateText, LLMClient } from './llm-client';
 import { ImageClient } from './image-client';
 import { CharacterKnowledgeSchema, type CharacterKnowledgeResponse } from './schemas/character-knowledge';
+import { CaseFileSchema, type CaseFileResponse } from './schemas/case-file';
 import type {
   UGCFormInput,
   UGCGeneratedData,
@@ -43,6 +44,7 @@ import type {
   UGCSolution,
   FleshOutProgressEvent,
   RegenerateTimelineRequest,
+  CaseFile,
 } from './types/ugc-types';
 
 // ============================================================================
@@ -166,11 +168,35 @@ export function deriveStatementFromAlibi(name: string, alibi: string): string {
     return `${name} was present during the incident. No detailed statement provided.`;
   }
 
-  // Clean up internal annotations
+  // Clean up internal annotations - remove anything that reveals alibi validity
   let cleanAlibi = alibi
+    // Remove parenthetical annotations
     .replace(/\s*\(false\)\s*/gi, '')
     .replace(/\s*\(true\)\s*/gi, '')
+    .replace(/\s*\(verified\)\s*/gi, '')
+    .replace(/\s*\(unverified\)\s*/gi, '')
+    // Remove "FALSE" / "TRUE" markers at end
+    .replace(/\s*[-–—]\s*(FALSE|TRUE)\s*$/i, '')
+    .replace(/\s+(FALSE|TRUE)\s*$/i, '')
+    // Remove sentences/clauses that reveal alibi validity
+    .replace(/,?\s*but\s+(this\s+is|it\s+is|was)\s+(disproved|proven false|contradicted|refuted)[^.]*\.?/gi, '.')
+    .replace(/,?\s*[-–—]\s*(this\s+)?(alibi\s+)?(is\s+)?(false|unverified|a lie|contradicted)[^.]*\.?/gi, '.')
+    .replace(/,?\s*[-–—]\s*her alibi is false\.?/gi, '.')
+    .replace(/,?\s*[-–—]\s*his alibi is false\.?/gi, '.')
+    .replace(/,?\s*which\s+(is|was)\s+(later\s+)?(disproved|proven false|contradicted)[^.]*\.?/gi, '.')
+    .replace(/;\s*(however|but),?\s+(this\s+)?(is|was)\s+(disproved|false|a lie)[^.]*\.?/gi, '.')
+    // Remove phrases indicating verification status at end
+    .replace(/\s*[-–—]\s*verified by[^.]*\.?$/gi, '')
+    .replace(/\s*[-–—]\s*confirmed by[^.]*\.?$/gi, '')
+    .replace(/\s*[-–—]\s*corroborated by[^.]*\.?$/gi, '')
+    // Clean up any trailing punctuation issues
+    .replace(/\.\s*\./g, '.')
+    .replace(/,\s*\./g, '.')
+    .replace(/\s+\./g, '.')
     .trim();
+
+  // Remove trailing period if the alibi ends awkwardly after cleanup
+  cleanAlibi = cleanAlibi.replace(/[,;]\s*$/, '').trim();
 
   // If already third-person style
   if (/^claims?\s/i.test(cleanAlibi)) {
@@ -449,7 +475,7 @@ For EACH character, generate enhanced details. The output must be a JSON array w
     "knowledge": {
       "knowsAboutCrime": "What this character witnessed, heard, or knows about the crime based on the timeline",
       "knowsAboutOthers": ["What they know about other characters that could be revealed in interrogation"],
-      "alibi": "INTERNAL: Where they claim to have been (can include notes like 'false' for guilty character)"
+      "alibi": "ONLY what they claim - e.g. 'I was in the library reading'. Do NOT include whether it's true/false. Append (FALSE) for guilty, (TRUE) for innocents as a tag only."
     },
     "secrets": [
       {
@@ -885,7 +911,7 @@ Generate a JSON array:
     "characterId": "tempId from above",
     "knowsAboutCrime": "What they directly witnessed or know about the crime from the timeline",
     "knowsAboutOthers": ["Specific info about other characters they could reveal"],
-    "alibi": "Their claimed whereabouts during the crime (based on timeline)",
+    "alibi": "ONLY their claim - e.g. 'I was in the garden'. Append (FALSE) for guilty, (TRUE) for innocent as tag only.",
     "behaviorUnderPressure": {
       "defensive": "How they deflect based on personality and secret",
       "whenCaughtLying": "Reaction based on personality",
@@ -1730,7 +1756,7 @@ Generate a JSON array of characters with this structure for EACH character:
     "knowledge": {
       "knowsAboutCrime": "What they witnessed or know",
       "knowsAboutOthers": ["Secret about character X", "Observation about Y"],
-      "alibi": "Where they claim to have been"
+      "alibi": "ONLY their claim - e.g. 'I was in the garden'. Append (FALSE) or (TRUE) as tag only."
     },
     "secrets": [
       {
@@ -2106,7 +2132,8 @@ Respond with ONLY the JSON array.`;
       name: char.name || '',
       role: char.role || '',
       age: char.age || 30,
-      isGuilty: char.isGuilty || false,
+      // Explicitly set isGuilty based on culprit ID - don't rely on LLM
+      isGuilty: char.id === culprit.characterId || char.tempId === culprit.characterId,
       isVictim: char.isVictim || false,
       personality: char.personality || { traits: [], speechStyle: '', quirks: [] },
       appearance: char.appearance || { description: '', imagePrompt: '' },
@@ -2426,7 +2453,7 @@ Generate a JSON object with a "characters" array containing each character's kno
       "characterId": "char_xxx",
       "knowsAboutCrime": "What they directly witnessed or know about the crime",
       "knowsAboutOthers": ["Info they have about other characters from timeline"],
-      "alibi": "Where they claim to have been (FALSE for culprit, TRUE for innocents)"
+      "alibi": "ONLY what they claim - e.g. 'I was in the kitchen'. Do NOT describe if alibi is true/false. Append (FALSE) or (TRUE) as a tag only."
     }
   ]
 }
@@ -2579,5 +2606,90 @@ Respond with ONLY the JSON array.`;
 
       throw new Error('Could not parse JSON from LLM response');
     }
+  }
+
+  /**
+   * Generate case file from completed story data
+   * This is a post-processing step that creates the newspaper-style case file
+   * shown to players at game start
+   *
+   * @param timeline - Array of timestamped events
+   * @param clues - Generated clues for the mystery
+   * @param characters - All characters including victim
+   * @param solution - The crime solution details
+   * @param setting - Story setting information
+   */
+  async generateCaseFile(
+    timeline: string[],
+    clues: UGCGeneratedClue[],
+    characters: UGCGeneratedCharacter[],
+    solution: UGCSolution,
+    setting: { location: string; timePeriod: string; atmosphere?: string }
+  ): Promise<CaseFile> {
+    // Find the victim character
+    const victim = characters.find(c => c.isVictim);
+    const victimName = victim?.name || 'Unknown Victim';
+
+    // Build clue descriptions for the prompt (so LLM knows what NOT to reveal)
+    const clueDescriptions = clues.map(c => `- ${c.description}`).join('\n');
+
+    const prompt = `Generate a case file for a mystery game. This is what the player sees when starting the investigation.
+
+SETTING:
+- Location: ${setting.location}
+- Time Period: ${setting.timePeriod}
+${setting.atmosphere ? `- Atmosphere: ${setting.atmosphere}` : ''}
+
+VICTIM: ${victimName}
+${victim ? `- Role: ${victim.role}` : ''}
+${victim ? `- Age: ${victim.age}` : ''}
+
+SOLUTION (DO NOT REVEAL TO PLAYER):
+- Culprit: ${solution.culprit}
+- Method: ${solution.method}
+- Motive: ${solution.motive}
+
+TIMELINE OF EVENTS:
+${timeline.join('\n')}
+
+CLUES THAT PLAYER MUST DISCOVER (DO NOT INCLUDE DIRECTLY):
+${clueDescriptions}
+
+Generate a case file with these fields:
+
+1. victimName: Full name with age (e.g., "Jason Miller, 17")
+2. victimDescription: Brief description of who they were - their role, reputation, or notable qualities (1 sentence)
+3. causeOfDeath: What a first responder would observe - physical observations only, NOT forensic conclusions (e.g., "Multiple stab wounds" not "Stabbed with a kitchen knife by the butler")
+4. lastSeen: When and where the victim was last seen alive, based on timeline
+5. locationFound: Where the body was discovered
+6. discoveredBy: Who found the body and their relationship to the victim
+7. timeOfDiscovery: When the body was found
+8. timeOfDeath: Estimated range based on timeline (e.g., "Between 2:00 PM - 5:00 PM")
+9. initialEvidence: 2-3 items that are:
+   - Scene observations (broken objects, open doors/windows, positions of items)
+   - Victim state observations (clothing, position, visible injuries)
+   - OPTIONAL: Atmospheric hints that point TOWARD investigating certain areas but do NOT reveal the clues directly
+
+CRITICAL RULES FOR initialEvidence:
+- NEVER include evidence that directly reveals the culprit
+- NEVER include evidence that directly reveals the motive
+- NEVER copy clues verbatim - these must be discoverable through interrogation
+- DO include scene details that make the player curious
+- DO include victim state that hints at manner of death
+- Atmospheric hints should create intrigue, not solve the case
+
+Example good evidence: "A broken window latch on the east side", "Victim's hands showed signs of struggle", "An untouched dinner plate on the desk"
+Example BAD evidence: "Poison residue in the victim's glass" (reveals method), "A love letter from the gardener" (reveals suspect)`;
+
+    this.tracePrompt('generate-case-file', prompt);
+
+    const llmClient = new LLMClient(this.config.llm);
+    const response = await llmClient.generateJSON<CaseFileResponse>(prompt, {
+      schema: CaseFileSchema,
+      maxTokens: 1500,
+      temperature: 0.7,
+    });
+
+    return response;
   }
 }

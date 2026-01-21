@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { CaseFile } from '@/packages/ai/types/ugc-types';
 
 // Types
 export interface ChatMessage {
@@ -26,6 +27,8 @@ export interface Story {
   };
   /** URL to scene image in Supabase Storage */
   sceneImageUrl?: string;
+  /** Structured case file data for newspaper-style display */
+  caseFile?: CaseFile | null;
 }
 
 export interface Character {
@@ -58,9 +61,8 @@ export interface GameState {
   chatHistories: Record<string, ChatMessage[]>;  // characterId -> messages
 
   // Timer
-  timeRemaining: number;  // seconds remaining
+  timeElapsed: number;  // seconds elapsed since start
   timerStarted: boolean;
-  isTimeUp: boolean;
 
   // UI state
   selectedCharacter: string | null;
@@ -90,17 +92,14 @@ export interface GameState {
   resetGame: () => void;
 }
 
-const GAME_DURATION_SECONDS = 10 * 60; // 10 minutes
-
 export const useGameStore = create<GameState>((set, get) => ({
   // Initial state
   storyFolderId: null,
   story: null,
   characters: [],
   chatHistories: {},
-  timeRemaining: GAME_DURATION_SECONDS,
+  timeElapsed: 0,
   timerStarted: false,
-  isTimeUp: false,
   selectedCharacter: null,
   isAccusationOpen: false,
   isResultsOpen: false,
@@ -126,9 +125,8 @@ export const useGameStore = create<GameState>((set, get) => ({
         story: data.story,
         characters: data.characters,
         chatHistories: {},
-        timeRemaining: GAME_DURATION_SECONDS,
+        timeElapsed: 0,
         timerStarted: false,
-        isTimeUp: false,
         gameStatus: 'playing',
         isLoading: false,
       });
@@ -180,35 +178,24 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   tickTimer: () => {
-    const { timeRemaining, gameStatus } = get();
+    const { gameStatus } = get();
     if (gameStatus !== 'playing') return;
 
-    const newTime = Math.max(0, timeRemaining - 1);
-    const isTimeUp = newTime === 0;
-
     set({
-      timeRemaining: newTime,
-      isTimeUp,
-      // Auto-open accusation when time runs out
-      isAccusationOpen: isTimeUp ? true : get().isAccusationOpen,
+      timeElapsed: get().timeElapsed + 1,
     });
   },
 
   openAccusation: () => set({ isAccusationOpen: true }),
   closeAccusation: () => {
-    // Can't close if time is up - must make accusation
-    const { isTimeUp } = get();
-    if (!isTimeUp) {
-      set({ isAccusationOpen: false });
-    }
+    set({ isAccusationOpen: false });
   },
 
   submitAccusation: async (characterId: string, reasoning: string) => {
     set({ isLoading: true });
 
-    // Calculate time taken (600 seconds - remaining time)
-    const GAME_DURATION = 10 * 60;
-    const timeTaken = GAME_DURATION - get().timeRemaining;
+    // Time taken is the elapsed time
+    const timeTaken = get().timeElapsed;
 
     try {
       const response = await fetch('/api/game/accuse', {
@@ -247,9 +234,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       story: null,
       characters: [],
       chatHistories: {},
-      timeRemaining: GAME_DURATION_SECONDS,
+      timeElapsed: 0,
       timerStarted: false,
-      isTimeUp: false,
       selectedCharacter: null,
       isAccusationOpen: false,
       isResultsOpen: false,

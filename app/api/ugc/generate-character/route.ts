@@ -84,7 +84,7 @@ Generate a JSON object with this structure:
   "knowledge": {
     "knowsAboutCrime": "What this character might witness or know (placeholder until crime is defined)",
     "knowsAboutOthers": ["What they know about other characters"],
-    "alibi": "Their general whereabouts during the evening (to be refined)"
+    "alibi": "ONLY their claim - e.g. 'I was in the garden'. Do NOT include true/false analysis."
   },
   "secrets": [
     {

@@ -12,12 +12,15 @@ interface AccusationModalProps {
 
 export function AccusationModal({ characters, storyId }: AccusationModalProps) {
   const [selectedSuspect, setSelectedSuspect] = useState<string | null>(null);
-  const [reasoning, setReasoning] = useState('');
+  const [motive, setMotive] = useState('');
+  const [method, setMethod] = useState('');
 
-  const { isAccusationOpen, closeAccusation, submitAccusation, isLoading, isTimeUp } = useGameStore();
+  const { isAccusationOpen, closeAccusation, submitAccusation, isLoading } = useGameStore();
 
   const handleSubmit = async () => {
-    if (!selectedSuspect || !reasoning.trim()) return;
+    if (!selectedSuspect || !motive.trim() || !method.trim()) return;
+    // Combine motive and method into reasoning for the LLM judge
+    const reasoning = `MOTIVE: ${motive.trim()}\n\nMETHOD: ${method.trim()}`;
     await submitAccusation(selectedSuspect, reasoning);
   };
 
@@ -27,19 +30,11 @@ export function AccusationModal({ characters, storyId }: AccusationModalProps) {
     <Modal isOpen={true} onClose={closeAccusation} size="lg">
       <div className="p-6">
         <h2 className="text-2xl font-bold text-amber-400 mb-2">
-          {isTimeUp ? "Time's Up! Make Your Final Accusation" : 'Make Your Accusation'}
+          Make Your Accusation
         </h2>
         <p className="text-slate-400 mb-6">
           Choose who you believe committed the crime and explain your reasoning.
         </p>
-
-        {isTimeUp && (
-          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-6">
-            <p className="text-red-400 text-sm">
-              Time has run out! You must make your accusation now.
-            </p>
-          </div>
-        )}
 
         {/* Suspect selection */}
         <div className="mb-6">
@@ -73,30 +68,42 @@ export function AccusationModal({ characters, storyId }: AccusationModalProps) {
           </div>
         </div>
 
-        {/* Reasoning */}
-        <div className="mb-6">
+        {/* Motive */}
+        <div className="mb-4">
           <label className="block text-sm font-medium text-slate-300 mb-2">
-            Your reasoning
+            Why did they commit the crime?
           </label>
           <textarea
-            value={reasoning}
-            onChange={(e) => setReasoning(e.target.value)}
-            placeholder="Explain why you believe this person is guilty. What did you learn from your interviews?"
-            rows={4}
+            value={motive}
+            onChange={(e) => setMotive(e.target.value)}
+            placeholder="What was their motive? What drove them to do this?"
+            rows={3}
+            className="w-full bg-slate-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
+          />
+        </div>
+
+        {/* Method */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-slate-300 mb-2">
+            How did they do it?
+          </label>
+          <textarea
+            value={method}
+            onChange={(e) => setMethod(e.target.value)}
+            placeholder="How did they commit the crime? What was their method?"
+            rows={3}
             className="w-full bg-slate-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
           />
         </div>
 
         {/* Actions */}
         <div className="flex gap-3 justify-end">
-          {!isTimeUp && (
-            <button onClick={closeAccusation} className="btn btn-secondary">
-              Cancel
-            </button>
-          )}
+          <button onClick={closeAccusation} className="btn btn-secondary">
+            Cancel
+          </button>
           <button
             onClick={handleSubmit}
-            disabled={!selectedSuspect || !reasoning.trim() || isLoading}
+            disabled={!selectedSuspect || !motive.trim() || !method.trim() || isLoading}
             className="btn btn-danger disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? 'Submitting...' : 'Submit Accusation'}

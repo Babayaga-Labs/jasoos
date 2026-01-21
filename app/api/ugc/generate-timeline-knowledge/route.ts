@@ -64,10 +64,20 @@ export async function POST(request: NextRequest) {
       clues
     );
 
+    // Step 3: Generate case file (newspaper-style victim/crime info)
+    const caseFile = await ugcEngine.generateCaseFile(
+      timeline,
+      clues,
+      charactersWithKnowledge,
+      solution,
+      foundation.setting
+    );
+
     return Response.json({
       success: true,
       timeline,
       characters: charactersWithKnowledge,
+      caseFile,
     });
 
   } catch (error) {

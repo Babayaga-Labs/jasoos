@@ -186,7 +186,7 @@ Generate a JSON array of characters with this structure for EACH character:
     "knowledge": {
       "knowsAboutCrime": "What they witnessed or know",
       "knowsAboutOthers": ["Secret about character X", "Observation about Y"],
-      "alibi": "Where they claim to have been"
+      "alibi": "ONLY their claim - e.g. 'I was in the garden'. Append (FALSE) or (TRUE) as tag only."
     },
     "secrets": [
       {

@@ -51,6 +51,8 @@ export default function GamePage() {
         characters={characters}
         storyId={storyId}
         premise={story.premise}
+        caseFile={story.caseFile}
+        setting={story.setting}
       />
 
       {/* Chat modal */}

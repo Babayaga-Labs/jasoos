@@ -161,6 +161,22 @@ export async function POST(request: NextRequest) {
           clues
         );
 
+        // Generate case file (newspaper-style victim/crime info)
+        sendEvent({
+          type: 'progress',
+          step: 'regeneration',
+          message: 'Generating case file...',
+          progress: 26,
+        });
+
+        const caseFile = await ugcEngine.generateCaseFile(
+          regeneratedTimeline,
+          clues,
+          updatedCharacters,
+          solution,
+          foundation.setting
+        );
+
         // Use the regenerated data for saving
         const finalTimeline = regeneratedTimeline;
         const finalCharacters = updatedCharacters;
@@ -260,6 +276,7 @@ export async function POST(request: NextRequest) {
           solution,
           scoring,
           scene_image_url: finalSceneImageUrl,
+          case_file: caseFile,
           is_published: true,
         });
 

@@ -246,7 +246,7 @@ export function FoundationStage() {
           className={`
             py-4 px-8 rounded-xl font-semibold text-lg transition-all duration-300
             ${canProceedFromFoundation && !state.charactersGenerating
-              ? 'bg-gradient-to-r from-amber-500 via-violet-500 to-pink-500 text-white shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 hover:scale-[1.02]'
+              ? 'bg-violet-500 text-white shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 hover:scale-[1.02]'
               : 'bg-slate-700 text-slate-500 cursor-not-allowed'
             }
           `}

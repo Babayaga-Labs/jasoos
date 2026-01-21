@@ -284,6 +284,31 @@ export interface UGCSolution {
 }
 
 /**
+ * Case file data - structured victim/crime info shown to player at game start
+ * Displayed as a newspaper clipping in the UI
+ */
+export interface CaseFile {
+  /** Victim's name and brief identifier (e.g., "Jason Miller, 17") */
+  victimName: string;
+  /** Brief description of who the victim was (e.g., "Junior at Riverside High, star quarterback") */
+  victimDescription: string;
+  /** Observable cause of death - NOT forensic conclusions (e.g., "Multiple stab wounds to the chest") */
+  causeOfDeath: string;
+  /** When/where victim was last seen alive (e.g., "7:00 AM, leaving home for football practice") */
+  lastSeen: string;
+  /** Where the body was discovered (e.g., "Basketball locker room, Riverside High gym") */
+  locationFound: string;
+  /** Who discovered the body (e.g., "Chuck Reynolds, classmate") */
+  discoveredBy: string;
+  /** When the body was found (e.g., "6:00 PM") */
+  timeOfDiscovery: string;
+  /** Estimated time of death range (e.g., "Between 2:00 PM - 5:00 PM") */
+  timeOfDeath: string;
+  /** 2-3 initial evidence items - scene observations and victim state, NOT clue spoilers */
+  initialEvidence: string[];
+}
+
+/**
  * Response from /api/ugc/flesh-out
  */
 export interface FleshOutResponse {

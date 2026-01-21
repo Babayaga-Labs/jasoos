@@ -138,7 +138,7 @@ function WizardLayoutInner({ children }: WizardLayoutProps) {
               <span className="font-medium">Back to Home</span>
             </Link>
 
-            <h1 className="text-xl font-bold bg-gradient-to-r from-amber-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold text-violet-400">
               Create Your Mystery
             </h1>
 

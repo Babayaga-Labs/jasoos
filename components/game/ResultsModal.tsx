@@ -1,11 +1,57 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Modal } from '@/components/ui/Modal';
 import { useGameStore } from '@/lib/store';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 export function ResultsModal() {
-  const { isResultsOpen, accusationResult, resetGame } = useGameStore();
+  const { isResultsOpen, accusationResult, resetGame, storyFolderId } = useGameStore();
+  const { user } = useAuth();
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'existing' | 'error'>('idle');
+
+  // Save result when modal opens
+  useEffect(() => {
+    if (!isResultsOpen || !accusationResult || !user || !storyFolderId) return;
+    if (saveStatus !== 'idle') return;
+
+    const saveResult = async () => {
+      setSaveStatus('saving');
+      try {
+        const response = await fetch('/api/game/save-result', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            storyId: storyFolderId,
+            score: accusationResult.score,
+            timeTaken: accusationResult.timeTaken,
+            reasoningScore: accusationResult.reasoningScore,
+            isCorrect: accusationResult.isCorrect,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setSaveStatus(data.saved ? 'saved' : 'existing');
+        } else {
+          setSaveStatus('error');
+        }
+      } catch (error) {
+        console.error('Failed to save result:', error);
+        setSaveStatus('error');
+      }
+    };
+
+    saveResult();
+  }, [isResultsOpen, accusationResult, user, storyFolderId, saveStatus]);
+
+  // Reset save status when modal closes
+  useEffect(() => {
+    if (!isResultsOpen) {
+      setSaveStatus('idle');
+    }
+  }, [isResultsOpen]);
 
   if (!isResultsOpen || !accusationResult) return null;
 
@@ -68,7 +114,7 @@ export function ResultsModal() {
         </div>
 
         {/* Score breakdown */}
-        <div className="text-left bg-slate-700/30 rounded-lg p-4 mb-6">
+        <div className="text-left bg-slate-700/30 rounded-lg p-4 mb-4">
           <h3 className="text-sm font-medium text-slate-400 mb-3">Score Breakdown</h3>
           <div className="space-y-2">
             <div className="flex justify-between">
@@ -87,6 +133,24 @@ export function ResultsModal() {
             </div>
           </div>
         </div>
+
+        {/* Leaderboard save status */}
+        {user && (
+          <div className="text-sm mb-6">
+            {saveStatus === 'saving' && (
+              <span className="text-slate-400">Saving to leaderboard...</span>
+            )}
+            {saveStatus === 'saved' && (
+              <span className="text-green-400">New best score saved to leaderboard!</span>
+            )}
+            {saveStatus === 'existing' && (
+              <span className="text-slate-400">Your previous best score is higher</span>
+            )}
+            {saveStatus === 'error' && (
+              <span className="text-red-400">Could not save to leaderboard</span>
+            )}
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex gap-3 justify-center">
