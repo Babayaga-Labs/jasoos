@@ -104,6 +104,67 @@ export async function getPublishedStories(): Promise<StoryRow[]> {
   return data || [];
 }
 
+export interface StoryWithStars extends StoryRow {
+  starCount: number;
+}
+
+/**
+ * Get all published stories with star counts, sorted by stars
+ */
+export async function getPublishedStoriesWithStars(): Promise<StoryWithStars[]> {
+  const supabase = createServiceClient();
+
+  // Fetch stories
+  const { data: stories, error: storiesError } = await supabase
+    .from('stories')
+    .select('*')
+    .eq('is_published', true);
+
+  if (storiesError) {
+    console.error('Failed to fetch published stories:', storiesError);
+    return [];
+  }
+
+  if (!stories || stories.length === 0) {
+    return [];
+  }
+
+  // Fetch star counts for all stories
+  const storyIds = stories.map((s) => s.id);
+  const { data: starCounts, error: starsError } = await supabase
+    .from('mystery_stars')
+    .select('story_id')
+    .in('story_id', storyIds);
+
+  if (starsError) {
+    console.error('Failed to fetch star counts:', starsError);
+    // Return stories without star counts
+    return stories.map((s) => ({ ...s, starCount: 0 }));
+  }
+
+  // Count stars per story
+  const starCountMap = new Map<string, number>();
+  (starCounts || []).forEach((row) => {
+    const current = starCountMap.get(row.story_id) || 0;
+    starCountMap.set(row.story_id, current + 1);
+  });
+
+  // Combine and sort by star count (descending), then by created_at (descending)
+  const storiesWithStars: StoryWithStars[] = stories.map((story) => ({
+    ...story,
+    starCount: starCountMap.get(story.id) || 0,
+  }));
+
+  storiesWithStars.sort((a, b) => {
+    if (b.starCount !== a.starCount) {
+      return b.starCount - a.starCount;
+    }
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+
+  return storiesWithStars;
+}
+
 /**
  * Get a story by ID
  */

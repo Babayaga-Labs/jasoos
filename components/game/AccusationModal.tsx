@@ -29,7 +29,7 @@ export function AccusationModal({ characters, storyId }: AccusationModalProps) {
   return (
     <Modal isOpen={true} onClose={closeAccusation} size="lg">
       <div className="p-6">
-        <h2 className="text-2xl font-bold text-amber-400 mb-2">
+        <h2 className="text-2xl font-bold text-rose-400 mb-2">
           Make Your Accusation
         </h2>
         <p className="text-slate-400 mb-6">
@@ -49,7 +49,7 @@ export function AccusationModal({ characters, storyId }: AccusationModalProps) {
                 className={`
                   p-3 rounded-lg border-2 transition-all
                   ${selectedSuspect === character.id
-                    ? 'border-amber-500 bg-amber-500/10'
+                    ? 'border-rose-500 bg-rose-500/10'
                     : 'border-slate-600 hover:border-slate-500 bg-slate-700/50'}
                 `}
               >
@@ -78,7 +78,7 @@ export function AccusationModal({ characters, storyId }: AccusationModalProps) {
             onChange={(e) => setMotive(e.target.value)}
             placeholder="What was their motive? What drove them to do this?"
             rows={3}
-            className="w-full bg-slate-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
+            className="w-full bg-slate-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-rose-500 resize-none"
           />
         </div>
 
@@ -92,7 +92,7 @@ export function AccusationModal({ characters, storyId }: AccusationModalProps) {
             onChange={(e) => setMethod(e.target.value)}
             placeholder="How did they commit the crime? What was their method?"
             rows={3}
-            className="w-full bg-slate-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
+            className="w-full bg-slate-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-rose-500 resize-none"
           />
         </div>
 

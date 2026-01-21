@@ -76,7 +76,7 @@ export function ChatModal({ character, storyId, onClose }: ChatModalProps) {
     <Modal isOpen={true} onClose={onClose} size="lg">
       {/* Header */}
       <div className="flex items-center gap-4 p-4 border-b border-slate-700">
-        <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-amber-500">
+        <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-slate-500">
           <Image
             src={imageUrl}
             alt={character.name}
@@ -137,7 +137,7 @@ export function ChatModal({ character, storyId, onClose }: ChatModalProps) {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask a question..."
             disabled={isStreaming}
-            className="flex-1 bg-slate-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-50"
+            className="flex-1 bg-slate-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-500 disabled:opacity-50"
           />
           <button
             type="submit"
@@ -170,7 +170,7 @@ function MessageBubble({
       {/* Avatar */}
       <div
         className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-sm ${
-          isUser ? 'bg-amber-500 text-slate-900' : 'bg-slate-700 text-slate-300'
+          isUser ? 'bg-slate-500 text-slate-900' : 'bg-slate-700 text-slate-300'
         }`}
       >
         {isUser ? '🔍' : characterName[0]}

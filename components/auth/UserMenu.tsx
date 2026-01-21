@@ -69,10 +69,10 @@ export function UserMenu() {
           <img
             src={avatarUrl}
             alt={name}
-            className="w-10 h-10 rounded-full border-2 border-amber-400"
+            className="w-10 h-10 rounded-full border-2 border-rose-400"
           />
         ) : (
-          <div className="w-10 h-10 rounded-full bg-amber-400 flex items-center justify-center text-slate-900 font-bold">
+          <div className="w-10 h-10 rounded-full bg-rose-400 flex items-center justify-center text-slate-900 font-bold">
             {name?.charAt(0).toUpperCase()}
           </div>
         )}

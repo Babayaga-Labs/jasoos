@@ -56,7 +56,7 @@ export function GameScene({ sceneImage, characters, storyId, premise, caseFile, 
             <CaseFile caseFile={caseFile} setting={setting} />
           ) : premise ? (
             <div className="mb-6 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
-              <h2 className="text-amber-400 font-semibold mb-2">The Case</h2>
+              <h2 className="text-rose-400 font-semibold mb-2">The Case</h2>
               <p className="text-slate-300">{premise}</p>
             </div>
           ) : null}
@@ -86,7 +86,7 @@ export function GameScene({ sceneImage, characters, storyId, premise, caseFile, 
           <div className="max-w-4xl mx-auto px-4 py-4">
             <button
               onClick={openAccusation}
-              className="w-full py-3 px-6 rounded-lg font-semibold text-lg transition-all bg-amber-600 hover:bg-amber-500 text-white"
+              className="w-full py-3 px-6 rounded-lg font-semibold text-lg transition-all bg-rose-500 hover:bg-rose-400 text-white"
             >
               Make Accusation
             </button>

@@ -23,7 +23,7 @@ export function CreateMysteryCard() {
         {/* Gradient background with sparkles */}
         <div className="relative h-48 bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900 overflow-hidden flex items-center justify-center rounded-t-lg">
           {/* Sparkle icons */}
-          <div className="text-amber-400 text-5xl flex gap-1">
+          <div className="text-purple-400 text-5xl flex gap-1">
             <span className="text-3xl opacity-80">✦</span>
             <span className="text-4xl">✦</span>
             <span className="text-3xl opacity-80">✦</span>

@@ -7,7 +7,7 @@ import { Header } from '@/components/layout/Header';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Jhakaas Jasoos',
+  title: 'Murder Verse',
   description: 'AI-powered detective game - interrogate suspects to solve mysteries',
 };
 

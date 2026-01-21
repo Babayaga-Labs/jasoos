@@ -64,7 +64,7 @@ export function ResultsModal() {
 
   // Determine score rating
   const getScoreRating = (score: number) => {
-    if (score >= 90) return { label: 'Master Detective', color: 'text-amber-400' };
+    if (score >= 90) return { label: 'Master Detective', color: 'text-rose-400' };
     if (score >= 70) return { label: 'Senior Detective', color: 'text-green-400' };
     if (score >= 50) return { label: 'Junior Detective', color: 'text-blue-400' };
     if (score >= 30) return { label: 'Rookie', color: 'text-slate-400' };
@@ -93,7 +93,7 @@ export function ResultsModal() {
 
         {/* Score display */}
         <div className="bg-slate-800 rounded-xl p-6 mb-6">
-          <div className="text-6xl font-bold text-amber-400 mb-2">
+          <div className="text-6xl font-bold text-rose-400 mb-2">
             {score}
           </div>
           <div className={`text-lg font-semibold ${rating.color}`}>
@@ -125,11 +125,11 @@ export function ResultsModal() {
             </div>
             <div className="flex justify-between">
               <span className="text-slate-300">Reasoning Quality</span>
-              <span className="text-amber-400">+{Math.round((reasoningScore / 100) * 40)}</span>
+              <span className="text-rose-400">+{Math.round((reasoningScore / 100) * 40)}</span>
             </div>
             <div className="border-t border-slate-600 pt-2 flex justify-between font-semibold">
               <span className="text-white">Total</span>
-              <span className="text-amber-400">{score}/100</span>
+              <span className="text-rose-400">{score}/100</span>
             </div>
           </div>
         </div>

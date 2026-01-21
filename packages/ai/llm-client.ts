@@ -65,7 +65,7 @@ export class LLMClient {
       baseURL: config.baseUrl,
       defaultHeaders: config.provider === 'openrouter' ? {
         'HTTP-Referer': process.env.OPENROUTER_REFERER || 'https://localhost:3000',
-        'X-Title': process.env.OPENROUTER_TITLE || 'Jhakaas Jasoos',
+        'X-Title': process.env.OPENROUTER_TITLE || 'Murder Verse',
       } : undefined,
     });
   }

@@ -20,7 +20,7 @@ export function CharacterCard({ character, storyId, isSelected, hasMessages, onC
       className={`
         bg-slate-800/90 rounded-lg border-2 transition-all duration-200
         ${isSelected
-          ? 'border-amber-500 shadow-lg shadow-amber-500/20'
+          ? 'border-rose-500 shadow-lg shadow-rose-500/20'
           : 'border-slate-600 hover:border-slate-500'
         }
       `}
@@ -66,7 +66,7 @@ export function CharacterCard({ character, storyId, isSelected, hasMessages, onC
           className={`
             w-full py-2 px-4 rounded-lg font-medium transition-colors
             ${isSelected
-              ? 'bg-amber-600 hover:bg-amber-500 text-white'
+              ? 'bg-rose-600 hover:bg-rose-500 text-white'
               : 'bg-slate-700 hover:bg-slate-600 text-slate-200'
             }
           `}

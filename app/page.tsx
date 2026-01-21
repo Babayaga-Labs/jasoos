@@ -1,6 +1,9 @@
 import { ScenarioCard } from '@/components/home/ScenarioCard';
 import { CreateMysteryCard } from '@/components/home/CreateMysteryCard';
-import { getPublishedStories } from '@/lib/supabase/queries';
+import { getPublishedStoriesWithStars } from '@/lib/supabase/queries';
+
+// Disable caching to always show fresh star counts
+export const dynamic = 'force-dynamic';
 
 interface Story {
   id: string;
@@ -9,10 +12,15 @@ interface Story {
   estimatedMinutes: number;
   premise: string;
   sceneImage?: string;
+  starCount: number;
+  setting?: {
+    location: string;
+    timePeriod?: string;
+  };
 }
 
 async function getStories(): Promise<Story[]> {
-  const storyRows = await getPublishedStories();
+  const storyRows = await getPublishedStoriesWithStars();
 
   return storyRows.map((row) => ({
     id: row.id,
@@ -21,6 +29,8 @@ async function getStories(): Promise<Story[]> {
     estimatedMinutes: 30, // Default estimate
     premise: row.synopsis,
     sceneImage: row.scene_image_url || undefined,
+    starCount: row.starCount,
+    setting: row.setting,
   }));
 }
 
@@ -33,7 +43,7 @@ export default async function HomePage() {
       <div className="relative py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-5xl md:text-6xl font-bold mb-4">
-            <span className="text-amber-400">Jhakaas</span> Jasoos
+            <span className="text-red-600">Open Cases</span>
           </h1>
           <p className="text-xl text-slate-400 mb-2">
             AI-Powered Detective Game
@@ -61,6 +71,8 @@ export default async function HomePage() {
               estimatedMinutes={story.estimatedMinutes}
               premise={story.premise}
               sceneImage={story.sceneImage}
+              starCount={story.starCount}
+              setting={story.setting}
             />
           ))}
         </div>

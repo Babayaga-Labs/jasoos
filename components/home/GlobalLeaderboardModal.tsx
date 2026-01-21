@@ -4,26 +4,24 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Modal } from '@/components/ui/Modal';
 
-interface LeaderboardEntry {
+interface GlobalLeaderboardEntry {
   rank: number;
   userId: string;
   displayName: string;
   avatarUrl: string | null;
-  score: number;
-  timeTaken: number;
+  totalPoints: number;
+  mysteriesSolved: number;
   isCurrentUser: boolean;
 }
 
-interface LeaderboardModalProps {
+interface GlobalLeaderboardModalProps {
   isOpen: boolean;
   onClose: () => void;
-  storyId: string;
-  storyTitle: string;
 }
 
-export function LeaderboardModal({ isOpen, onClose, storyId, storyTitle }: LeaderboardModalProps) {
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [currentUserEntry, setCurrentUserEntry] = useState<LeaderboardEntry | null>(null);
+export function GlobalLeaderboardModal({ isOpen, onClose }: GlobalLeaderboardModalProps) {
+  const [leaderboard, setLeaderboard] = useState<GlobalLeaderboardEntry[]>([]);
+  const [currentUserEntry, setCurrentUserEntry] = useState<GlobalLeaderboardEntry | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,7 +33,7 @@ export function LeaderboardModal({ isOpen, onClose, storyId, storyTitle }: Leade
       setError(null);
 
       try {
-        const response = await fetch(`/api/leaderboard/${storyId}`);
+        const response = await fetch('/api/leaderboard/global');
         if (!response.ok) throw new Error('Failed to fetch');
 
         const data = await response.json();
@@ -50,13 +48,7 @@ export function LeaderboardModal({ isOpen, onClose, storyId, storyTitle }: Leade
     };
 
     fetchLeaderboard();
-  }, [isOpen, storyId]);
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+  }, [isOpen]);
 
   const getRankDisplay = (rank: number) => {
     if (rank === 1) return '1st';
@@ -65,11 +57,15 @@ export function LeaderboardModal({ isOpen, onClose, storyId, storyTitle }: Leade
     return `#${rank}`;
   };
 
+  const formatPoints = (points: number) => {
+    return points.toLocaleString();
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="md">
       <div className="p-6">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-2xl font-bold text-white">Leaderboard</h2>
+          <h2 className="text-2xl font-bold text-white">Global Leaderboard</h2>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors p-1"
@@ -85,7 +81,7 @@ export function LeaderboardModal({ isOpen, onClose, storyId, storyTitle }: Leade
           </button>
         </div>
 
-        <p className="text-slate-400 text-sm mb-6">{storyTitle}</p>
+        <p className="text-slate-400 text-sm mb-6">Top detectives across all mysteries</p>
 
         {isLoading && (
           <div className="text-center py-12 text-slate-400">Loading leaderboard...</div>
@@ -95,7 +91,7 @@ export function LeaderboardModal({ isOpen, onClose, storyId, storyTitle }: Leade
 
         {!isLoading && !error && leaderboard.length === 0 && (
           <div className="text-center py-12 text-slate-400">
-            No scores yet. Be the first to solve this mystery!
+            No scores yet. Be the first to solve a mystery!
           </div>
         )}
 
@@ -105,8 +101,8 @@ export function LeaderboardModal({ isOpen, onClose, storyId, storyTitle }: Leade
             <div className="grid grid-cols-12 gap-2 px-3 py-2 text-xs text-slate-500 uppercase tracking-wide">
               <div className="col-span-2">Rank</div>
               <div className="col-span-5">Detective</div>
-              <div className="col-span-3 text-right">Score</div>
-              <div className="col-span-2 text-right">Time</div>
+              <div className="col-span-3 text-right">Points</div>
+              <div className="col-span-2 text-right">Cases</div>
             </div>
 
             {/* Entries */}
@@ -124,11 +120,11 @@ export function LeaderboardModal({ isOpen, onClose, storyId, storyTitle }: Leade
                     <span
                       className={`font-bold ${
                         entry.rank === 1
-                          ? 'text-rose-400'
+                          ? 'text-amber-400'
                           : entry.rank === 2
                             ? 'text-slate-300'
                             : entry.rank === 3
-                              ? 'text-rose-600'
+                              ? 'text-amber-600'
                               : 'text-slate-400'
                       }`}
                     >
@@ -157,11 +153,10 @@ export function LeaderboardModal({ isOpen, onClose, storyId, storyTitle }: Leade
                     </span>
                   </div>
                   <div className="col-span-3 text-right flex items-center justify-end">
-                    <span className="text-rose-400 font-bold">{entry.score}</span>
-                    <span className="text-slate-500 text-sm ml-1">/100</span>
+                    <span className="text-rose-400 font-bold">{formatPoints(entry.totalPoints)}</span>
                   </div>
-                  <div className="col-span-2 text-right text-slate-300 flex items-center justify-end font-mono text-sm">
-                    {formatTime(entry.timeTaken)}
+                  <div className="col-span-2 text-right text-slate-300 flex items-center justify-end">
+                    {entry.mysteriesSolved}
                   </div>
                 </div>
               ))}
@@ -195,11 +190,10 @@ export function LeaderboardModal({ isOpen, onClose, storyId, storyTitle }: Leade
                       </span>
                     </div>
                     <div className="col-span-3 text-right flex items-center justify-end">
-                      <span className="text-rose-400 font-bold">{currentUserEntry.score}</span>
-                      <span className="text-slate-500 text-sm ml-1">/100</span>
+                      <span className="text-rose-400 font-bold">{formatPoints(currentUserEntry.totalPoints)}</span>
                     </div>
-                    <div className="col-span-2 text-right text-slate-300 flex items-center justify-end font-mono text-sm">
-                      {formatTime(currentUserEntry.timeTaken)}
+                    <div className="col-span-2 text-right text-slate-300 flex items-center justify-end">
+                      {currentUserEntry.mysteriesSolved}
                     </div>
                   </div>
                 </>
