@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { signInWithGoogle } from '@/lib/supabase/auth';
+import { signInWithGoogle, getSiteOrigin } from '@/lib/supabase/auth';
 
 export function CreateMysteryCard() {
   const router = useRouter();
@@ -12,7 +12,7 @@ export function CreateMysteryCard() {
     if (user) {
       router.push('/create');
     } else {
-      const callbackUrl = `${window.location.origin}/auth/callback?next=/create`;
+      const callbackUrl = `${getSiteOrigin()}/auth/callback?next=/create`;
       await signInWithGoogle(callbackUrl);
     }
   };

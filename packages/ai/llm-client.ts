@@ -64,7 +64,7 @@ export class LLMClient {
       apiKey: config.apiKey,
       baseURL: config.baseUrl,
       defaultHeaders: config.provider === 'openrouter' ? {
-        'HTTP-Referer': process.env.OPENROUTER_REFERER || 'https://localhost:3000',
+        'HTTP-Referer': process.env.OPENROUTER_REFERER || process.env.NEXT_PUBLIC_SITE_URL || 'https://localhost:3000',
         'X-Title': process.env.OPENROUTER_TITLE || 'Murder Verse',
       } : undefined,
     });

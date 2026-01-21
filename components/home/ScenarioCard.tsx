@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { signInWithGoogle } from '@/lib/supabase/auth';
+import { signInWithGoogle, getSiteOrigin } from '@/lib/supabase/auth';
 import { MysteryDetailsModal } from './MysteryDetailsModal';
 
 interface ScenarioCardProps {
@@ -42,7 +42,7 @@ export function ScenarioCard({
     if (user) {
       router.push(`/game/${id}`);
     } else {
-      const callbackUrl = `${window.location.origin}/auth/callback?next=/game/${id}`;
+      const callbackUrl = `${getSiteOrigin()}/auth/callback?next=/game/${id}`;
       await signInWithGoogle(callbackUrl);
     }
   };

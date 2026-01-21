@@ -2,11 +2,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
+function getOrigin(request: NextRequest): string {
+  // Use NEXT_PUBLIC_SITE_URL if set (recommended for production)
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL;
+  }
+
+  // Try to get origin from forwarded headers (for reverse proxies)
+  const forwardedHost = request.headers.get('x-forwarded-host');
+  const forwardedProto = request.headers.get('x-forwarded-proto') || 'https';
+  if (forwardedHost) {
+    return `${forwardedProto}://${forwardedHost}`;
+  }
+
+  // Fallback to request URL origin
+  return new URL(request.url).origin;
+}
+
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   const next = requestUrl.searchParams.get('next') || '/';
-  const origin = requestUrl.origin;
+  const origin = getOrigin(request);
 
   if (code) {
     const cookieStore = await cookies();
