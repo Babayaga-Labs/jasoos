@@ -20,7 +20,6 @@ export function getSiteOrigin(): string {
 export async function signInWithGoogle(redirectTo?: string) {
   const supabase = createClient();
   const origin = getSiteOrigin();
-
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {

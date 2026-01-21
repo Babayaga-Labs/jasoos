@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { signInWithGoogle } from '@/lib/supabase/auth';
+import { getSiteOrigin } from '@/lib/supabase/auth';
 
 interface LoginButtonProps {
   className?: string;
@@ -13,7 +14,8 @@ export function LoginButton({ className = '' }: LoginButtonProps) {
   const handleSignIn = async () => {
     try {
       setIsLoading(true);
-      await signInWithGoogle();
+      const callbackUrl = `${getSiteOrigin()}`;
+      await signInWithGoogle(callbackUrl);
     } catch (error) {
       console.error('Failed to sign in:', error);
       setIsLoading(false);

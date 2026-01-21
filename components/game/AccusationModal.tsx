@@ -28,7 +28,7 @@ export function AccusationModal({ characters, storyId }: AccusationModalProps) {
 
   return (
     <Modal isOpen={true} onClose={closeAccusation} size="lg">
-      <div className="p-6">
+      <div className="p-6 overflow-y-auto max-h-[calc(90vh-2rem)]">
         <h2 className="text-2xl font-bold text-rose-400 mb-2">
           Make Your Accusation
         </h2>

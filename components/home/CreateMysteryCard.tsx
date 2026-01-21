@@ -12,6 +12,7 @@ export function CreateMysteryCard() {
     if (user) {
       router.push('/create');
     } else {
+      console.log('getSiteOrigin(): ', getSiteOrigin());
       const callbackUrl = `${getSiteOrigin()}/auth/callback?next=/create`;
       await signInWithGoogle(callbackUrl);
     }

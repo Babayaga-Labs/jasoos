@@ -42,6 +42,7 @@ export function ScenarioCard({
     if (user) {
       router.push(`/game/${id}`);
     } else {
+      console.log('getSiteOrigin(): ', getSiteOrigin());
       const callbackUrl = `${getSiteOrigin()}/auth/callback?next=/game/${id}`;
       await signInWithGoogle(callbackUrl);
     }
