@@ -350,7 +350,6 @@ export function CluesStage() {
       </div>
 
       {/* Review & Publish Modal */}
-      {console.log('[CluesStage] Modal render check:', { showPublishModal, modalStep, hasFoundation: !!foundation })}
       {showPublishModal && (
         <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-slate-900 rounded-2xl max-w-4xl w-full shadow-2xl border border-slate-800 overflow-hidden max-h-[90vh] flex flex-col">
