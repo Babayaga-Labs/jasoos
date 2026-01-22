@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useWizard } from '../wizard/WizardContext';
+import { Modal } from '@/components/ui/Modal';
 import type { UGCGeneratedClue, UGCGeneratedCharacter } from '@/packages/ai/types/ugc-types';
 
 interface ValidationWarning {
@@ -314,22 +315,21 @@ export function CluesStage() {
       </div>
 
       {/* Review & Publish Modal */}
-      {showPublishModal && (
-        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-900 rounded-2xl max-w-4xl w-full shadow-2xl border border-slate-800 overflow-hidden max-h-[90vh] flex flex-col">
-            {/* Modal Header - Only show for non-preview steps */}
-            {modalStep !== 'preview' && (
-              <div className="p-6 border-b border-slate-700 shrink-0">
-                <h3 className="text-xl font-bold text-white">
-                  {modalStep === 'publishing' ? 'Publishing...' :
-                   modalStep === 'validating' ? 'Deep Check...' :
-                   'Deep Check Results'}
-                </h3>
-              </div>
-            )}
+      <Modal isOpen={showPublishModal} onClose={() => setShowPublishModal(false)} size="lg">
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-2rem)]">
+          {/* Modal Header - Only show for non-preview steps */}
+          {modalStep !== 'preview' && (
+            <div className="p-6 border-b border-slate-700">
+              <h3 className="text-xl font-bold text-white">
+                {modalStep === 'publishing' ? 'Publishing...' :
+                 modalStep === 'validating' ? 'Deep Check...' :
+                 'Deep Check Results'}
+              </h3>
+            </div>
+          )}
 
-            {/* Modal Content */}
-            <div className="overflow-y-auto flex-1">
+          {/* Modal Content */}
+          <div>
               {/* Polished Preview Step */}
               {modalStep === 'preview' && foundation && (
                 <div className="relative">
@@ -539,7 +539,7 @@ export function CluesStage() {
                       </div>
 
                       {/* Warning List */}
-                      <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                      <div className="space-y-2">
                         {validationWarnings.map((warning, i) => (
                           <div
                             key={i}
@@ -587,69 +587,68 @@ export function CluesStage() {
 
             </div>
 
-            {/* Modal Footer */}
-            <div className="p-6 border-t border-slate-700 flex gap-3 justify-end shrink-0">
-              {modalStep === 'preview' && (
-                <>
-                  <button
-                    onClick={() => setShowPublishModal(false)}
-                    className="px-6 py-2 text-slate-400 hover:text-white transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleRunDeepCheck}
-                    className="px-6 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition-all border border-slate-600"
-                  >
-                    Sanity Check
-                  </button>
-                  <button
-                    onClick={handleConfirmPublish}
-                    className="px-6 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-all"
-                  >
-                    Publish
-                  </button>
-                </>
-              )}
-
-              {modalStep === 'validating' && (
+          {/* Modal Footer */}
+          <div className="p-6 border-t border-slate-700 flex gap-3 justify-end">
+            {modalStep === 'preview' && (
+              <>
                 <button
-                  disabled
-                  className="px-6 py-2 bg-slate-700 text-slate-500 rounded-lg cursor-not-allowed"
+                  onClick={() => setShowPublishModal(false)}
+                  className="px-6 py-2 text-slate-400 hover:text-white transition-colors"
                 >
-                  Checking...
+                  Cancel
                 </button>
-              )}
-
-              {modalStep === 'warnings' && (
-                <>
-                  <button
-                    onClick={() => setShowPublishModal(false)}
-                    className="px-6 py-2 text-slate-400 hover:text-white transition-colors"
-                  >
-                    Go Back & Fix
-                  </button>
-                  <button
-                    onClick={handleConfirmPublish}
-                    className="px-6 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-all"
-                  >
-                    {validationWarnings.length > 0 ? 'Publish Anyway' : 'Publish Now'}
-                  </button>
-                </>
-              )}
-
-              {modalStep === 'publishing' && (
                 <button
-                  disabled
-                  className="px-6 py-2 bg-slate-700 text-slate-500 rounded-lg cursor-not-allowed"
+                  onClick={handleRunDeepCheck}
+                  className="px-6 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition-all border border-slate-600"
                 >
-                  Publishing...
+                  Sanity Check
                 </button>
-              )}
-            </div>
+                <button
+                  onClick={handleConfirmPublish}
+                  className="px-6 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-all"
+                >
+                  Publish
+                </button>
+              </>
+            )}
+
+            {modalStep === 'validating' && (
+              <button
+                disabled
+                className="px-6 py-2 bg-slate-700 text-slate-500 rounded-lg cursor-not-allowed"
+              >
+                Checking...
+              </button>
+            )}
+
+            {modalStep === 'warnings' && (
+              <>
+                <button
+                  onClick={() => setShowPublishModal(false)}
+                  className="px-6 py-2 text-slate-400 hover:text-white transition-colors"
+                >
+                  Go Back & Fix
+                </button>
+                <button
+                  onClick={handleConfirmPublish}
+                  className="px-6 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-all"
+                >
+                  {validationWarnings.length > 0 ? 'Publish Anyway' : 'Publish Now'}
+                </button>
+              </>
+            )}
+
+            {modalStep === 'publishing' && (
+              <button
+                disabled
+                className="px-6 py-2 bg-slate-700 text-slate-500 rounded-lg cursor-not-allowed"
+              >
+                Publishing...
+              </button>
+            )}
           </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

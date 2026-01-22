@@ -571,7 +571,7 @@ ${story.actualEvents.join('\n')}
 CHARACTERS AND THEIR KNOWLEDGE:
 ${JSON.stringify(characterInfo, null, 2)}
 
-Create 8-12 plot points (clues) that form a solvable mystery. Generate a JSON object:
+Create 4-5 plot points (clues) that form a solvable mystery. Generate a JSON object:
 
 {
   "plotPoints": [
@@ -835,7 +835,7 @@ CRITICAL TIMELINE RULES:
    - Moments where they OBSERVE something relevant (even unknowingly)
 
 5. STRUCTURE:
-   - 8-12 timestamped events
+   - 6-8 timestamped events
    - Events BEFORE the crime (setup, tensions, movements)
    - The CRIME itself (culprit's opportunity window)
    - Events AFTER (discovery, reactions)
@@ -1038,7 +1038,7 @@ SOLUTION:
 CHARACTERS AND WHAT THEY KNOW:
 ${JSON.stringify(characterInfo, null, 2)}
 
-Create 8-12 plot points (clues) that form a solvable mystery.
+Create 4-5 plot points (clues) that form a solvable mystery.
 
 {
   "plotPoints": [
@@ -1802,7 +1802,7 @@ Solution: ${story.solution.culprit} did it because ${story.solution.motive}
 
 CHARACTERS: ${characterNames}
 
-Create 8-12 plot points that the player can discover through interrogation. Include:
+Create 4-5 plot points that the player can discover through interrogation. Include:
 - Critical evidence pointing to the culprit
 - Motive clues
 - Alibi inconsistencies
@@ -2176,7 +2176,7 @@ Generate a JSON object:
 {
   "timeline": [
     "TIME - Event description showing what happened",
-    "Include 8-12 timestamped events",
+    "Include 6-8 timestamped events",
     "Show movements of all characters",
     "Include the crime itself",
     "End with discovery"
@@ -2240,7 +2240,7 @@ ${timeline.join('\n')}
 CHARACTERS WHO CAN BE INTERROGATED:
 ${interactableCharacters.map(c => `- ${c.id}: ${c.name} (${c.role})`).join('\n')}
 
-Create 8-12 clues that form a solvable mystery. Generate a JSON object:
+Create 4-5 clues that form a solvable mystery. Generate a JSON object:
 {
   "clues": [
     {
@@ -2331,7 +2331,7 @@ SOLUTION TO PROVE:
 CHARACTERS AND THEIR SECRETS:
 ${characterInfoSection}
 
-Generate 8-12 clues that would allow a detective to solve this mystery.
+Generate 4-5 clues that would allow a detective to solve this mystery.
 
 CLUE REQUIREMENTS BY CATEGORY:
 1. MOTIVE CLUES (2+ required) - Why the culprit did it
@@ -2420,10 +2420,14 @@ Respond with ONLY the JSON object.`;
     solution: UGCSolution,
     clues: UGCGeneratedClue[] = []
   ): Promise<UGCGeneratedCharacter[]> {
+    // Limit characters and clues to reduce prompt size
+    const limitedCharacters = characters.slice(0, 5);
+    const limitedClues = clues.slice(0, 5);
+
     // Build clue alignment section only if clues are provided
-    const clueAlignmentSection = clues.length > 0 ? `
+    const clueAlignmentSection = limitedClues.length > 0 ? `
 CLUES AND WHO REVEALS THEM:
-${clues.map(clue => `- "${clue.description}" → Revealed by: ${clue.revealedBy.join(', ')}`).join('\n')}
+${limitedClues.map(clue => `- "${clue.description}" → Revealed by: ${clue.revealedBy.join(', ')}`).join('\n')}
 
 CRITICAL - CLUE ALIGNMENT:
 6. For each clue, look at who reveals it (revealedBy)
@@ -2444,7 +2448,7 @@ SOLUTION:
 - Motive: ${solution.motive}
 
 CHARACTERS:
-${characters.map(c => `- ${c.id}: ${c.name} (${c.role}) - Guilty: ${c.isGuilty}`).join('\n')}
+${limitedCharacters.map(c => `- ${c.id}: ${c.name} (${c.role}) - Guilty: ${c.isGuilty}`).join('\n')}
 ${clueAlignmentSection}
 Generate a JSON object with a "characters" array containing each character's knowledge:
 {
@@ -2537,8 +2541,11 @@ RULES:
   async regenerateTimelineFromClues(request: RegenerateTimelineRequest): Promise<string[]> {
     const { clues, characters, solution, setting } = request;
 
-    // Filter out victims
-    const interactableCharacters = characters.filter(c => !c.isVictim);
+    // Filter out victims and limit to 5 characters
+    const interactableCharacters = characters.filter(c => !c.isVictim).slice(0, 5);
+
+    // Limit clues to 5
+    const limitedClues = clues.slice(0, 5);
 
     const prompt = `You are regenerating a mystery timeline to be coherent with the edited clues.
 
@@ -2555,7 +2562,7 @@ CHARACTERS:
 ${interactableCharacters.map(c => `- ${c.name} (${c.role})`).join('\n')}
 
 CLUES THAT MUST BE SUPPORTED BY TIMELINE:
-${clues.map(c => `- "${c.description}" (revealed by: ${c.revealedBy.map(id => {
+${limitedClues.map(c => `- "${c.description}" (revealed by: ${c.revealedBy.map(id => {
   const char = characters.find(ch => ch.id === id);
   return char?.name || id;
 }).join(', ')})`).join('\n')}
@@ -2566,46 +2573,114 @@ Generate a NEW timeline that:
 3. Provides alibis for innocent characters
 4. Makes the clues logically discoverable through interrogation
 
-Output a JSON array of 8-12 timestamped events:
-["TIME - Event description", ...]
+Output a JSON array of 6-8 timestamped events. Keep each event description BRIEF (1-2 sentences max):
+["TIME - Brief event description", ...]
 
-Respond with ONLY the JSON array.`;
+IMPORTANT: Respond with ONLY the valid JSON array. No markdown, no explanation.`;
 
     this.tracePrompt('regenerate-timeline-from-clues', prompt);
 
     const { text } = await generateText({
       config: this.config.llm,
       prompt,
-      maxTokens: 2000,
+      maxTokens: 4000,
       temperature: 0.7,
     });
 
-    return this.parseJSONResponse(text);
+    const parsed = this.parseJSONResponse(text);
+
+    // Handle case where LLM returns { timeline: [...] } instead of [...]
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && Array.isArray(parsed.timeline)) {
+      return parsed.timeline;
+    }
+
+    // Ensure we always return an array
+    if (!Array.isArray(parsed)) {
+      console.error('regenerateTimelineFromClues: Expected array, got:', typeof parsed);
+      throw new Error('Timeline generation returned invalid format');
+    }
+
+    return parsed;
   }
 
   /**
    * Parse JSON from LLM response, handling common formatting issues
    */
   private parseJSONResponse(text: string): any {
-    // Try direct parse first
-    try {
-      return JSON.parse(text);
-    } catch {
-      // Try to extract JSON from markdown code blocks
-      const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[1].trim());
+    const sanitizeJSON = (str: string): string => {
+      // Remove trailing commas before ] or }
+      return str
+        .replace(/,(\s*[}\]])/g, '$1')
+        // Fix unescaped newlines in strings (common LLM issue)
+        .replace(/(?<!\\)\n(?=(?:[^"]*"[^"]*")*[^"]*"[^"]*$)/g, '\\n');
+    };
+
+    const tryParse = (str: string): any => {
+      try {
+        return JSON.parse(str);
+      } catch {
+        // Try sanitized version
+        try {
+          return JSON.parse(sanitizeJSON(str));
+        } catch {
+          return null;
+        }
       }
+    };
 
-      // Try to find JSON object/array
-      const objectMatch = text.match(/\{[\s\S]*\}/);
-      const arrayMatch = text.match(/\[[\s\S]*\]/);
+    // Try direct parse first
+    const directResult = tryParse(text);
+    if (directResult !== null) return directResult;
 
-      if (objectMatch) return JSON.parse(objectMatch[0]);
-      if (arrayMatch) return JSON.parse(arrayMatch[0]);
-
-      throw new Error('Could not parse JSON from LLM response');
+    // Try to extract JSON from markdown code blocks
+    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+      const result = tryParse(jsonMatch[1].trim());
+      if (result !== null) return result;
     }
+
+    // Try to find JSON object/array - be more careful with matching
+    // Use a greedy match to get the largest possible JSON structure
+    const objectMatch = text.match(/\{[\s\S]*\}/);
+    if (objectMatch) {
+      const result = tryParse(objectMatch[0]);
+      if (result !== null) return result;
+    }
+
+    const arrayMatch = text.match(/\[[\s\S]*\]/);
+    if (arrayMatch) {
+      const result = tryParse(arrayMatch[0]);
+      if (result !== null) return result;
+    }
+
+    // Handle truncated arrays (LLM response cut off before closing bracket)
+    const trimmedText = text.trim();
+    if (trimmedText.startsWith('[') && !trimmedText.includes(']')) {
+      console.warn('Detected truncated JSON array, attempting repair...');
+
+      // Strategy: find all complete "string", patterns and take up to the last one
+      // A complete element ends with ", (handles escaped quotes inside strings)
+      const matches = [...trimmedText.matchAll(/"(?:[^"\\]|\\.)*",/g)];
+
+      if (matches.length > 0) {
+        const lastMatch = matches[matches.length - 1];
+        const cutoffIndex = lastMatch.index! + lastMatch[0].length - 1; // Position of the comma
+        // Take everything up to (but not including) the trailing comma, then close
+        const repaired = trimmedText.substring(0, cutoffIndex) + ']';
+        console.warn('Repair attempt, last match:', lastMatch[0].substring(0, 50));
+        const result = tryParse(repaired);
+        if (result !== null) {
+          console.warn('Successfully repaired truncated array with', result.length, 'elements');
+          return result;
+        } else {
+          console.warn('Repair failed, repaired string starts with:', repaired.substring(0, 100));
+        }
+      }
+    }
+
+    // Log the problematic response for debugging
+    console.error('Failed to parse JSON from LLM response. First 500 chars:', text.substring(0, 500));
+    throw new Error('Could not parse JSON from LLM response');
   }
 
   /**

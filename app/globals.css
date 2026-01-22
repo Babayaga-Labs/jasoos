@@ -45,7 +45,7 @@
   .modal-content {
     @apply fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2;
     @apply bg-slate-800 rounded-xl border border-slate-700 z-50;
-    @apply max-h-[90vh] overflow-hidden flex flex-col;
+    @apply max-h-[90vh] overflow-auto flex flex-col;
   }
 
   /* Chat styling - consistent slate theme */

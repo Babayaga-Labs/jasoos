@@ -75,7 +75,7 @@ export function ResultsModal() {
 
   return (
     <Modal isOpen={true} onClose={() => {}} size="md">
-      <div className="p-6 text-center">
+      <div className="p-6 text-center overflow-y-auto max-h-[calc(90vh-2rem)]">
         {/* Result banner */}
         <div className={`text-6xl mb-4 ${isCorrect ? 'animate-bounce' : ''}`}>
           {isCorrect ? '🎉' : '❌'}
