@@ -111,13 +111,11 @@ export async function POST(request: NextRequest) {
           progress: 10,
         });
 
-        const validationResult = validateFoundationStory({
+        const validationResult = await validateFoundationStory({
           clues,
           characters,
           timeline,
           solution,
-          minimumPointsToAccuse: scoring.minimumPointsToAccuse,
-          perfectScoreThreshold: scoring.perfectScoreThreshold,
         });
 
         // Send validation warnings (but don't block)

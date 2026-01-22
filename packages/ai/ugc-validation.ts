@@ -11,9 +11,9 @@ import type {
   UGCGeneratedClue,
   UGCSolution,
 } from './types/ugc-types';
+import type { LLMConfig } from './config';
 import { LLMClient } from './llm-client';
 import { LLMValidationSchema, type LLMValidationResponse, type ValidationCategory, type ValidationSeverity } from './schemas/validation-schema';
-import { config } from './config';
 
 /**
  * Helper to safely get alibi as a string (LLM might return object)
@@ -129,7 +129,10 @@ export function validateStructure(input: FoundationValidationInput): ValidationW
 /**
  * LLM-based validation - deep semantic analysis for logical flaws
  */
-export async function validateWithLLM(input: FoundationValidationInput): Promise<ValidationWarning[]> {
+export async function validateWithLLM(
+  input: FoundationValidationInput,
+  llmConfig: LLMConfig
+): Promise<ValidationWarning[]> {
   const { clues, characters, timeline, solution } = input;
 
   // Find the culprit
@@ -201,7 +204,7 @@ SEVERITY GUIDE:
 Be constructive - provide specific, actionable suggestions.`;
 
   try {
-    const llmClient = new LLMClient(config.llm);
+    const llmClient = new LLMClient(llmConfig);
     const response = await llmClient.generateJSON<LLMValidationResponse>(prompt, {
       schema: LLMValidationSchema,
       maxTokens: 2000,
@@ -226,19 +229,20 @@ Be constructive - provide specific, actionable suggestions.`;
  * Master validation for foundation-based flow
  * @param input - Story data to validate
  * @param options.deepCheck - If true, runs LLM-based semantic validation
+ * @param options.llmConfig - Required if deepCheck is true
  */
 export async function validateFoundationStory(
   input: FoundationValidationInput,
-  options: { deepCheck?: boolean } = {}
+  options: { deepCheck?: boolean; llmConfig?: LLMConfig } = {}
 ): Promise<ValidationResult> {
   const warnings: ValidationWarning[] = [];
 
   // 1. Quick structural checks (sync, no LLM) - always run
   warnings.push(...validateStructure(input));
 
-  // 2. LLM-based semantic validation - only if deepCheck requested
-  if (options.deepCheck) {
-    const llmWarnings = await validateWithLLM(input);
+  // 2. LLM-based semantic validation - only if deepCheck requested and config provided
+  if (options.deepCheck && options.llmConfig) {
+    const llmWarnings = await validateWithLLM(input, options.llmConfig);
     warnings.push(...llmWarnings);
   }
 

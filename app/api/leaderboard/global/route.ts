@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 
+export const dynamic = 'force-dynamic';
+
 interface GlobalLeaderboardEntry {
   rank: number;
   userId: string;

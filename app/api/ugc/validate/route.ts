@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { validateFoundationStory, MIN_CHARACTERS } from '@/packages/ai';
+import { validateFoundationStory, loadAIConfig, MIN_CHARACTERS } from '@/packages/ai';
 import type {
   UGCGeneratedCharacter,
   UGCGeneratedClue,
@@ -35,6 +35,9 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: 'Solution is required' }, { status: 400 });
     }
 
+    // Load AI config if deep check is requested
+    const aiConfig = body.deepCheck ? loadAIConfig() : undefined;
+
     // Run validation (async now due to optional LLM check)
     const validationResult = await validateFoundationStory(
       {
@@ -43,7 +46,10 @@ export async function POST(request: NextRequest) {
         timeline: body.timeline || [],
         solution: body.solution,
       },
-      { deepCheck: body.deepCheck }
+      {
+        deepCheck: body.deepCheck,
+        llmConfig: aiConfig?.llm,
+      }
     );
 
     return Response.json({
