@@ -130,7 +130,7 @@ type WizardAction =
   // Timeline/Knowledge generation (Clues → Publish transition)
   | { type: 'START_TIMELINE_KNOWLEDGE_GEN' }
   | { type: 'UPDATE_TIMELINE_KNOWLEDGE_PROGRESS'; step: string; progress: number }
-  | { type: 'COMPLETE_TIMELINE_KNOWLEDGE_GEN'; timeline: string[]; characters: UGCGeneratedCharacter[] }
+  | { type: 'COMPLETE_TIMELINE_KNOWLEDGE_GEN'; timeline: string[] }
 
   // Publish
   | { type: 'START_SCENE_GEN' }
@@ -492,12 +492,12 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
       };
 
     case 'COMPLETE_TIMELINE_KNOWLEDGE_GEN':
+      // Only update timeline - character knowledge is generated during publish
       return {
         ...state,
         timelineKnowledgeGenerating: false,
         timelineKnowledgeProgress: null,
         timeline: action.timeline,
-        generatedCharacters: action.characters,
         secretsEditedSinceGeneration: false,
       };
 

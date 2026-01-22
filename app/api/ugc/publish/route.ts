@@ -37,6 +37,17 @@ interface PublishRequest {
     minimumPointsToAccuse: number;
     perfectScoreThreshold: number;
   };
+  caseFile?: {
+    victimName: string;
+    victimDescription: string;
+    causeOfDeath: string;
+    lastSeen: string;
+    locationFound: string;
+    discoveredBy: string;
+    timeOfDiscovery: string;
+    timeOfDeath: string;
+    initialEvidence: string[];
+  };
 }
 
 /**
@@ -125,59 +136,34 @@ export async function POST(request: NextRequest) {
           isPublishable: validationResult.isPublishable,
         });
 
-        // Step 2: Regenerate timeline and knowledge from clues (internal consistency)
+        // Step 2: Generate character knowledge (single LLM call)
+        // Timeline and case file are already generated from the review step
         sendEvent({
           type: 'progress',
-          step: 'regeneration',
-          message: 'Ensuring story consistency...',
-          progress: 15,
+          step: 'knowledge',
+          message: 'Generating character knowledge...',
+          progress: 20,
         });
 
         const config = loadAIConfig();
         const ugcEngine = new UGCEngine(config);
 
-        // Regenerate timeline from current clues
-        const regeneratedTimeline = await ugcEngine.generateTimelineFromClues({
-          clues,
-          characters,
-          solution,
-          setting: foundation.setting,
-        });
-
-        sendEvent({
-          type: 'progress',
-          step: 'regeneration',
-          message: 'Aligning character knowledge...',
-          progress: 22,
-        });
-
-        // Regenerate character knowledge to align with clues and new timeline
+        // Generate character knowledge based on the timeline from review step
         const updatedCharacters = await ugcEngine.addCharacterKnowledge(
           characters,
-          regeneratedTimeline,
+          timeline,
           solution,
           clues
         );
 
-        // Generate case file (newspaper-style victim/crime info)
-        sendEvent({
-          type: 'progress',
-          step: 'regeneration',
-          message: 'Generating case file...',
-          progress: 26,
-        });
-
-        const caseFile = await ugcEngine.generateCaseFile(
-          regeneratedTimeline,
-          clues,
-          updatedCharacters,
-          solution,
-          foundation.setting
-        );
-
-        // Use the regenerated data for saving
-        const finalTimeline = regeneratedTimeline;
+        // Use timeline and case file from request (generated during review)
+        const finalTimeline = timeline;
         const finalCharacters = updatedCharacters;
+        const caseFile = body.caseFile;
+
+        if (!caseFile) {
+          throw new Error('Case file is required - should be generated during review step');
+        }
 
         // Step 3: Generate scene image
         sendEvent({

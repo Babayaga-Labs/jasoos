@@ -175,7 +175,7 @@ export async function getStoryById(storyId: string): Promise<StoryRow | null> {
     .from('stories')
     .select('*')
     .eq('id', storyId)
-    .single();
+    .maybeSingle(); // Use maybeSingle to avoid error when story doesn't exist
 
   if (error) {
     console.error('Failed to fetch story:', error);

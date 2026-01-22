@@ -17,10 +17,11 @@ interface TimelineKnowledgeRequest {
 }
 
 /**
- * Generate timeline and character knowledge based on finalized clues (staged flow)
+ * Generate timeline and case file based on finalized clues (staged flow)
  * POST /api/ugc/generate-timeline-knowledge
  *
- * This is called after the user finalizes clues in the Clues stage
+ * This is called when user clicks "Review & Publish" - generates story data for preview.
+ * Character knowledge is generated separately during publish.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -56,27 +57,19 @@ export async function POST(request: NextRequest) {
       setting: foundation.setting,
     });
 
-    // Step 2: Add character knowledge based on timeline and clues
-    const charactersWithKnowledge = await ugcEngine.addCharacterKnowledge(
-      characters,
-      timeline,
-      solution,
-      clues
-    );
-
-    // Step 3: Generate case file (newspaper-style victim/crime info)
+    // Step 2: Generate case file (newspaper-style victim/crime info)
     const caseFile = await ugcEngine.generateCaseFile(
       timeline,
       clues,
-      charactersWithKnowledge,
+      characters,
       solution,
       foundation.setting
     );
 
+    // Note: Character knowledge is generated during publish, not here
     return Response.json({
       success: true,
       timeline,
-      characters: charactersWithKnowledge,
       caseFile,
     });
 

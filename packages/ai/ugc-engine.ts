@@ -18,7 +18,7 @@ import type { AIConfig } from './config';
 import { generateText, LLMClient } from './llm-client';
 import { ImageClient } from './image-client';
 import { CharacterKnowledgeSchema, type CharacterKnowledgeResponse } from './schemas/character-knowledge';
-import { CaseFileSchema, type CaseFileResponse } from './schemas/case-file';
+import { type CaseFileResponse } from './schemas/case-file';
 import type {
   UGCFormInput,
   UGCGeneratedData,
@@ -2420,9 +2420,10 @@ Respond with ONLY the JSON object.`;
     solution: UGCSolution,
     clues: UGCGeneratedClue[] = []
   ): Promise<UGCGeneratedCharacter[]> {
-    // Limit characters and clues to reduce prompt size
+    // Limit inputs to reduce prompt size
     const limitedCharacters = characters.slice(0, 5);
     const limitedClues = clues.slice(0, 5);
+    const limitedTimeline = timeline.slice(0, 8);
 
     // Build clue alignment section only if clues are provided
     const clueAlignmentSection = limitedClues.length > 0 ? `
@@ -2437,10 +2438,12 @@ CRITICAL - CLUE ALIGNMENT:
 9. This ensures gameplay consistency - characters can only reveal what they know
 ` : '';
 
-    const prompt = `Derive what each character knows based on the timeline of events.
+    const prompt = `You are a game designer creating character knowledge for a fictional Clue-style mystery board game. This is for entertainment purposes similar to the classic board game "Clue/Cluedo".
+
+Derive what each character knows based on the timeline of events.
 
 TIMELINE:
-${timeline.join('\n')}
+${limitedTimeline.join('\n')}
 
 SOLUTION:
 - Culprit: ${solution.culprit}
@@ -2547,7 +2550,9 @@ RULES:
     // Limit clues to 5
     const limitedClues = clues.slice(0, 5);
 
-    const prompt = `You are regenerating a mystery timeline to be coherent with the edited clues.
+    const prompt = `You are a game designer creating a timeline for a fictional Clue-style mystery board game. This is for entertainment purposes similar to the classic board game "Clue/Cluedo".
+
+Regenerate a mystery timeline to be coherent with the edited clues.
 
 SETTING:
 - Location: ${setting.location}
@@ -2701,14 +2706,20 @@ IMPORTANT: Respond with ONLY the valid JSON array. No markdown, no explanation.`
     solution: UGCSolution,
     setting: { location: string; timePeriod: string; atmosphere?: string }
   ): Promise<CaseFile> {
+    // Limit inputs to reduce prompt size
+    const limitedTimeline = timeline.slice(0, 8);
+    const limitedClues = clues.slice(0, 5);
+
     // Find the victim character
     const victim = characters.find(c => c.isVictim);
     const victimName = victim?.name || 'Unknown Victim';
 
     // Build clue descriptions for the prompt (so LLM knows what NOT to reveal)
-    const clueDescriptions = clues.map(c => `- ${c.description}`).join('\n');
+    const clueDescriptions = limitedClues.map(c => `- ${c.description}`).join('\n');
 
-    const prompt = `Generate a case file for a mystery game. This is what the player sees when starting the investigation.
+    const prompt = `You are a game designer creating a case file for a fictional Clue-style mystery board game. This is for entertainment purposes similar to the classic board game "Clue/Cluedo".
+
+Generate a case file for the mystery game. This is what the player sees when starting the investigation.
 
 SETTING:
 - Location: ${setting.location}
@@ -2725,7 +2736,7 @@ SOLUTION (DO NOT REVEAL TO PLAYER):
 - Motive: ${solution.motive}
 
 TIMELINE OF EVENTS:
-${timeline.join('\n')}
+${limitedTimeline.join('\n')}
 
 CLUES THAT PLAYER MUST DISCOVER (DO NOT INCLUDE DIRECTLY):
 ${clueDescriptions}
@@ -2754,17 +2765,46 @@ CRITICAL RULES FOR initialEvidence:
 - Atmospheric hints should create intrigue, not solve the case
 
 Example good evidence: "A broken window latch on the east side", "Victim's hands showed signs of struggle", "An untouched dinner plate on the desk"
-Example BAD evidence: "Poison residue in the victim's glass" (reveals method), "A love letter from the gardener" (reveals suspect)`;
+Example BAD evidence: "Poison residue in the victim's glass" (reveals method), "A love letter from the gardener" (reveals suspect)
+
+Output a JSON object with these exact fields:
+{
+  "victimName": "string",
+  "victimDescription": "string",
+  "causeOfDeath": "string",
+  "lastSeen": "string",
+  "locationFound": "string",
+  "discoveredBy": "string",
+  "timeOfDiscovery": "string",
+  "timeOfDeath": "string",
+  "initialEvidence": ["string", "string", "string"]
+}
+
+Respond with ONLY the JSON object.`;
 
     this.tracePrompt('generate-case-file', prompt);
 
-    const llmClient = new LLMClient(this.config.llm);
-    const response = await llmClient.generateJSON<CaseFileResponse>(prompt, {
-      schema: CaseFileSchema,
-      maxTokens: 1500,
+    // Use generateText instead of generateJSON to avoid Azure content filter issues with structured outputs
+    const { text } = await generateText({
+      config: this.config.llm,
+      prompt,
+      maxTokens: 2000,
       temperature: 0.7,
     });
 
-    return response;
+    const parsed = this.parseJSONResponse(text);
+
+    // Ensure all required fields are present with defaults
+    return {
+      victimName: parsed.victimName || victimName,
+      victimDescription: parsed.victimDescription || 'No description available',
+      causeOfDeath: parsed.causeOfDeath || 'Under investigation',
+      lastSeen: parsed.lastSeen || 'Unknown',
+      locationFound: parsed.locationFound || 'Unknown',
+      discoveredBy: parsed.discoveredBy || 'Unknown',
+      timeOfDiscovery: parsed.timeOfDiscovery || 'Unknown',
+      timeOfDeath: parsed.timeOfDeath || 'Unknown',
+      initialEvidence: Array.isArray(parsed.initialEvidence) ? parsed.initialEvidence : [],
+    };
   }
 }

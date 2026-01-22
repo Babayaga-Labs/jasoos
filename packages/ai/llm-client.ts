@@ -235,6 +235,12 @@ export class LLMClient {
 
       const content = response.choices[0]?.message?.content;
       if (!content) {
+        console.error('[LLM] Empty structured output response. Debug:', JSON.stringify({
+          finishReason: response.choices[0]?.finish_reason,
+          message: response.choices[0]?.message,
+          model: response.model,
+          usage: response.usage,
+        }, null, 2));
         throw new Error('Empty response from LLM with structured outputs');
       }
 

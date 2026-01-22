@@ -1,10 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { useWizard } from '../wizard/WizardContext';
 import { Modal } from '@/components/ui/Modal';
 import type { UGCGeneratedClue, UGCGeneratedCharacter } from '@/packages/ai/types/ugc-types';
+
+interface CaseFile {
+  victimName: string;
+  victimDescription: string;
+  causeOfDeath: string;
+  lastSeen: string;
+  locationFound: string;
+  discoveredBy: string;
+  timeOfDiscovery: string;
+  timeOfDeath: string;
+  initialEvidence: string[];
+}
 
 interface ValidationWarning {
   category: string;
@@ -35,6 +47,7 @@ export function CluesStage() {
   const [modalStep, setModalStep] = useState<ModalStep>('preview');
   const [validationWarnings, setValidationWarnings] = useState<ValidationWarning[]>([]);
   const [publishProgress, setPublishProgress] = useState<{ step: string; progress: number } | null>(null);
+  const caseFileRef = useRef<CaseFile | null>(null);
 
   if (clues.length === 0) {
     return (
@@ -74,13 +87,15 @@ export function CluesStage() {
       }
 
       const data = await response.json();
-      console.log('[CluesStage] API response:', { timeline: data.timeline?.length, characters: data.characters?.length });
+      console.log('[CluesStage] API response:', { timeline: data.timeline?.length, hasCaseFile: !!data.caseFile });
 
-      // Update state with generated timeline and character knowledge
+      // Store the case file for publish
+      caseFileRef.current = data.caseFile || null;
+
+      // Update state with generated timeline (characters get knowledge during publish)
       dispatch({
         type: 'COMPLETE_TIMELINE_KNOWLEDGE_GEN',
         timeline: data.timeline,
-        characters: data.characters,
       });
 
       // Now show the publish modal
@@ -153,6 +168,7 @@ export function CluesStage() {
             minimumPointsToAccuse,
             perfectScoreThreshold,
           },
+          caseFile: caseFileRef.current,
         }),
       });
 
