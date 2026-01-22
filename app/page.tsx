@@ -46,10 +46,8 @@ export default async function HomePage() {
             <span className="text-red-600">Open Cases</span>
           </h1>
           <p className="text-xl text-slate-400 mb-2">
-            AI-Powered Detective Game
-          </p>
-          <p className="text-slate-500">
-            Interrogate suspects. Uncover evidence. Solve the mystery.
+          Interrogate suspects. Uncover evidence. Solve daily mysteries.
+
           </p>
         </div>
       </div>
