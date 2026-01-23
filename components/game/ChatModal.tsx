@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { Modal } from '@/components/ui/Modal';
+import { MicButton } from '@/components/ui/MicButton';
 import { useGameStore, Character, ChatMessage } from '@/lib/store';
+import { useVoiceInput } from '@/hooks/useVoiceInput';
 
 interface ChatModalProps {
   character: Character;
@@ -14,11 +16,39 @@ interface ChatModalProps {
 export function ChatModal({ character, storyId, onClose }: ChatModalProps) {
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
+  const [voiceFeedback, setVoiceFeedback] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { chatHistories, addChatMessage, updateLastMessage, startTimer } = useGameStore();
   const messages = chatHistories[character.id] || [];
+
+  // Voice input - APPEND transcription to existing text
+  const handleFinalTranscript = useCallback((transcript: string) => {
+    setInput(prev => {
+      const trimmed = prev.trim();
+      const separator = trimmed ? ' ' : '';
+      return trimmed + separator + transcript;
+    });
+    inputRef.current?.focus();
+    setVoiceFeedback(null);
+  }, []);
+
+  const handleNoSpeech = useCallback(() => {
+    setVoiceFeedback('No speech detected. Try again.');
+    setTimeout(() => setVoiceFeedback(null), 3000);
+  }, []);
+
+  const handleVoiceError = useCallback((error: string) => {
+    setVoiceFeedback(error);
+    setTimeout(() => setVoiceFeedback(null), 4000);
+  }, []);
+
+  const { isListening, isSupported, toggleListening } = useVoiceInput({
+    onFinalTranscript: handleFinalTranscript,
+    onNoSpeech: handleNoSpeech,
+    onError: handleVoiceError,
+  });
 
   // Use imageUrl from Supabase, fallback to filesystem path for legacy stories
   const imageUrl = character.imageUrl || `/stories/${storyId}/assets/characters/${character.id}.png`;
@@ -129,20 +159,32 @@ export function ChatModal({ character, storyId, onClose }: ChatModalProps) {
 
       {/* Input */}
       <form onSubmit={handleSubmit} className="p-4 border-t border-slate-700">
-        <div className="flex gap-2">
+        {/* Voice feedback message */}
+        {voiceFeedback && (
+          <div className="mb-2 text-sm text-amber-400 bg-amber-500/10 px-3 py-2 rounded-lg">
+            {voiceFeedback}
+          </div>
+        )}
+        <div className="flex gap-2 items-center">
           <input
             ref={inputRef}
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask a question..."
+            placeholder={isListening ? 'Listening... speak now' : 'Ask a question...'}
             disabled={isStreaming}
             className="flex-1 bg-slate-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-500 disabled:opacity-50"
+          />
+          <MicButton
+            isListening={isListening}
+            isSupported={isSupported}
+            onClick={toggleListening}
+            disabled={isStreaming}
           />
           <button
             type="submit"
             disabled={!input.trim() || isStreaming}
-            className="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn btn-primary px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Send
           </button>

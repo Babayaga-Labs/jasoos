@@ -37,11 +37,13 @@ export async function POST(request: NextRequest) {
     const config = loadAIConfig();
     const llm = new LLMClient(config.llm);
 
-    // Build message history
-    const messages = history.map((msg: any) => ({
-      role: msg.role === 'user' ? 'user' : 'assistant',
-      content: msg.content,
-    }));
+    // Build message history - filter out messages with null/empty content
+    const messages = history
+      .filter((msg: any) => msg.content != null && msg.content !== '')
+      .map((msg: any) => ({
+        role: msg.role === 'user' ? 'user' : 'assistant',
+        content: msg.content,
+      }));
 
     messages.push({ role: 'user', content: message });
 
