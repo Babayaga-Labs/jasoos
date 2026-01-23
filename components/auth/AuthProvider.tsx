@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { getUser, onAuthStateChange } from '@/lib/supabase/auth';
 import type { User } from '@supabase/supabase-js';
+import { analytics } from '@/lib/analytics';
 
 interface AuthContextType {
   user: User | null;
@@ -27,12 +28,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getUser().then((user) => {
       setUser(user);
       setIsLoading(false);
+      // Identify user in PostHog
+      if (user) {
+        analytics.identify(user.id, {
+          email: user.email,
+          name: user.user_metadata?.full_name || user.user_metadata?.name,
+        });
+      }
     });
 
     // Subscribe to auth changes
     const unsubscribe = onAuthStateChange((user) => {
       setUser(user);
       setIsLoading(false);
+      // Update PostHog identity
+      if (user) {
+        analytics.identify(user.id, {
+          email: user.email,
+          name: user.user_metadata?.full_name || user.user_metadata?.name,
+        });
+      } else {
+        analytics.reset();
+      }
     });
 
     return unsubscribe;

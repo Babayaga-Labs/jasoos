@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import { Header } from '@/components/layout/Header';
+import { PostHogProvider } from '@/components/providers/PostHogProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -19,10 +20,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} bg-slate-900 text-white min-h-screen`}>
-        <AuthProvider>
-          <Header />
-          {children}
-        </AuthProvider>
+        <PostHogProvider>
+          <AuthProvider>
+            <Header />
+            {children}
+          </AuthProvider>
+        </PostHogProvider>
       </body>
     </html>
   );

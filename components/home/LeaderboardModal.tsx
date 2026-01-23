@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { Modal } from '@/components/ui/Modal';
+import { analytics } from '@/lib/analytics';
 
 interface LeaderboardEntry {
   rank: number;
@@ -26,6 +27,7 @@ export function LeaderboardModal({ isOpen, onClose, storyId, storyTitle }: Leade
   const [currentUserEntry, setCurrentUserEntry] = useState<LeaderboardEntry | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hasTrackedRef = useRef(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -41,6 +43,17 @@ export function LeaderboardModal({ isOpen, onClose, storyId, storyTitle }: Leade
         const data = await response.json();
         setLeaderboard(data.leaderboard);
         setCurrentUserEntry(data.currentUserEntry);
+
+        // Track leaderboard view (only once per open)
+        if (!hasTrackedRef.current) {
+          hasTrackedRef.current = true;
+          analytics.leaderboardViewed({
+            type: 'story',
+            story_id: storyId,
+            story_name: storyTitle,
+            user_rank: data.currentUserEntry?.rank,
+          });
+        }
       } catch (err) {
         setError('Could not load leaderboard');
         console.error(err);
@@ -50,7 +63,14 @@ export function LeaderboardModal({ isOpen, onClose, storyId, storyTitle }: Leade
     };
 
     fetchLeaderboard();
-  }, [isOpen, storyId]);
+  }, [isOpen, storyId, storyTitle]);
+
+  // Reset tracking when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      hasTrackedRef.current = false;
+    }
+  }, [isOpen]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useReducer } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useRef } from 'react';
 import {
   PERSONALITY_TRAITS,
   type UGCStoryScaffold,
@@ -11,6 +11,7 @@ import {
   type UGCSolution,
   type FleshOutResponse,
 } from '@/packages/ai/types/ugc-types';
+import { analytics } from '@/lib/analytics';
 
 // ============================================================================
 // Wizard Types
@@ -570,6 +571,40 @@ const WizardContext = createContext<WizardContextValue | null>(null);
 
 export function WizardProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(wizardReducer, undefined, createInitialState);
+  const prevStageRef = useRef<WizardStage>(state.currentStage);
+  const stageStartTimeRef = useRef<number>(Date.now());
+  const creationStartTimeRef = useRef<number>(Date.now());
+
+  // Track stage transitions
+  useEffect(() => {
+    if (prevStageRef.current !== state.currentStage) {
+      const stageDuration = Math.floor((Date.now() - stageStartTimeRef.current) / 1000);
+
+      // Track the completed stage
+      analytics.createStageCompleted({
+        stage: prevStageRef.current,
+        stage_duration_seconds: stageDuration,
+        modifications: [], // Could be enhanced to track specific modifications
+      });
+
+      // Reset for new stage
+      prevStageRef.current = state.currentStage;
+      stageStartTimeRef.current = Date.now();
+    }
+  }, [state.currentStage]);
+
+  // Track mystery published
+  useEffect(() => {
+    if (state.isPublished && state.storyId) {
+      const totalTime = Math.floor((Date.now() - creationStartTimeRef.current) / 1000);
+      analytics.mysteryPublished({
+        story_id: state.storyId,
+        characters_count: state.generatedCharacters.length,
+        clues_count: state.clues.length,
+        total_creation_time_seconds: totalTime,
+      });
+    }
+  }, [state.isPublished, state.storyId, state.generatedCharacters.length, state.clues.length]);
 
   // Can generate scaffold? (premise must be non-empty)
   const canGenerateScaffold = state.premise.trim().length > 0;

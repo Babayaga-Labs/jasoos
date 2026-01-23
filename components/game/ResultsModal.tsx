@@ -1,15 +1,79 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { Modal } from '@/components/ui/Modal';
 import { useGameStore } from '@/lib/store';
 import { useAuth } from '@/components/auth/AuthProvider';
+import { analytics } from '@/lib/analytics';
 
 export function ResultsModal() {
-  const { isResultsOpen, accusationResult, resetGame, storyFolderId } = useGameStore();
+  const { isResultsOpen, accusationResult, resetGame, storyFolderId, story, characters, chatHistories } = useGameStore();
   const { user } = useAuth();
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'existing' | 'error'>('idle');
+  const hasTrackedRef = useRef(false);
+
+  // Track game session analytics
+  useEffect(() => {
+    if (!isResultsOpen || !accusationResult || !story || hasTrackedRef.current) return;
+    hasTrackedRef.current = true;
+
+    // Build interrogation order and turns from chat histories
+    const interrogationOrder: string[] = [];
+    const turns: Array<{ character: string; role: 'user' | 'ai'; content: string }> = [];
+    let totalTurns = 0;
+
+    // Get character name by ID
+    const getCharacterName = (id: string) => characters.find(c => c.id === id)?.name || id;
+
+    // Process chat histories to build turns and order
+    Object.entries(chatHistories).forEach(([characterId, messages]) => {
+      if (messages.length > 0 && !interrogationOrder.includes(getCharacterName(characterId))) {
+        interrogationOrder.push(getCharacterName(characterId));
+      }
+      messages.forEach(msg => {
+        turns.push({
+          character: getCharacterName(characterId),
+          role: msg.role === 'user' ? 'user' : 'ai',
+          content: msg.content,
+        });
+        if (msg.role === 'user') totalTurns++;
+      });
+    });
+
+    // Determine rating
+    const getRating = (score: number) => {
+      if (score >= 90) return 'Master Detective';
+      if (score >= 70) return 'Senior Detective';
+      if (score >= 50) return 'Junior Detective';
+      if (score >= 30) return 'Rookie';
+      return 'Case Closed';
+    };
+
+    analytics.gameSession({
+      story_id: storyFolderId || '',
+      story_name: story.title,
+      completed: true,
+      correct_accusation: accusationResult.isCorrect,
+      score: accusationResult.score,
+      rating: getRating(accusationResult.score),
+      time_elapsed_seconds: accusationResult.timeTaken,
+      interrogation_order: interrogationOrder,
+      characters_interrogated: interrogationOrder.length,
+      total_turns: totalTurns,
+      turns,
+      accused_character: '', // Will be populated if we track this in store
+      accusation_motive: '',
+      accusation_method: '',
+    });
+  }, [isResultsOpen, accusationResult, story, storyFolderId, characters, chatHistories]);
+
+  // Reset tracking ref when modal closes
+  useEffect(() => {
+    if (!isResultsOpen) {
+      hasTrackedRef.current = false;
+    }
+  }, [isResultsOpen]);
 
   // Save result when modal opens
   useEffect(() => {
