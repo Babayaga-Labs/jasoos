@@ -38,11 +38,22 @@ export function Modal({ isOpen, onClose, children, size = 'md' }: ModalProps) {
 
   return (
     <>
-      {/* Overlay */}
-      <div className="modal-overlay" onClick={onClose} />
+      {/* Overlay - mystical dark backdrop */}
+      <div 
+        className="modal-overlay" 
+        onClick={onClose}
+        style={{
+          background: 'radial-gradient(circle at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.95) 100%)',
+        }}
+      />
 
-      {/* Content */}
-      <div className={`modal-content ${sizeClasses[size]} md:w-full`}>
+      {/* Content - with magical entrance animation */}
+      <div 
+        className={`modal-content ${sizeClasses[size]} md:w-full`}
+        style={{
+          boxShadow: '0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(251,191,36,0.1), inset 0 1px 0 rgba(251,191,36,0.05)',
+        }}
+      >
         {children}
       </div>
     </>

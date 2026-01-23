@@ -13,22 +13,24 @@ export function Header() {
 
   return (
     <>
-      <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-sm sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="text-xl font-bold text-red-600">
+      <header className="border-b border-slate-900/80 bg-slate-950/90 backdrop-blur-md sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 group">
+            <span className="text-lg font-semibold text-slate-100 tracking-tight group-hover:text-slate-50 transition-colors duration-300">
               Open Cases
             </span>
           </Link>
 
-          <nav className="flex items-center gap-4">
+          <nav className="flex items-center gap-6">
             {/* Leaderboard button */}
             <button
               onClick={() => setIsLeaderboardOpen(true)}
-              className="flex items-center gap-1.5 text-slate-300 hover:text-white transition-colors"
+              className="flex items-center gap-2 text-slate-400 hover:text-slate-200 transition-colors duration-300 text-sm font-medium"
             >
-              <span className="text-lg">🏆</span>
-              <span className="hidden sm:inline">Leaderboard</span>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.228a46.865 46.865 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0" />
+              </svg>
+              <span className="hidden sm:inline tracking-wide">Leaderboard</span>
             </button>
 
             {!isLoading && (
