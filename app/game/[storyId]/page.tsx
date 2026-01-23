@@ -19,15 +19,15 @@ export default function GamePage() {
     selectCharacter,
     loadStory,
     isLoading,
-    gameStatus,
+    storyFolderId,
   } = useGameStore();
 
-  // Load story on mount
+  // Load story on mount or when storyId changes
   useEffect(() => {
-    if (storyId && gameStatus === 'idle') {
+    if (storyId && storyId !== storyFolderId) {
       loadStory(storyId);
     }
-  }, [storyId, gameStatus, loadStory]);
+  }, [storyId, storyFolderId, loadStory]);
 
   // Loading state
   if (isLoading || !story) {
