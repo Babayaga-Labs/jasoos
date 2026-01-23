@@ -12,7 +12,12 @@ export interface GameSessionProperties {
   interrogation_order: string[];
   characters_interrogated: number;
   total_turns: number;
-  turns: Array<{ character: string; role: 'user' | 'ai'; content: string }>;
+  turns: Array<{
+    turn: number;
+    character: string;
+    user_message: string;
+    ai_response: string;
+  }>;
   accused_character: string;
   accusation_motive: string;
   accusation_method: string;

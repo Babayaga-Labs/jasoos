@@ -18,28 +18,44 @@ export function ResultsModal() {
     if (!isResultsOpen || !accusationResult || !story || hasTrackedRef.current) return;
     hasTrackedRef.current = true;
 
-    // Build interrogation order and turns from chat histories
+    // Build interrogation order and paired turns from chat histories
     const interrogationOrder: string[] = [];
-    const turns: Array<{ character: string; role: 'user' | 'ai'; content: string }> = [];
-    let totalTurns = 0;
+    const turns: Array<{
+      turn: number;
+      character: string;
+      user_message: string;
+      ai_response: string;
+    }> = [];
+    let turnNumber = 0;
 
     // Get character name by ID
     const getCharacterName = (id: string) => characters.find(c => c.id === id)?.name || id;
 
-    // Process chat histories to build turns and order
+    // Process chat histories to build paired turns
     Object.entries(chatHistories).forEach(([characterId, messages]) => {
-      if (messages.length > 0 && !interrogationOrder.includes(getCharacterName(characterId))) {
-        interrogationOrder.push(getCharacterName(characterId));
+      const characterName = getCharacterName(characterId);
+      if (messages.length > 0 && !interrogationOrder.includes(characterName)) {
+        interrogationOrder.push(characterName);
       }
-      messages.forEach(msg => {
-        turns.push({
-          character: getCharacterName(characterId),
-          role: msg.role === 'user' ? 'user' : 'ai',
-          content: msg.content,
-        });
-        if (msg.role === 'user') totalTurns++;
-      });
+
+      // Pair user messages with AI responses
+      for (let i = 0; i < messages.length; i += 2) {
+        const userMsg = messages[i];
+        const aiMsg = messages[i + 1];
+
+        if (userMsg?.role === 'user') {
+          turnNumber++;
+          turns.push({
+            turn: turnNumber,
+            character: characterName,
+            user_message: userMsg.content || '',
+            ai_response: aiMsg?.content || '',
+          });
+        }
+      }
     });
+
+    const totalTurns = turnNumber;
 
     // Determine rating
     const getRating = (score: number) => {
