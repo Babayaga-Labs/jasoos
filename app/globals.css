@@ -39,16 +39,13 @@
   }
 
   .modal-overlay {
-    @apply fixed inset-0 backdrop-blur-sm z-40;
-    background: radial-gradient(circle at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.95) 100%);
+    @apply fixed inset-0 bg-black/70 backdrop-blur-sm z-40;
   }
 
   .modal-content {
     @apply fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2;
-    @apply bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 rounded-xl border z-50;
+    @apply bg-slate-800 rounded-xl border border-slate-700 z-50;
     @apply max-h-[90vh] overflow-auto flex flex-col;
-    border-color: rgba(251, 191, 36, 0.15);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(251,191,36,0.1), inset 0 1px 0 rgba(251,191,36,0.05);
   }
 
   /* Chat styling - consistent slate theme */
@@ -116,15 +113,4 @@
 
 .animate-pulse-glow {
   animation: pulse-glow 1.5s ease-in-out infinite;
-}
-
-/* Respect reduced motion preference */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
 }

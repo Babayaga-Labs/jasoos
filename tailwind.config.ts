@@ -12,10 +12,6 @@ const config: Config = {
         background: 'rgb(var(--background))',
         foreground: 'rgb(var(--foreground))',
       },
-      fontFamily: {
-        'cinzel': ['var(--font-cinzel)', 'serif'],
-        'cormorant': ['var(--font-cormorant)', 'serif'],
-      },
       keyframes: {
         fadeInUp: {
           '0%': { opacity: '0', transform: 'translateY(20px)' },
