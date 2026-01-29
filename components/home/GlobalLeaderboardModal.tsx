@@ -157,6 +157,7 @@ export function GlobalLeaderboardModal({ isOpen, onClose }: GlobalLeaderboardMod
                         width={24}
                         height={24}
                         className="rounded-full flex-shrink-0"
+                        unoptimized
                       />
                     ) : (
                       <div className="w-6 h-6 bg-slate-600 rounded-full flex items-center justify-center text-xs flex-shrink-0">
@@ -197,6 +198,7 @@ export function GlobalLeaderboardModal({ isOpen, onClose }: GlobalLeaderboardMod
                           width={24}
                           height={24}
                           className="rounded-full flex-shrink-0"
+                          unoptimized
                         />
                       ) : (
                         <div className="w-6 h-6 bg-slate-600 rounded-full flex items-center justify-center text-xs flex-shrink-0">
