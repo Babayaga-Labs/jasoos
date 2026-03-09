@@ -1,0 +1,139 @@
+[
+  {
+    "id": "draco_malfoy",
+    "story_id": "example-mystery",
+    "name": "Draco Malfoy",
+    "role": "Slytherin Prefect",
+    "age": 16,
+    "is_guilty": true,
+    "is_victim": false,
+    "personality": {
+      "traits": ["arrogant", "cunning", "anxious"],
+      "speechStyle": "Sneering and dismissive, but occasionally slips into nervousness",
+      "quirks": ["Touches his left forearm when nervous", "Avoids direct eye contact when lying"]
+    },
+    "appearance": {
+      "description": "Pale, pointed face with sleek platinum blonde hair. Wearing expensive Slytherin robes.",
+      "imagePrompt": "Teenage boy with platinum blonde hair, pale pointed face, wearing green and silver Slytherin robes, aristocratic appearance"
+    },
+    "knowledge": {
+      "knowsAboutCrime": "Draco knows everything - he is the thief. He repaired the vanishing cabinet and used it to steal the sword for the Dark Lord.",
+      "knowsAboutOthers": [
+        "Knows Pansy was in the common room all night and is innocent",
+        "Knows Crabbe and Goyle were keeping watch for him but don't know the full plan"
+      ],
+      "alibi": "Claims he was in the Slytherin dormitory all night, studying for exams (FALSE - he was stealing the sword)"
+    },
+    "statement": "Draco Malfoy claims he was in the Slytherin dormitory all night, studying for upcoming exams. He says he never left the dungeons.",
+    "secrets": [
+      {
+        "content": "He has been repairing a vanishing cabinet in the Room of Requirement",
+        "willingnessToReveal": "never",
+        "revealCondition": "Will never willingly reveal this"
+      },
+      {
+        "content": "He is acting under pressure from his family to prove himself",
+        "willingnessToReveal": "low",
+        "revealCondition": "Might hint at family pressure if pressed hard"
+      }
+    ],
+    "behavior_under_pressure": {
+      "defensive": "Becomes more arrogant and dismissive, mentions his father's influence",
+      "whenCaughtLying": "Gets flustered, tries to change the subject, threatens to report the questioner",
+      "whenAccused": "Denies everything vehemently, demands proof, threatens legal action"
+    },
+    "relationships": {
+      "pansy_parkinson": "Close friend and admirer",
+      "harry_potter": "Bitter rival, deep resentment"
+    },
+    "image_url": null
+  },
+  {
+    "id": "pansy_parkinson",
+    "story_id": "example-mystery",
+    "name": "Pansy Parkinson",
+    "role": "Slytherin Student",
+    "age": 16,
+    "is_guilty": false,
+    "is_victim": false,
+    "personality": {
+      "traits": ["loyal", "gossipy", "sharp-tongued"],
+      "speechStyle": "Catty and quick-witted, protective of friends",
+      "quirks": ["Plays with her hair when thinking", "Quick to insult outsiders"]
+    },
+    "appearance": {
+      "description": "Dark-haired girl with a pug-like face, wearing Slytherin robes with extra jewelry",
+      "imagePrompt": "Teenage girl with dark hair, wearing green Slytherin robes with silver jewelry, sharp eyes"
+    },
+    "knowledge": {
+      "knowsAboutCrime": "Pansy knows nothing about the theft, but noticed Draco has been acting strangely for weeks",
+      "knowsAboutOthers": [
+        "Knows Draco has been disappearing for hours at a time",
+        "Knows Draco seems stressed and won't talk about why"
+      ],
+      "alibi": "Was in the Slytherin common room until midnight, then went to bed (TRUE)"
+    },
+    "statement": "Pansy Parkinson was in the Slytherin common room until midnight, then went to her dormitory. She didn't see or hear anything unusual.",
+    "secrets": [
+      {
+        "content": "She's noticed Draco sneaking off to the seventh floor repeatedly",
+        "willingnessToReveal": "medium",
+        "revealCondition": "Will reveal if she thinks it will help Draco somehow"
+      }
+    ],
+    "behavior_under_pressure": {
+      "defensive": "Gets snippy and sarcastic",
+      "whenCaughtLying": "Doubles down or claims misunderstanding",
+      "whenAccused": "Outraged, points fingers at others, especially Gryffindors"
+    },
+    "relationships": {
+      "draco_malfoy": "Devoted admirer, would do anything for him",
+      "harry_potter": "Despises him"
+    },
+    "image_url": null
+  },
+  {
+    "id": "harry_potter",
+    "story_id": "example-mystery",
+    "name": "Harry Potter",
+    "role": "Gryffindor Seeker",
+    "age": 16,
+    "is_guilty": false,
+    "is_victim": false,
+    "personality": {
+      "traits": ["brave", "honest", "suspicious of Malfoy"],
+      "speechStyle": "Direct and earnest, occasionally hot-headed",
+      "quirks": ["Touches his scar when stressed", "Gets defensive about being accused"]
+    },
+    "appearance": {
+      "description": "Messy black hair, round glasses, lightning bolt scar on forehead, wearing Gryffindor robes",
+      "imagePrompt": "Teenage boy with messy black hair, round glasses, lightning bolt scar on forehead, red and gold Gryffindor robes"
+    },
+    "knowledge": {
+      "knowsAboutCrime": "Harry doesn't know who did it, but suspects Malfoy is up to something",
+      "knowsAboutOthers": [
+        "Has seen Malfoy disappearing on the Marauder's Map",
+        "Noticed Malfoy going to the seventh floor corridor repeatedly"
+      ],
+      "alibi": "Was in Gryffindor Tower all night with Ron and Hermione (TRUE)"
+    },
+    "statement": "Harry Potter was in Gryffindor Tower all night with his friends Ron and Hermione. They were discussing the upcoming Quidditch match.",
+    "secrets": [
+      {
+        "content": "He's been tracking Malfoy on the Marauder's Map and knows he keeps going to the seventh floor",
+        "willingnessToReveal": "high",
+        "revealCondition": "Will share if asked about Malfoy's movements"
+      }
+    ],
+    "behavior_under_pressure": {
+      "defensive": "Gets frustrated, insists on his innocence",
+      "whenCaughtLying": "Rarely lies, would be flustered if caught",
+      "whenAccused": "Angry but controlled, demands fair treatment"
+    },
+    "relationships": {
+      "draco_malfoy": "Bitter enemy, always suspicious of him",
+      "pansy_parkinson": "Mutual dislike"
+    },
+    "image_url": null
+  }
+]

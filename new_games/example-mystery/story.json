@@ -1,0 +1,48 @@
+{
+  "id": "example-mystery",
+  "user_id": null,
+  "title": "The Chamber of Secrets Heist",
+  "synopsis": "A priceless artifact has vanished from the Chamber of Secrets. As a young Auror, you must interrogate the suspects and uncover the truth before the thief escapes.",
+  "crime_type": "theft",
+  "setting": {
+    "location": "Hogwarts School of Witchcraft and Wizardry",
+    "timePeriod": "1990s",
+    "atmosphere": "Mysterious and tense"
+  },
+  "victim_paragraph": "The Sword of Gryffindor, a legendary artifact said to present itself to any worthy Gryffindor in times of need, has been stolen from its display case in the Chamber of Secrets. The theft occurred sometime between midnight and dawn.",
+  "timeline": [
+    "11:00 PM - Sword last confirmed in display case by Filch during night patrol",
+    "11:30 PM - Suspicious noise reported near the second floor bathroom",
+    "12:00 AM - Moaning Myrtle claims to have seen a shadowy figure",
+    "2:00 AM - Peeves reports hearing footsteps in the dungeons",
+    "5:00 AM - Empty display case discovered by Professor McGonagall"
+  ],
+  "solution": {
+    "culprit": "draco_malfoy",
+    "method": "Used a vanishing cabinet connected to Borgin and Burkes to transport the sword out of Hogwarts",
+    "motive": "To restore the Malfoy family's reputation by presenting the sword to the Dark Lord",
+    "explanation": "Draco repaired the vanishing cabinet in the Room of Requirement and used it to smuggle the sword out. He created a diversion by having Peeves make noise in the dungeons while he made his escape through the cabinet."
+  },
+  "scoring": {
+    "minimumPointsToAccuse": 30,
+    "perfectScoreThreshold": 80
+  },
+  "scene_image_url": null,
+  "case_file": {
+    "victimName": "The Sword of Gryffindor",
+    "victimDescription": "A goblin-made sword imbued with the power to absorb that which makes it stronger",
+    "causeOfDeath": "N/A - Theft",
+    "lastSeen": "11:00 PM in the Chamber display case",
+    "locationFound": "Display case in the Chamber of Secrets",
+    "discoveredBy": "Professor McGonagall",
+    "timeOfDiscovery": "5:00 AM",
+    "timeOfDeath": "N/A",
+    "initialEvidence": [
+      "Display case lock shows no signs of forced entry",
+      "Faint magical residue detected near the case",
+      "Small amount of silver dust found on the floor"
+    ]
+  },
+  "is_published": true,
+  "created_at": "2024-01-01T00:00:00Z"
+}

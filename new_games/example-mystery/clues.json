@@ -1,0 +1,42 @@
+[
+  {
+    "id": "clue_vanishing_cabinet",
+    "story_id": "example-mystery",
+    "description": "There's a vanishing cabinet on the seventh floor that connects to Borgin and Burkes",
+    "points": 25,
+    "revealed_by": ["harry_potter", "pansy_parkinson"],
+    "detection_hints": ["vanishing", "cabinet", "seventh floor", "room of requirement", "borgin"]
+  },
+  {
+    "id": "clue_draco_disappearing",
+    "story_id": "example-mystery",
+    "description": "Draco has been sneaking off to the seventh floor repeatedly over the past few weeks",
+    "points": 20,
+    "revealed_by": ["harry_potter", "pansy_parkinson"],
+    "detection_hints": ["disappearing", "seventh floor", "sneaking", "weeks", "strange behavior"]
+  },
+  {
+    "id": "clue_no_forced_entry",
+    "story_id": "example-mystery",
+    "description": "The display case was opened with magic, not force - suggesting someone skilled with advanced spells",
+    "points": 15,
+    "revealed_by": ["harry_potter"],
+    "detection_hints": ["no forced entry", "magic", "lock", "advanced", "spell"]
+  },
+  {
+    "id": "clue_family_pressure",
+    "story_id": "example-mystery",
+    "description": "Draco has been under immense pressure from his family to prove himself",
+    "points": 15,
+    "revealed_by": ["pansy_parkinson", "draco_malfoy"],
+    "detection_hints": ["family", "pressure", "prove", "father", "malfoy"]
+  },
+  {
+    "id": "clue_silver_dust",
+    "story_id": "example-mystery",
+    "description": "The silver dust found at the scene matches the residue from vanishing cabinet transport",
+    "points": 20,
+    "revealed_by": ["harry_potter"],
+    "detection_hints": ["silver", "dust", "residue", "transport", "magical trace"]
+  }
+]
